@@ -1,0 +1,44 @@
+{
+	"name": "protoo",
+	"description": "Fast and powerful Node.js framework for building Protoo applications.",
+	"version": "0.1.0",
+	"author": "Iñaki Baz Castillo <ibc@aliax.net>",
+	"keyworkds": [
+		"protoo",
+		"webrtc"
+	],
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "https://bitbucket.org/ibc_aliax/protoo/blob/master/LICENSE-MIT"
+		}
+	],
+	"homepage": "https://bitbucket.org/ibc_aliax/protoo",
+	"repository": {
+		"type": "git",
+		"url": "https://bitbucket.org/ibc_aliax/protoo.git"
+	},
+	"bugs": {
+		"url": "https://bitbucket.org/ibc_aliax/protoo/issues?status=new&status=open"
+	},
+	"engines": {
+		"node": ">=0.10.32"
+	},
+	"main": "./lib/protoo.js",
+	"directories": {
+		"lib": "lib",
+		"test": "test"
+	},
+	"scripts": {
+		"test": "grunt test"
+	},
+	"dependencies": {
+		"ws": "~0.4.32"
+	},
+	"devDependencies": {
+		"grunt": "~0.4.5",
+		"grunt-contrib-jshint": "~0.10.0",
+		"grunt-contrib-watch": "~0.6.1",
+		"grunt-contrib-nodeunit": "~0.4.1"
+	}
+}
