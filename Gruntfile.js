@@ -1,11 +1,9 @@
-'use strict';
-
-
 module.exports = function(grunt) {
 	var files = {
 		gruntfile: [ 'Gruntfile.js' ],
-		lib:       [ 'lib/**/*.js' ],
-		test:      [ 'test/**/*.js' ]
+		lib:	   [ 'lib/**/*.js' ],
+		test:	  [ 'test/**/*.js' ],
+		doc:	   [ 'README.md', 'lib/**/*.js' ]
 	};
 
 	grunt.initConfig({
@@ -29,15 +27,15 @@ module.exports = function(grunt) {
 				quotmark: 'single',
 				undef: true,
 				unused: true,
-				strict: true,
+				strict: false,
 				sub: true,  // Allow person['name'] vs. person.name.
 				validthis: true,  // Allow 'this' in a non-constructor function.
 				node: true,
 				globals: {}
 			},
 			gruntfile: files.gruntfile,
-			lib:       files.lib,
-			test:      files.test
+			lib:	   files.lib,
+			test:	  files.test
 		},
 
 		watch: {
@@ -66,6 +64,41 @@ module.exports = function(grunt) {
 
 		nodeunit: {
 			files: files.test
+		},
+
+		jsdoc : {
+			basic: {
+				src: files.doc,
+				options: {
+					destination: 'doc/basic/',
+					private: false
+				}
+			},
+			docstrap: {
+				src: files.doc,
+				options: {
+					destination: 'doc/docstrap/',
+					private: false,
+					template: 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template',
+					configure: 'jsdoc.conf.json'
+				}
+			}
+		},
+
+		yuidoc: {
+			compile: {
+				name: '<%= pkg.name %>',
+				description: '<%= pkg.description %>',
+				version: '<%= pkg.version %>',
+				url: '<%= pkg.homepage %>',
+				options: {
+					paths: 'lib/',
+					// themedir: 'path/to/custom/theme/',
+					outdir: 'doc/yuidoc/',
+					tabtospace: 4,
+					linkNatives: true
+				}
+			}
 		}
 	});
 
@@ -73,8 +106,12 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-nodeunit');
+	grunt.loadNpmTasks('grunt-jsdoc');
+	grunt.loadNpmTasks('grunt-contrib-yuidoc');
 
 	// Tasks.
 	grunt.registerTask('test',    [ 'nodeunit' ]);
+	grunt.registerTask('doc2',    [ 'jsdoc:docstrap' ]);
+	grunt.registerTask('doc',     [ 'yuidoc' ]);
 	grunt.registerTask('default', [ 'jshint' ]);
 };

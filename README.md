@@ -1,6 +1,6 @@
 # Protoo.js
 
-Fast and powerful Node.js framework for building real-time applications using the Protoo protocol.
+Fast and powerful Node.js framework for building Protoo applications.
 
 ## Getting Started
 Install with: `npm install protoo`
