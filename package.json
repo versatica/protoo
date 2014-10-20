@@ -34,7 +34,8 @@
 		"test": "grunt test"
 	},
 	"dependencies": {
-		"ws": "git://github.com/ibc/ws.git#master"
+		"ws": "git://github.com/ibc/ws.git#master",
+		"debug": "~2.1.0"
 	},
 	"devDependencies": {
 		"grunt": "~0.4.5",
