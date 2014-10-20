@@ -1,0 +1,17 @@
+{
+	"log": {
+		"level": "debug"
+	},
+	"transport": {
+		"webSocket": {
+			"secure": true,
+			"listenIP": "127.0.0.1",
+			"listenPort": 10080
+		}
+	},
+	"tls": {
+		"certFile": "/Users/ibc/src/ProtooServer/config/local.protooserver.org.crt.pem",
+		"keyFile": "/Users/ibc/src/ProtooServer/config/local.protooserver.org.key.pem",
+		"handshakeTimeout": 10
+	}
+}

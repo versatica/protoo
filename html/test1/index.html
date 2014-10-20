@@ -2,32 +2,49 @@
 <html>
 
 <head>
-	<meta charset="utf-8">
+	<meta charset='utf-8'>
 	<title>ws.ibc test1</title>
 	<script>
-		var ws = new WebSocket("ws://local.protoo.org:10080", ["qwe", "protoo", "foo"]);
+		var username = 'ibc';
+		var uuid = (function(size, base) {
+			var i, r,
+			token = '';
 
-		ws.onopen = function() {
-			console.log("WebSocket onopen! | protocol: %s", ws.protocol);
-		};
+			base = base || 32;
+			for( i=0; i < size; i++ ) {
+				r = Math.random() * base|0;
+				token += r.toString(base);
+			}
+			return token;
+		})(10);
 
-		ws.onerror = function() {
-			console.error("WebSocket onerror!");
-		};
+		function test() {
+			console.log('username:%s | uuid:%s', username, uuid);
 
-		ws.onclose = function(e) {
-			console.error("WebSocket onclose! [code:%d | reason:%s | wasClean:%s]", e.code, e.reason, e.wasClean);
-		};
+			var ws = new WebSocket('ws://local.protoo.org:10080?username=' + username + '&uuid=' + uuid, ['qwe', 'protoo', 'foo']);
 
-		ws.onmessage = function(e) {
-			console.log("WebSocket onmessage: %s", e.data);
-		};
+			ws.onopen = function() {
+				console.log('WebSocket onopen! | protocol: %s', ws.protocol);
+			};
 
-		window.ws = ws;
+			ws.onerror = function() {
+				console.error('WebSocket onerror!');
+			};
+
+			ws.onclose = function(e) {
+				console.error('WebSocket onclose! [code:%d | reason:%s | wasClean:%s]', e.code, e.reason, e.wasClean);
+			};
+
+			ws.onmessage = function(e) {
+				console.log('WebSocket onmessage: %s', e.data);
+			};
+
+			window.ws = ws;
+		}
 	</script>
 </head>
 
-<body>
+<body onload='test()'>
 </body>
 
 </html>

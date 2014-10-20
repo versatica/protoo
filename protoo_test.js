@@ -8,6 +8,9 @@
 var protoo = require('./');
 var PrettyError = require('pretty-error');
 var http = require('http');
+var https = require('https');
+var url = require('url');
+var fs = require('fs');
 
 
 // Some funny stuff.
@@ -20,14 +23,17 @@ function logError(error) {
 console.log('protoo version: %s', protoo.version);
 
 var app = protoo();  // My Protoo application.
-var httpServer = http.createServer();
 
+var httpServer = http.createServer();
 httpServer.listen(10080, '127.0.0.1');
 
-app.handleWebSocket(httpServer, {
-	// path: '/qwe'
+var httpsServer = https.createServer({
+	cert: fs.readFileSync('./test/local.protoo.org.crt.pem'),
+	key: fs.readFileSync('./test/local.protoo.org.key.pem')
 });
+httpsServer.listen(10443, '127.0.0.1');
 
+app.handleWebSocket(httpServer);
 
 
 app.on('error', function(error) {
@@ -35,17 +41,22 @@ app.on('error', function(error) {
 });
 
 
-app.on('ws:connection', function(data, acceptCb, rejectCb, waitCb) {
-	var req = data.req;
-	var origin = data.origin;
-	var socket = req.socket;
+app.on('ws:connecting', function(connectingInfo, acceptCb, rejectCb, waitCb) {
+	var req = connectingInfo.req;
+	var origin = connectingInfo.origin;
+	var socket = connectingInfo.socket;
+	var u = url.parse(req.url, true);
+	var username = u.query.username;
+	var uuid = u.query.uuid;
+
+	// console.log(u);
 
 	console.log('app.on(ws:connection) | [method:%s | url:"%s" | origin:"%s" | src:%s:%s]',
-		req.method, req.url, origin, req.socket.remoteAddress, req.socket.remotePort);
+		req.method, req.url, origin, socket.remoteAddress, socket.remotePort);
 
 	// setTimeout(function() {
-		acceptCb('ibc', '110ec58a-a0f2-4ac4-8393-c866d813b8d1');
-		// rejectCb(666, 'Y U NOT ALLOWED');
+		acceptCb(username, uuid);
+		// rejectCb(403, 'Y U NOT ALLOWED');
 	// }, 5000);
 
 	// waitCb();
@@ -55,16 +66,24 @@ app.on('ws:connection', function(data, acceptCb, rejectCb, waitCb) {
 });
 
 
-app.on('user:connected', function(socket, user, uuid, transport) {
-	console.log('app.on(user:connected) | [user:%s | uuid:%s]', user, uuid);
+app.on('peer:connected', function(peer) {
+	console.log('app.on(peer:connected) | [username:%s | uuid:%s]', peer.username, peer.uuid);
 });
+
+
+app.on('peer:disconnected', function(peer) {
+	console.log('app.on(peer:disconnected) | [username:%s | uuid:%s]', peer.username, peer.uuid);
+});
+
+
+
 
 
 // Run interactive Node REPL.
 
 global.app = app;  // Make the app global.
 var r = require('repl').start({
-	prompt: '>>> ',
+	prompt: '>>>\n',
 	useColors: true,
 	useGlobal: true,
 	ignoreUndefined: true
