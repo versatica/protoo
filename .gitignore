@@ -1,5 +1,7 @@
 node_modules/
+doc/
 npm-debug.log
+.npmignore
 .DS_Store
 NO_GIT/
 

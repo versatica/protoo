@@ -83,22 +83,6 @@ module.exports = function(grunt) {
 					configure: 'jsdoc.conf.json'
 				}
 			}
-		},
-
-		yuidoc: {
-			compile: {
-				name: '<%= pkg.name %>',
-				description: '<%= pkg.description %>',
-				version: '<%= pkg.version %>',
-				url: '<%= pkg.homepage %>',
-				options: {
-					paths: 'lib/',
-					// themedir: 'path/to/custom/theme/',
-					outdir: 'doc/yuidoc/',
-					tabtospace: 4,
-					linkNatives: true
-				}
-			}
 		}
 	});
 
@@ -107,11 +91,9 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-nodeunit');
 	grunt.loadNpmTasks('grunt-jsdoc');
-	grunt.loadNpmTasks('grunt-contrib-yuidoc');
 
 	// Tasks.
 	grunt.registerTask('test',    [ 'nodeunit' ]);
-	grunt.registerTask('doc2',    [ 'jsdoc:docstrap' ]);
-	grunt.registerTask('doc',     [ 'yuidoc' ]);
+	grunt.registerTask('doc',    [ 'jsdoc:docstrap' ]);
 	grunt.registerTask('default', [ 'jshint' ]);
 };

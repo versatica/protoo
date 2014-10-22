@@ -1,7 +1,7 @@
 {
 	"name": "protoo",
 	"description": "Fast and powerful Node.js framework for building Protoo applications.",
-	"version": "0.1.0",
+	"version": "0.1.0-alpha1",
 	"author": "Iñaki Baz Castillo <ibc@aliax.net>",
 	"keyworkds": [
 		"protoo",
@@ -22,7 +22,7 @@
 		"url": "https://bitbucket.org/ibc_aliax/protoo/issues?status=new&status=open"
 	},
 	"engines": {
-		"node": ">=0.10.32"
+		"node": "~0.10.32"
 	},
 	"main": "./lib/protoo.js",
 	"directories": {
@@ -42,7 +42,6 @@
 		"grunt-contrib-jshint": "~0.10.0",
 		"grunt-contrib-watch": "~0.6.1",
 		"grunt-contrib-nodeunit": "~0.4.1",
-		"grunt-jsdoc": "~0.5.7",
-		"grunt-contrib-yuidoc": "~0.5.2"
+		"grunt-jsdoc": "~0.5.7"
 	}
 }

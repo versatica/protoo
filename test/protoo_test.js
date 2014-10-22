@@ -1,37 +1,97 @@
+// process.env.DEBUG = 'test, ' + process.env.DEBUG;
+
+
 var protoo = require('../');
 var pkg = require('../package.json');
+var http = require('http');
+var WebSocket = require('ws');
+var debug = require('debug')('test');
 
 
-/*
-	======== A Handy Little Nodeunit Reference ========
-	https://github.com/caolan/nodeunit
-
-	Test methods:
-		test.expect(numAssertions)
-		test.done()
-	Test assertions:
-		test.ok(value, [message])
-		test.equal(actual, expected, [message])
-		test.notEqual(actual, expected, [message])
-		test.deepEqual(actual, expected, [message])
-		test.notDeepEqual(actual, expected, [message])
-		test.strictEqual(actual, expected, [message])
-		test.notStrictEqual(actual, expected, [message])
-		test.throws(block, [error], [message])
-		test.doesNotThrow(block, [error], [message])
-		test.ifError(value)
-*/
+// The global Protoo app.
+global.app = null;
 
 
-exports['version'] = {
-	setUp: function(done) {
-		// setup here
+function runProtooServer(done) {
+	global.app = protoo();
+
+	var httpServer = http.createServer();
+
+	global.app.handleWebSocket(httpServer);
+
+	httpServer.listen(54321, '127.0.0.1', function() {
 		done();
+	});
+
+	global.app.on('ws:connecting', function(connectingInfo, acceptCb, rejectCb, waitCb) {  // jshint ignore:line
+		acceptCb('testuser', 'testuuid');
+	});
+}
+
+
+function stopProtooServer(done) {
+	global.app.close(true);
+
+	process.nextTick(function() {
+		done();
+	});
+}
+
+
+function wsConnect(username, uuid, protocol) {
+	var ws = new WebSocket('ws://127.0.0.1:54321/?username=' + username + '&uuid=' + uuid, {protocol: protocol});
+
+	return ws;
+}
+
+
+exports['version'] = function(test) {
+	test.equal(protoo.version, pkg.version);
+	test.done();
+};
+
+
+exports['test Protoo server'] = {
+	setUp: function(done) {
+		runProtooServer(done);
 	},
-	'no args': function(test) {
+
+	tearDown: function(done) {
+		stopProtooServer(done);
+	},
+
+	'fail to connect if WS "protoo" sub-protocol is not given': function(test) {
 		test.expect(1);
-		// tests here
-		test.equal(protoo.version, pkg.version);
-		test.done();
+
+		var ws = wsConnect('testuser', 'testuuid');
+
+		ws.on('open', function() {
+			test.ok(false);
+			test.done();
+		});
+
+		ws.on('error', function(error) {
+			debug(error.message);
+			test.ok(true);
+			test.done();
+		});
 	},
+
+	'connect if WS "protoo" sub-protocol is given': function(test) {
+		test.expect(1);
+
+		var ws = wsConnect('testuser', 'testuuid', 'protoo');
+
+		ws.on('open', function() {
+			test.ok(true);
+			ws.close();
+			test.done();
+		});
+
+		ws.on('error', function(error) {
+			debug(error.message);
+			test.ok(false);
+			test.done();
+		});
+	}
 };

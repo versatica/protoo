@@ -5,7 +5,7 @@
  * Enable debug
  */
 
-process.env.DEBUG = 'myApp, protoo:*'
+process.env.DEBUG = 'myApp, protoo:ERROR:*, protoo:*'
 
 
 /**
@@ -13,19 +13,11 @@ process.env.DEBUG = 'myApp, protoo:*'
  */
 
 var protoo = require('./');
-var PrettyError = require('pretty-error');
 var http = require('http');
 var https = require('https');
 var url = require('url');
 var fs = require('fs');
 var debug = require('debug')('myApp');
-
-
-// Some funny stuff.
-var pe = new PrettyError();
-function logError(error) {
-	console.error(pe.render(error));
-}
 
 
 debug('protoo version loaded: %s', protoo.version);
@@ -53,7 +45,6 @@ app.handleWebSocket(httpsServer);
 
 app.on('error', function(error) {
 	debug('on(error) | %s', error);
-	// logError(error);
 });
 
 
@@ -73,6 +64,7 @@ app.on('ws:connecting', function(connectingInfo, acceptCb, rejectCb, waitCb) {
 	// setTimeout(function() {
 		acceptCb(username, uuid);
 		// rejectCb(403, 'Y U NOT ALLOWED');
+		// rejectCb();
 	// }, 5000);
 
 	// waitCb();
