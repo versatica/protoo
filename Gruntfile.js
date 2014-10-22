@@ -6,9 +6,9 @@ module.exports = function(grunt) {
 		doc:	   [ 'README.md', 'lib/**/*.js' ]
 	};
 
-	grunt.initConfig({
-		pkg: grunt.file.readJSON('package.json'),
+	var pkg = grunt.file.readJSON('package.json');
 
+	grunt.initConfig({
 		jshint: {
 			options: {
 				// DOC: http://www.jshint.com/docs/options/
@@ -62,10 +62,6 @@ module.exports = function(grunt) {
 			}
 		},
 
-		nodeunit: {
-			files: files.test
-		},
-
 		jsdoc : {
 			basic: {
 				src: files.doc,
@@ -89,11 +85,25 @@ module.exports = function(grunt) {
 	// Load Grunt plugins.
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-contrib-nodeunit');
 	grunt.loadNpmTasks('grunt-jsdoc');
 
 	// Tasks.
-	grunt.registerTask('test',    [ 'nodeunit' ]);
-	grunt.registerTask('doc',    [ 'jsdoc:docstrap' ]);
-	grunt.registerTask('default', [ 'jshint' ]);
+	grunt.registerTask('test', function() {
+		var done = this.async();  // This is an async task.
+		var exec = require('child_process').exec;
+		var child;
+
+		child = exec(pkg.scripts.test, function(error, stdout, stderr) {
+			if (error) {
+				console.error(stderr);
+				done(false);
+			}
+
+			console.log(stdout);
+			done(true);
+		});
+	});
+	grunt.registerTask('lint',    [ 'jshint' ]);
+	grunt.registerTask('doc',     [ 'jsdoc:docstrap' ]);
+	grunt.registerTask('default', [ 'lint', 'test' ]);
 };

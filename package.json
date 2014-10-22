@@ -31,7 +31,7 @@
 		"doc": "doc"
 	},
 	"scripts": {
-		"test": "grunt test"
+		"test": "node_modules/.bin/nodeunit"
 	},
 	"dependencies": {
 		"ws": "git://github.com/ibc/ws.git#master",
@@ -41,7 +41,7 @@
 		"grunt": "~0.4.5",
 		"grunt-contrib-jshint": "~0.10.0",
 		"grunt-contrib-watch": "~0.6.1",
-		"grunt-contrib-nodeunit": "~0.4.1",
-		"grunt-jsdoc": "~0.5.7"
+		"grunt-jsdoc": "~0.5.7",
+		"nodeunit": "~0.9.0"
 	}
 }
