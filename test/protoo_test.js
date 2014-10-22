@@ -12,6 +12,7 @@ global.app = null;
 
 // Show uncaught errors.
 process.on('uncaughtException', function(error) {
+	console.error('uncaught exception:');
 	console.error(error.stack);
 	process.exit(1);
 });
@@ -81,6 +82,20 @@ function wsConnect(test, protocol) {
 }
 
 
+var Done = function(test, must_do) {
+	this.test = test;
+	this.must_do = must_do;
+	this.dones = 0;
+}
+
+Done.prototype.done = function() {
+	this.dones++;
+	if (this.dones === this.must_do) {
+		this.test.done();
+	}
+}
+
+
 exports['version'] = function(test) {
 	test.equal(protoo.version, pkg.version);
 	test.done();
@@ -113,19 +128,25 @@ exports['test Protoo server'] = {
 	},
 
 	'peer sync accept': function(test) {
-		test.expect(1);
+		test.expect(2);
+		var done = new Done(test, 2);
 		var ws = wsConnect('sync_accept', 'protoo');
 
 		ws.on('open', function() {
 			test.ok(true);
 			ws.close();
-			test.done();
+			done.done();
 		});
 
 		ws.on('error', function(error) {
 			debug(error.message);
 			test.ok(false);
-			test.done();
+			this.done();
+		});
+
+		global.app.once('peer:online', function(peer) {
+			test.strictEqual(peer.username, 'sync_accept');
+			done.done();
 		});
 	},
 
@@ -147,19 +168,25 @@ exports['test Protoo server'] = {
 	},
 
 	'peer async accept': function(test) {
-		test.expect(1);
+		test.expect(2);
+		var done = new Done(test, 2);
 		var ws = wsConnect('async_accept', 'protoo');
 
 		ws.on('open', function() {
 			test.ok(true);
 			ws.close();
-			test.done();
+			done.done();
 		});
 
 		ws.on('error', function(error) {
 			debug(error.message);
 			test.ok(false);
 			test.done();
+		});
+
+		global.app.once('peer:online', function(peer) {
+			test.strictEqual(peer.username, 'async_accept');
+			done.done();
 		});
 	},
 
@@ -182,6 +209,7 @@ exports['test Protoo server'] = {
 
 	'peer fails to connect if no callback is called on "ws:connecting"': function(test) {
 		test.expect(1);
+		var done = new Done(test, 2);
 		var ws = wsConnect('no_cb_called', 'protoo');
 
 		ws.on('open', function() {
@@ -193,7 +221,11 @@ exports['test Protoo server'] = {
 		ws.on('error', function(error) {
 			debug(error.message);
 			test.ok(true);
-			test.done();
+			done.done();
+		});
+
+		global.app.once('error', function() {
+			done.done();
 		});
 	}
 };
