@@ -1,6 +1,3 @@
-// process.env.DEBUG = 'test, ' + process.env.DEBUG;
-
-
 var protoo = require('../');
 var pkg = require('../package.json');
 var http = require('http');
@@ -11,6 +8,13 @@ var debug = require('debug')('test');
 
 // The global Protoo app.
 global.app = null;
+
+
+// Show uncaught errors.
+process.on('uncaughtException', function(error) {
+	console.error(error.stack);
+	process.exit(1);
+});
 
 
 function runProtooServer(done) {
@@ -94,7 +98,6 @@ exports['test Protoo server'] = {
 
 	'peer fails to connect if WS "protoo" sub-protocol is not given': function(test) {
 		test.expect(1);
-
 		var ws = wsConnect('fail');
 
 		ws.on('open', function() {
@@ -111,7 +114,6 @@ exports['test Protoo server'] = {
 
 	'peer sync accept': function(test) {
 		test.expect(1);
-
 		var ws = wsConnect('sync_accept', 'protoo');
 
 		ws.on('open', function() {
@@ -129,7 +131,6 @@ exports['test Protoo server'] = {
 
 	'peer sync reject': function(test) {
 		test.expect(1);
-
 		var ws = wsConnect('sync_reject', 'protoo');
 
 		ws.on('open', function() {
@@ -147,7 +148,6 @@ exports['test Protoo server'] = {
 
 	'peer async accept': function(test) {
 		test.expect(1);
-
 		var ws = wsConnect('async_accept', 'protoo');
 
 		ws.on('open', function() {
@@ -165,7 +165,6 @@ exports['test Protoo server'] = {
 
 	'peer async reject': function(test) {
 		test.expect(1);
-
 		var ws = wsConnect('async_reject', 'protoo');
 
 		ws.on('open', function() {
@@ -183,7 +182,6 @@ exports['test Protoo server'] = {
 
 	'peer fails to connect if no callback is called on "ws:connecting"': function(test) {
 		test.expect(1);
-
 		var ws = wsConnect('no_cb_called', 'protoo');
 
 		ws.on('open', function() {
