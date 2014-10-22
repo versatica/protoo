@@ -21,8 +21,8 @@
 		function connect(username, uuid) {
 			console.log('username:%s | uuid:%s', username, uuid);
 
-			// var ws = new WebSocket('wss://local.protoo.org:10443?username=' + username + '&uuid=' + uuid, ['qwe', 'protoo', 'foo']);
-			var ws = new WebSocket('ws://local.protoo.org:10080?username=' + username + '&uuid=' + uuid, ['qwe', 'protoo', 'foo']);
+			var ws = new WebSocket('wss://local.protoo.org:10443?username=' + username + '&uuid=' + uuid, ['qwe', 'protoo', 'foo']);
+			// var ws = new WebSocket('ws://local.protoo.org:10080?username=' + username + '&uuid=' + uuid, ['qwe', 'protoo', 'foo']);
 
 			ws.onopen = function() {
 				console.log('WebSocket onopen! | protocol: %s', ws.protocol);

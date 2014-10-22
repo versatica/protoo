@@ -1,7 +1,7 @@
 {
 	"name": "protoo",
 	"description": "Fast and powerful Node.js framework for building Protoo applications.",
-	"version": "0.1.0-alpha1",
+	"version": "0.1.0-alpha2",
 	"author": "Iñaki Baz Castillo <ibc@aliax.net>",
 	"keyworkds": [
 		"protoo",
