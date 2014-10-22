@@ -7,7 +7,7 @@ var debug = require('debug')('test');
 
 
 // The global Protoo app.
-global.app = null;
+var app = null;
 
 
 // Show uncaught errors.
@@ -18,22 +18,22 @@ process.on('uncaughtException', function(error) {
 });
 
 
-function runProtooServer(done) {
-	global.app = protoo();
+function runApp(done) {
+	app = protoo();
 
 	var httpServer = http.createServer();
 
-	global.app.handleWebSocket(httpServer);
+	app.handleWebSocket(httpServer);
 
 	httpServer.listen(54321, '127.0.0.1', function() {
 		done();
 	});
 
-	global.app.on('error', function(error) {
+	app.on('error', function(error) {
 		debug(error);
 	});
 
-	global.app.on('ws:connecting', function(connectingInfo, acceptCb, rejectCb, waitCb) {  // jshint ignore:line
+	app.on('ws:connecting', function(connectingInfo, acceptCb, rejectCb, waitCb) {  // jshint ignore:line
 		var u = url.parse(connectingInfo.req.url, true);
 		var test = u.query.test;
 		var uuid = 'abcd-1234';
@@ -68,8 +68,8 @@ function runProtooServer(done) {
 }
 
 
-function stopProtooServer(done) {
-	global.app.close(true);
+function stopApp(done) {
+	app.close(true);
 
 	process.nextTick(function() {
 		done();
@@ -104,11 +104,11 @@ exports['version'] = function(test) {
 
 exports['test Protoo server'] = {
 	setUp: function(done) {
-		runProtooServer(done);
+		runApp(done);
 	},
 
 	tearDown: function(done) {
-		stopProtooServer(done);
+		stopApp(done);
 	},
 
 	'peer fails to connect if WS "protoo" sub-protocol is not given': function(test) {
@@ -144,7 +144,7 @@ exports['test Protoo server'] = {
 			this.done();
 		});
 
-		global.app.once('peer:online', function(peer) {
+		app.once('peer:online', function(peer) {
 			test.strictEqual(peer.username, 'sync_accept');
 			done.done();
 		});
@@ -184,7 +184,7 @@ exports['test Protoo server'] = {
 			test.done();
 		});
 
-		global.app.once('peer:online', function(peer) {
+		app.once('peer:online', function(peer) {
 			test.strictEqual(peer.username, 'async_accept');
 			done.done();
 		});
@@ -224,7 +224,7 @@ exports['test Protoo server'] = {
 			done.done();
 		});
 
-		global.app.once('error', function() {
+		app.once('error', function() {
 			done.done();
 		});
 	}

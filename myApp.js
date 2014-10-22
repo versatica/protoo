@@ -20,7 +20,7 @@ var fs = require('fs');
 var debug = require('debug')('myApp');
 
 
-debug('protoo version loaded: %s', protoo.version);
+debug('protoo version: %s', protoo.version);
 
 debug('creating a "protoo" application');
 var app = protoo();  // My Protoo application.
