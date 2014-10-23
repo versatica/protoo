@@ -1,7 +1,5 @@
-var protoo = require('../');
+var eventcollector = require('eventcollector');
 var testServer = require('./include/TestServer');
-var Done = require('./include/Done');
-var debug = require('debug')('test');
 
 
 // Show uncaught errors.
@@ -22,8 +20,7 @@ var tests = {
 			test.done();
 		});
 
-		ws.on('error', function(error) {
-			debug(error.message);
+		ws.on('error', function() {
 			test.ok(true);
 			test.done();
 		});
@@ -31,24 +28,27 @@ var tests = {
 
 	'sync accept': function(test) {
 		test.expect(2);
-		var done = new Done(test, 2);
+		var ec = eventcollector(2, 2000);
 		var ws = testServer.connect('sync_accept', 'protoo');
+
+		ec.on('alldone', function() {
+			test.done();
+		});
 
 		ws.on('open', function() {
 			test.ok(true);
 			ws.close();
-			done.done();
+			ec.done();
 		});
 
-		ws.on('error', function(error) {
-			debug(error.message);
+		ws.on('error', function() {
 			test.ok(false);
 			test.done();
 		});
 
 		testServer.app.once('peer:online', function(peer) {
 			test.strictEqual(peer.username, 'sync_accept');
-			done.done();
+			ec.done();
 		});
 	},
 
@@ -62,8 +62,7 @@ var tests = {
 			test.done();
 		});
 
-		ws.on('error', function(error) {
-			debug(error.message);
+		ws.on('error', function() {
 			test.ok(true);
 			test.done();
 		});
@@ -71,24 +70,27 @@ var tests = {
 
 	'async accept': function(test) {
 		test.expect(2);
-		var done = new Done(test, 2);
+		var ec = eventcollector(2, 2000);
 		var ws = testServer.connect('async_accept', 'protoo');
+
+		ec.on('alldone', function() {
+			test.done();
+		});
 
 		ws.on('open', function() {
 			test.ok(true);
 			ws.close();
-			done.done();
+			ec.done();
 		});
 
-		ws.on('error', function(error) {
-			debug(error.message);
+		ws.on('error', function() {
 			test.ok(false);
 			test.done();
 		});
 
 		testServer.app.once('peer:online', function(peer) {
 			test.strictEqual(peer.username, 'async_accept');
-			done.done();
+			ec.done();
 		});
 	},
 
@@ -102,8 +104,7 @@ var tests = {
 			test.done();
 		});
 
-		ws.on('error', function(error) {
-			debug(error.message);
+		ws.on('error', function() {
 			test.ok(true);
 			test.done();
 		});
@@ -111,8 +112,12 @@ var tests = {
 
 	'fail if no callback is called on "ws:connecting"': function(test) {
 		test.expect(1);
-		var done = new Done(test, 2);
+		var ec = eventcollector(2, 2000);
 		var ws = testServer.connect('no_cb_called', 'protoo');
+
+		ec.on('alldone', function() {
+			test.done();
+		});
 
 		ws.on('open', function() {
 			test.ok(false);
@@ -120,14 +125,32 @@ var tests = {
 			test.done();
 		});
 
-		ws.on('error', function(error) {
-			debug(error.message);
+		ws.on('error', function() {
 			test.ok(true);
-			done.done();
+			ec.done();
 		});
 
 		testServer.app.once('error', function() {
-			done.done();
+			ec.done();
+		});
+	},
+
+	'peer disconnects': function(test) {
+		test.expect(1);
+		var ws = testServer.connect('sync_accept', 'protoo');
+
+		ws.on('open', function() {
+			ws.close();
+		});
+
+		ws.on('error', function() {
+			test.ok(false);
+			test.done();
+		});
+
+		testServer.app.once('peer:offline', function(peer) {
+			test.strictEqual(peer.username, 'sync_accept');
+			test.done();
 		});
 	}
 };  // tests

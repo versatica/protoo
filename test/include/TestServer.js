@@ -43,29 +43,29 @@ TestServer.prototype.run = function(wss, done) {
 
 	this.app.on('ws:connecting', function(connectingInfo, acceptCb, rejectCb, waitCb) {  // jshint ignore:line
 		var u = url.parse(connectingInfo.req.url, true);
-		var test = u.query.test;
+		var username = u.query.username;
 		var uuid = 'abcd-1234';
 
-		switch(test) {
+		switch(username) {
 			case 'sync_accept':
-				acceptCb(test, uuid);
+				acceptCb(username, uuid);
 				break;
 
 			case 'sync_reject':
-				rejectCb(403, test);
+				rejectCb(403, username);
 				break;
 
 			case 'async_accept':
 				waitCb();
 				process.nextTick(function() {
-					acceptCb(test, uuid);
+					acceptCb(username, uuid);
 				});
 				break;
 
 			case 'async_reject':
 				waitCb();
 				process.nextTick(function() {
-					rejectCb(403, test);
+					rejectCb(403, username);
 				});
 				break;
 
@@ -76,7 +76,7 @@ TestServer.prototype.run = function(wss, done) {
 };
 
 
-TestServer.prototype.connect = function(test, protocol) {
+TestServer.prototype.connect = function(username, protocol) {
 	var schema = (this.wss ? 'wss' : 'ws');
 	var options = {
 		protocol: protocol
@@ -86,7 +86,7 @@ TestServer.prototype.connect = function(test, protocol) {
 		options.rejectUnauthorized = false;
 	}
 
-	return new WebSocket(schema + '://127.0.0.1:' + this.port + '?test=' + test, options);
+	return new WebSocket(schema + '://127.0.0.1:' + this.port + '?username=' + username, options);
 };
 
 
