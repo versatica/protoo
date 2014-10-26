@@ -35,7 +35,8 @@
 	},
 	"dependencies": {
 		"ws": "git://github.com/ibc/ws.git#master",
-		"debug": "~2.1.0"
+		"debug": "~2.1.0",
+		"path-to-regexp": "1.0.1"
 	},
 	"devDependencies": {
 		"grunt": "~0.4.5",

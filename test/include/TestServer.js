@@ -1,21 +1,20 @@
 var protoo = require('../../');
 var http = require('http');
 var https = require('https');
-var url = require('url');
 var path = require('path');
 var fs = require('fs');
 var WebSocket = require('ws');
 var debug = require('debug')('test:TestServer');
 
 
-var TestServer = function() {
+function TestServer() {
 	this.port = 54321;
 	this.wss = null;
 	this.app = null;
-};
+}
 
 
-TestServer.prototype.run = function(wss, done) {
+TestServer.prototype.run = function(wss, onApp, done) {
 	this.wss = wss;
 	this.app = protoo();
 
@@ -41,38 +40,7 @@ TestServer.prototype.run = function(wss, done) {
 		debug(error);
 	});
 
-	this.app.on('ws:connecting', function(connectingInfo, acceptCb, rejectCb, waitCb) {  // jshint ignore:line
-		var u = url.parse(connectingInfo.req.url, true);
-		var username = u.query.username;
-		var uuid = 'abcd-1234';
-
-		switch(username) {
-			case 'sync_accept':
-				acceptCb(username, uuid);
-				break;
-
-			case 'sync_reject':
-				rejectCb(403, username);
-				break;
-
-			case 'async_accept':
-				waitCb();
-				process.nextTick(function() {
-					acceptCb(username, uuid);
-				});
-				break;
-
-			case 'async_reject':
-				waitCb();
-				process.nextTick(function() {
-					rejectCb(403, username);
-				});
-				break;
-
-			case 'no_cb_called':
-				break;
-		}
-	});
+	onApp(this.app);
 };
 
 
@@ -94,7 +62,7 @@ TestServer.prototype.stop = function(done) {
 	this.app.close(true);
 	this.app = null;
 
-	process.nextTick(function() {
+	setImmediate(function() {
 		done();
 	});
 };

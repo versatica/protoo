@@ -1,3 +1,4 @@
+var url = require('url');
 var eventcollector = require('eventcollector');
 var testServer = require('./include/TestServer');
 
@@ -156,15 +157,60 @@ var tests = {
 };  // tests
 
 
+// Set the server events.
+function onApp(app) {
+	app.on('ws:connecting', function(info, acceptCb, rejectCb, waitCb) {  // _jshint ignore:line
+		var u = url.parse(info.req.url, true);
+		var username = u.query.username;
+		var uuid = 'abcd-1234';
+
+		switch(username) {
+			case 'sync_accept':
+				var peerInfo = {
+					username: username,
+					uuid: uuid
+				};
+				acceptCb(peerInfo);
+				break;
+
+			case 'sync_reject':
+				rejectCb(403, username);
+				break;
+
+			case 'async_accept':
+				waitCb();
+				setImmediate(function() {
+					var peerInfo = {
+						username: username,
+						uuid: uuid
+					};
+					acceptCb(peerInfo);
+				});
+				break;
+
+			case 'async_reject':
+				waitCb();
+				setImmediate(function() {
+					rejectCb(403, username);
+				});
+				break;
+
+			case 'no_cb_called':
+				break;
+		}
+	});
+}
+
+
 var ws_tests = {
-	setUp: function(done)    { testServer.run(false, done); },
-	tearDown: function(done) { testServer.stop(done);       }
+	setUp: function(done)    { testServer.run(false, onApp, done); },
+	tearDown: function(done) { testServer.stop(done); }
 };
 
 
 var wss_tests = {
-	setUp: function(done)    { testServer.run(true, done);  },
-	tearDown: function(done) { testServer.stop(done);       }
+	setUp: function(done)    { testServer.run(true, onApp, done); },
+	tearDown: function(done) { testServer.stop(done); }
 };
 
 

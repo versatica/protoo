@@ -31,8 +31,8 @@ httpServer.listen(10080, '127.0.0.1');
 
 debug('creating a HTTPS server on port 10443');
 var httpsServer = https.createServer({
-	cert: fs.readFileSync('./test/local.protoo.org.crt.pem'),
-	key: fs.readFileSync('./test/local.protoo.org.key.pem')
+	cert: fs.readFileSync('./test/include/local.protoo.org.crt.pem'),
+	key: fs.readFileSync('./test/include/local.protoo.org.key.pem')
 });
 httpsServer.listen(10443, '127.0.0.1');
 
@@ -48,10 +48,10 @@ app.on('error', function(error) {
 });
 
 
-app.on('ws:connecting', function(connectingInfo, acceptCb, rejectCb, waitCb) {
-	var req = connectingInfo.req;
-	var origin = connectingInfo.origin;
-	var socket = connectingInfo.socket;
+app.on('ws:connecting', function(info, acceptCb, rejectCb, waitCb) {
+	var req = info.req;
+	var origin = info.origin;
+	var socket = info.socket;
 	var u = url.parse(req.url, true);
 	var username = u.query.username;
 	var uuid = u.query.uuid;
@@ -61,8 +61,17 @@ app.on('ws:connecting', function(connectingInfo, acceptCb, rejectCb, waitCb) {
 	debug('on(ws:connecting) | [method:%s | url:%s | origin:%s | src:%s:%s]',
 		req.method, req.url, origin, socket.remoteAddress, socket.remotePort);
 
+	var peerInfo = {
+		username: username,
+		uuid: uuid
+	};
+
+	var onPeerCb = function(peer) {
+		debug('onPeerCb for peer %s', peer);
+	};
+
 	// setTimeout(function() {
-		acceptCb(username, uuid);
+		acceptCb(peerInfo, onPeerCb);
 		// rejectCb(403, 'Y U NOT ALLOWED');
 		// rejectCb();
 	// }, 5000);
