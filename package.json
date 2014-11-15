@@ -1,49 +1,48 @@
 {
-	"name": "protoo",
-	"description": "Fast and powerful Node.js framework for building Protoo applications.",
-	"version": "0.1.0-alpha2",
-	"author": "Iñaki Baz Castillo <ibc@aliax.net>",
-	"keyworkds": [
-		"protoo",
-		"webrtc"
-	],
-	"licenses": [
-		{
-			"type": "MIT",
-			"url": "https://bitbucket.org/ibc_aliax/protoo/blob/master/LICENSE-MIT"
-		}
-	],
-	"homepage": "https://bitbucket.org/ibc_aliax/protoo",
-	"repository": {
-		"type": "git",
-		"url": "https://bitbucket.org/ibc_aliax/protoo.git"
-	},
-	"bugs": {
-		"url": "https://bitbucket.org/ibc_aliax/protoo/issues?status=new&status=open"
-	},
-	"engines": {
-		"node": "~0.10.32"
-	},
-	"main": "./lib/protoo.js",
-	"directories": {
-		"lib": "lib",
-		"test": "test",
-		"doc": "doc"
-	},
-	"scripts": {
-		"test": "node_modules/.bin/nodeunit"
-	},
-	"dependencies": {
-		"ws": "git://github.com/ibc/ws.git#master",
-		"debug": "~2.1.0",
-		"path-to-regexp": "1.0.1"
-	},
-	"devDependencies": {
-		"grunt": "~0.4.5",
-		"grunt-contrib-jshint": "~0.10.0",
-		"grunt-contrib-watch": "~0.6.1",
-		"grunt-jsdoc": "~0.5.7",
-		"nodeunit": "~0.9.0",
-		"eventcollector": "~0.1.3"
-	}
+  "name": "protoo",
+  "description": "Fast and powerful Node.js framework for building Protoo applications.",
+  "version": "0.1.0",
+  "author": "Iñaki Baz Castillo <ibc@aliax.net>",
+  "keyworkds": [
+    "protoo",
+    "webrtc"
+  ],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://bitbucket.org/ibc_aliax/protoo/blob/master/LICENSE-MIT"
+    }
+  ],
+  "homepage": "https://bitbucket.org/ibc_aliax/protoo",
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/ibc_aliax/protoo.git"
+  },
+  "bugs": {
+    "url": "https://bitbucket.org/ibc_aliax/protoo/issues?status=new&status=open"
+  },
+  "engines": {
+    "node": "~0.10.32"
+  },
+  "main": "./lib/protoo.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "gulp test"
+  },
+  "dependencies": {
+    "ws": "git://github.com/ibc/ws.git#master",
+    "debug": "~2.1.0",
+    "path-to-regexp": "1.0.1"
+  },
+  "devDependencies": {
+    "gulp": "git://github.com/gulpjs/gulp.git#4.0",
+    "gulp-filelog": "^0.4.1",
+    "gulp-jshint": "^1.9.0",
+    "gulp-nodeunit-runner": "^0.2.2",
+    "jshint-stylish": "^1.0.0",
+    "nodeunit": "~0.9.0"
+  }
 }
