@@ -14,7 +14,7 @@ function TestServer() {
 }
 
 
-TestServer.prototype.run = function(wss, onApp, done) {
+TestServer.prototype.run = function(wss, connectionListener, done) {
 	this.wss = wss;
 	this.app = protoo();
 
@@ -30,7 +30,7 @@ TestServer.prototype.run = function(wss, onApp, done) {
 		httpServer = http.createServer();
 	}
 
-	this.app.handleWebSocket(httpServer);
+	this.app.websocket(httpServer, connectionListener);
 
 	httpServer.listen(this.port, '127.0.0.1', function() {
 		done();
@@ -39,8 +39,6 @@ TestServer.prototype.run = function(wss, onApp, done) {
 	this.app.on('error', function(error) {
 		debug(error);
 	});
-
-	onApp(this.app);
 };
 
 

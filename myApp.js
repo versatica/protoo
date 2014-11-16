@@ -36,27 +36,14 @@ var httpsServer = https.createServer({
 });
 httpsServer.listen(10443, '127.0.0.1');
 
-debug('handle Protoo non-secure WebSocket access on the HTTP server');
-app.handleWebSocket(httpServer);
 
-debug('handle Protoo secure WebSocket access on the HTTPS server');
-app.handleWebSocket(httpsServer);
-
-
-app.on('error', function(error) {
-	debug('on(error) | %s', error);
-});
-
-
-app.on('ws:connecting', function(info, acceptCb, rejectCb, waitCb) {
+var wsConnectionListenerapp = function(info, acceptCb, rejectCb, waitCb) {
 	var req = info.req;
 	var origin = info.origin;
 	var socket = info.socket;
 	var u = url.parse(req.url, true);
 	var username = u.query.username;
 	var uuid = u.query.uuid;
-
-	// console.log(u);
 
 	debug('on(ws:connecting) | [method:%s | url:%s | origin:%s | src:%s:%s]',
 		req.method, req.url, origin, socket.remoteAddress, socket.remotePort);
@@ -71,7 +58,7 @@ app.on('ws:connecting', function(info, acceptCb, rejectCb, waitCb) {
 	};
 
 	// setTimeout(function() {
-		acceptCb(peerInfo, onPeerCb);
+		// acceptCb(peerInfo, onPeerCb);
 		// rejectCb(403, 'Y U NOT ALLOWED');
 		// rejectCb();
 	// }, 5000);
@@ -80,19 +67,26 @@ app.on('ws:connecting', function(info, acceptCb, rejectCb, waitCb) {
 	// setTimeout(function() {
 		// socket.end();
 	// }, 2000);
+};
+
+
+debug('handle Protoo non-secure WebSocket access on the HTTP server');
+app.websocket(httpServer, wsConnectionListenerapp);
+
+debug('handle Protoo secure WebSocket access on the HTTPS server');
+app.websocket(httpsServer, wsConnectionListenerapp);
+
+app.on('error', function(error) {
+	debug('on(error) | %s', error);
 });
 
-
-app.on('peer:online', function(peer) {
-	debug('on(peer:online) | [username:%s | uuid:%s]', peer.username, peer.uuid);
+app.online(function(peer) {
+	debug('online() | [username:%s | uuid:%s]', peer.username, peer.uuid);
 });
 
-
-app.on('peer:offline', function(peer) {
-	debug('on(peer:offline) | [username:%s | uuid:%s]', peer.username, peer.uuid);
+app.offline(function(peer) {
+	debug('offline()) | [username:%s | uuid:%s]', peer.username, peer.uuid);
 });
-
-
 
 
 

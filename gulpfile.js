@@ -25,11 +25,10 @@ gulp.task('test', function() {
 });
 
 
-// TODO: set the default taks properly.
-gulp.task('default', gulp.series('lint', 'test'));
-
-
-// Rerun the task when a file changes
 gulp.task('watch', function() {
 	gulp.watch(['lib/**/*.js'], ['lint']);
 });
+
+
+// TODO: set the default taks properly.
+gulp.task('default', gulp.series('lint', 'test'));

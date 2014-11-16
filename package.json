@@ -38,6 +38,7 @@
     "path-to-regexp": "1.0.1"
   },
   "devDependencies": {
+    "eventcollector": "^0.1.4",
     "gulp": "git://github.com/gulpjs/gulp.git#4.0",
     "gulp-filelog": "^0.4.1",
     "gulp-jshint": "^1.9.0",

@@ -13,17 +13,32 @@ process.on('uncaughtException', function(error) {
 
 var tests = {
 	'fail if "protoo" is not set as WebSocket sub-protocol': function(test) {
-		test.expect(1);
-		var ws = testServer.connect('fail');
+		test.expect(2);
+		var ec = eventcollector(2, 2000);
+		var ws1 = testServer.connect('fail');
+		var ws2 = testServer.connect('fail', 'foo');
 
-		ws.on('open', function() {
+		ec.on('alldone', function() { test.done(); });
+		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
+
+		ws1.on('open', function() {
 			test.ok(false);
-			test.done();
+			ec.done();
 		});
 
-		ws.on('error', function() {
+		ws1.on('error', function() {
 			test.ok(true);
-			test.done();
+			ec.done();
+		});
+
+		ws2.on('open', function() {
+			test.ok(false);
+			ec.done();
+		});
+
+		ws2.on('error', function() {
+			test.ok(true);
+			ec.done();
 		});
 	},
 
@@ -32,9 +47,8 @@ var tests = {
 		var ec = eventcollector(2, 2000);
 		var ws = testServer.connect('sync_accept', 'protoo');
 
-		ec.on('alldone', function() {
-			test.done();
-		});
+		ec.on('alldone', function() { test.done(); });
+		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
 
 		ws.on('open', function() {
 			test.ok(true);
@@ -47,7 +61,7 @@ var tests = {
 			test.done();
 		});
 
-		testServer.app.once('peer:online', function(peer) {
+		testServer.app.online(function(peer) {
 			test.strictEqual(peer.username, 'sync_accept');
 			ec.done();
 		});
@@ -74,9 +88,8 @@ var tests = {
 		var ec = eventcollector(2, 2000);
 		var ws = testServer.connect('async_accept', 'protoo');
 
-		ec.on('alldone', function() {
-			test.done();
-		});
+		ec.on('alldone', function() { test.done(); });
+		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
 
 		ws.on('open', function() {
 			test.ok(true);
@@ -89,7 +102,7 @@ var tests = {
 			test.done();
 		});
 
-		testServer.app.once('peer:online', function(peer) {
+		testServer.app.online(function(peer) {
 			test.strictEqual(peer.username, 'async_accept');
 			ec.done();
 		});
@@ -111,14 +124,13 @@ var tests = {
 		});
 	},
 
-	'fail if no callback is called on "ws:connecting"': function(test) {
+	'fail if no callback is called': function(test) {
 		test.expect(1);
 		var ec = eventcollector(2, 2000);
 		var ws = testServer.connect('no_cb_called', 'protoo');
 
-		ec.on('alldone', function() {
-			test.done();
-		});
+		ec.on('alldone', function() { test.done(); });
+		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
 
 		ws.on('open', function() {
 			test.ok(false);
@@ -149,67 +161,64 @@ var tests = {
 			test.done();
 		});
 
-		testServer.app.once('peer:offline', function(peer) {
+		testServer.app.offline(function(peer) {
 			test.strictEqual(peer.username, 'sync_accept');
 			test.done();
 		});
 	}
-};  // tests
+};
 
 
-// Set the server events.
-function onApp(app) {
-	app.on('ws:connecting', function(info, acceptCb, rejectCb, waitCb) {  // _jshint ignore:line
-		var u = url.parse(info.req.url, true);
-		var username = u.query.username;
-		var uuid = 'abcd-1234';
+function connectionListener(info, acceptCb, rejectCb, waitCb) {
+	var u = url.parse(info.req.url, true);
+	var username = u.query.username;
+	var uuid = 'abcd-1234';
 
-		switch(username) {
-			case 'sync_accept':
+	switch(username) {
+		case 'sync_accept':
+			var peerInfo = {
+				username: username,
+				uuid: uuid
+			};
+			acceptCb(peerInfo);
+			break;
+
+		case 'sync_reject':
+			rejectCb(403, username);
+			break;
+
+		case 'async_accept':
+			waitCb();
+			setImmediate(function() {
 				var peerInfo = {
 					username: username,
 					uuid: uuid
 				};
 				acceptCb(peerInfo);
-				break;
+			});
+			break;
 
-			case 'sync_reject':
+		case 'async_reject':
+			waitCb();
+			setImmediate(function() {
 				rejectCb(403, username);
-				break;
+			});
+			break;
 
-			case 'async_accept':
-				waitCb();
-				setImmediate(function() {
-					var peerInfo = {
-						username: username,
-						uuid: uuid
-					};
-					acceptCb(peerInfo);
-				});
-				break;
-
-			case 'async_reject':
-				waitCb();
-				setImmediate(function() {
-					rejectCb(403, username);
-				});
-				break;
-
-			case 'no_cb_called':
-				break;
-		}
-	});
+		case 'no_cb_called':
+			break;
+	}
 }
 
 
 var ws_tests = {
-	setUp: function(done)    { testServer.run(false, onApp, done); },
+	setUp: function(done)    { testServer.run(false, connectionListener, done); },
 	tearDown: function(done) { testServer.stop(done); }
 };
 
 
 var wss_tests = {
-	setUp: function(done)    { testServer.run(true, onApp, done); },
+	setUp: function(done)    { testServer.run(true, connectionListener, done); },
 	tearDown: function(done) { testServer.stop(done); }
 };
 
