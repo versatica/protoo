@@ -3,42 +3,54 @@ var http = require('http');
 var https = require('https');
 var path = require('path');
 var fs = require('fs');
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 var WebSocket = require('ws');
-var debug = require('debug')('test:TestServer');
+var domain = require('domain');
+var debugerror = require('debug')('test:ERROR:TestServer');
 
 
 function TestServer() {
+	EventEmitter.call(this);
+
 	this.port = 54321;
 	this.wss = null;
 	this.app = null;
 }
 
+util.inherits(TestServer, EventEmitter);
+
 
 TestServer.prototype.run = function(wss, connectionListener, done) {
 	this.wss = wss;
-	this.app = protoo();
+
 
 	var httpServer;
+	var d = domain.create();
 
-	if (wss) {
-		httpServer = https.createServer({
-			cert: fs.readFileSync(path.resolve(__dirname, 'local.protoo.org.crt.pem')),
-			key:  fs.readFileSync(path.resolve(__dirname, 'local.protoo.org.key.pem'))
+	d.on('error', function(error) {
+		debugerror('error catched by domain module: %s', error);
+		this.emit('error', error);
+	}.bind(this));
+
+	d.run(function() {
+		this.app = protoo();
+		if (wss) {
+			httpServer = https.createServer({
+				cert: fs.readFileSync(path.resolve(__dirname, 'local.protoo.org.crt.pem')),
+				key:  fs.readFileSync(path.resolve(__dirname, 'local.protoo.org.key.pem'))
+			});
+		}
+		else {
+			httpServer = http.createServer();
+		}
+
+		this.app.websocket(httpServer, connectionListener);
+
+		httpServer.listen(this.port, '127.0.0.1', function() {
+			done();
 		});
-	}
-	else {
-		httpServer = http.createServer();
-	}
-
-	this.app.websocket(httpServer, connectionListener);
-
-	httpServer.listen(this.port, '127.0.0.1', function() {
-		done();
-	});
-
-	this.app.on('error', function(error) {
-		debug(error);
-	});
+	}.bind(this));
 };
 
 

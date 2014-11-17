@@ -61,7 +61,7 @@ var tests = {
 			test.done();
 		});
 
-		testServer.app.online(function(peer) {
+		testServer.app.on('online', function(peer) {
 			test.strictEqual(peer.username, 'sync_accept');
 			ec.done();
 		});
@@ -102,7 +102,7 @@ var tests = {
 			test.done();
 		});
 
-		testServer.app.online(function(peer) {
+		testServer.app.on('online', function(peer) {
 			test.strictEqual(peer.username, 'async_accept');
 			ec.done();
 		});
@@ -143,7 +143,7 @@ var tests = {
 			ec.done();
 		});
 
-		testServer.app.once('error', function() {
+		testServer.once('error', function() {
 			ec.done();
 		});
 	},
@@ -161,7 +161,7 @@ var tests = {
 			test.done();
 		});
 
-		testServer.app.offline(function(peer) {
+		testServer.app.on('offline', function(peer) {
 			test.strictEqual(peer.username, 'sync_accept');
 			test.done();
 		});
