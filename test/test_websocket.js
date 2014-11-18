@@ -230,5 +230,5 @@ for (var test in tests) {
 
 module.exports = {
 	'ws access':  ws_tests,
-	// 'wss access': wss_tests
+	'wss access': wss_tests
 };
