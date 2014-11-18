@@ -5,7 +5,7 @@ var path = require('path');
 var fs = require('fs');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var WebSocket = require('ws');
+var WebSocketClient = require('websocket').client;
 var domain = require('domain');
 var debugerror = require('debug')('test:ERROR:TestServer');
 
@@ -56,15 +56,25 @@ TestServer.prototype.run = function(wss, connectionListener, done) {
 
 TestServer.prototype.connect = function(username, protocol) {
 	var schema = (this.wss ? 'wss' : 'ws');
-	var options = {
-		protocol: protocol
-	};
+	var protocols = [];
+	var options = {};
+	var url;
+	var client;
+
+	url = schema + '://127.0.0.1:' + this.port + '/?username=' + username;
+
+	if (protocol) {
+		protocols.push(protocol);
+	}
 
 	if (this.wss) {
 		options.rejectUnauthorized = false;
 	}
 
-	return new WebSocket(schema + '://127.0.0.1:' + this.port + '?username=' + username, options);
+	client = new WebSocketClient();
+	client.connect(url, protocols, null, null, options);
+
+	return client;
 };
 
 

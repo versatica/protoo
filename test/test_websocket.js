@@ -21,22 +21,22 @@ var tests = {
 		ec.on('alldone', function() { test.done(); });
 		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
 
-		ws1.on('open', function() {
+		ws1.on('connect', function() {
 			test.ok(false);
 			ec.done();
 		});
 
-		ws1.on('error', function() {
+		ws1.on('connectFailed', function() {
 			test.ok(true);
 			ec.done();
 		});
 
-		ws2.on('open', function() {
+		ws2.on('connect', function() {
 			test.ok(false);
 			ec.done();
 		});
 
-		ws2.on('error', function() {
+		ws2.on('connectFailed', function() {
 			test.ok(true);
 			ec.done();
 		});
@@ -50,13 +50,13 @@ var tests = {
 		ec.on('alldone', function() { test.done(); });
 		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
 
-		ws.on('open', function() {
+		ws.on('connect', function(conn) {
 			test.ok(true);
-			ws.close();
+			conn.close();
 			ec.done();
 		});
 
-		ws.on('error', function() {
+		ws.on('connectFailed', function() {
 			test.ok(false);
 			test.done();
 		});
@@ -71,13 +71,13 @@ var tests = {
 		test.expect(1);
 		var ws = testServer.connect('sync_reject', 'protoo');
 
-		ws.on('open', function() {
+		ws.on('connect', function(conn) {
 			test.ok(false);
-			ws.close();
+			conn.close();
 			test.done();
 		});
 
-		ws.on('error', function() {
+		ws.on('connectFailed', function() {
 			test.ok(true);
 			test.done();
 		});
@@ -91,13 +91,13 @@ var tests = {
 		ec.on('alldone', function() { test.done(); });
 		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
 
-		ws.on('open', function() {
+		ws.on('connect', function(conn) {
 			test.ok(true);
-			ws.close();
+			conn.close();
 			ec.done();
 		});
 
-		ws.on('error', function() {
+		ws.on('connectFailed', function() {
 			test.ok(false);
 			test.done();
 		});
@@ -112,13 +112,13 @@ var tests = {
 		test.expect(1);
 		var ws = testServer.connect('async_reject', 'protoo');
 
-		ws.on('open', function() {
+		ws.on('connect', function(conn) {
 			test.ok(false);
-			ws.close();
+			conn.close();
 			test.done();
 		});
 
-		ws.on('error', function() {
+		ws.on('connectFailed', function() {
 			test.ok(true);
 			test.done();
 		});
@@ -131,14 +131,13 @@ var tests = {
 
 		ec.on('alldone', function() { test.done(); });
 		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
-
-		ws.on('open', function() {
+		ws.on('connect', function(conn) {
 			test.ok(false);
-			ws.close();
+			conn.close();
 			test.done();
 		});
 
-		ws.on('error', function() {
+		ws.on('connectFailed', function() {
 			test.ok(true);
 			ec.done();
 		});
@@ -152,11 +151,11 @@ var tests = {
 		test.expect(1);
 		var ws = testServer.connect('sync_accept', 'protoo');
 
-		ws.on('open', function() {
-			ws.close();
+		ws.on('connect', function(conn) {
+			conn.close();
 		});
 
-		ws.on('error', function() {
+		ws.on('connectFailed', function() {
 			test.ok(false);
 			test.done();
 		});
@@ -231,5 +230,5 @@ for (var test in tests) {
 
 module.exports = {
 	'ws access':  ws_tests,
-	'wss access': wss_tests
+	// 'wss access': wss_tests
 };

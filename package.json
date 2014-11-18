@@ -33,9 +33,9 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "ws": "git://github.com/ibc/ws.git#master",
     "debug": "~2.1.0",
-    "path-to-regexp": "1.0.1"
+    "path-to-regexp": "1.0.1",
+    "websocket": "^1.0.10"
   },
   "devDependencies": {
     "eventcollector": "^0.1.4",
