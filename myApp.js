@@ -76,9 +76,9 @@ d.run(function() {
 			// acceptCb(peerInfo, onPeerCb);
 			// rejectCb(403, 'Y U NOT ALLOWED');
 			// rejectCb();
-		// }, 5000);
-
+		// }, 7000);
 		// waitCb();
+
 		// setTimeout(function() {
 			// socket.end();
 		// }, 2000);

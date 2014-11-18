@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset='utf-8'>
-	<title>ws.ibc test1</title>
+	<title>protoo test</title>
 	<script>
 		function generateUUID() {
 			var i, r;
@@ -37,7 +37,7 @@
 			};
 
 			ws.onmessage = function(e) {
-				console.log('WebSocket onmessage: %s', e.data);
+				console.log('WebSocket onmessage: [', typeof(e), ' | ', e.data, ']');
 			};
 
 			window.ws = ws;
