@@ -124,29 +124,6 @@ var tests = {
 		});
 	},
 
-	'fail if no callback is called': function(test) {
-		test.expect(1);
-		var ec = eventcollector(2, 2000);
-		var ws = testServer.connect('no_cb_called', 'protoo');
-
-		ec.on('alldone', function() { test.done(); });
-		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
-		ws.on('connect', function(conn) {
-			test.ok(false);
-			conn.close();
-			test.done();
-		});
-
-		ws.on('connectFailed', function() {
-			test.ok(true);
-			ec.done();
-		});
-
-		testServer.once('error', function() {
-			ec.done();
-		});
-	},
-
 	'peer disconnects': function(test) {
 		test.expect(1);
 		var ws = testServer.connect('sync_accept', 'protoo');
@@ -168,7 +145,7 @@ var tests = {
 };
 
 
-function connectionListener(info, acceptCb, rejectCb, waitCb) {
+function connectionListener(info, acceptCb, rejectCb) {
 	var u = url.parse(info.req.url, true);
 	var username = u.query.username;
 	var uuid = 'abcd-1234';
@@ -187,7 +164,6 @@ function connectionListener(info, acceptCb, rejectCb, waitCb) {
 			break;
 
 		case 'async_accept':
-			waitCb();
 			setImmediate(function() {
 				var peerInfo = {
 					username: username,
@@ -198,7 +174,6 @@ function connectionListener(info, acceptCb, rejectCb, waitCb) {
 			break;
 
 		case 'async_reject':
-			waitCb();
 			setImmediate(function() {
 				rejectCb(403, username);
 			});

@@ -50,7 +50,7 @@ d.run(function() {
 	httpsServer.listen(10443, '127.0.0.1');
 
 
-	var wsConnectionListenerapp = function(info, acceptCb, rejectCb, waitCb) {
+	var wsConnectionListenerapp = function(info, acceptCb, rejectCb) {
 		var req = info.req;
 		var origin = info.origin;
 		var socket = info.socket;
@@ -77,7 +77,6 @@ d.run(function() {
 			// rejectCb(403, 'Y U NOT ALLOWED');
 			// rejectCb();
 		// }, 7000);
-		// waitCb();
 
 		// setTimeout(function() {
 			// socket.end();
@@ -106,17 +105,22 @@ d.run(function() {
 });
 
 
+
+
 // Run interactive Node REPL.
 
 global.app = app;  // Make the app global.
+global.d = function() { app.peerManager.dump(); };
+
 var r = require('repl').start({
-	prompt: '\n',
+	prompt: '>>> ',
 	useColors: true,
 	useGlobal: true,
-	ignoreUndefined: true
+	ignoreUndefined: false
 });
 r.on('exit', function () {
 	console.log();
 	process.exit();
 });
+
 
