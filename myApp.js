@@ -69,13 +69,13 @@ d.run(function() {
 			debug('onPeerCb for peer %s', peer);
 		};
 
-		// accept(peerInfo, onPeerCb);
+		accept(peerInfo, onPeerCb);
 
-		setTimeout(function() {
-			accept(peerInfo, onPeerCb);
+		// setTimeout(function() {
+			// accept(peerInfo, onPeerCb);
 			// reject(403, 'Y U NOT ALLOWED');
 			// reject();
-		}, 7000);
+		// }, 7000);
 
 		// setTimeout(function() {
 			// socket.end();

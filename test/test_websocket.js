@@ -21,25 +21,25 @@ var tests = {
 		ec.on('alldone', function() { test.done(); });
 		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
 
-		ws1.on('connect', function() {
+		ws1.onopen = function() {
 			test.ok(false);
 			ec.done();
-		});
+		};
 
-		ws1.on('connectFailed', function() {
+		ws1.onerror = function() {
 			test.ok(true);
 			ec.done();
-		});
+		};
 
-		ws2.on('connect', function() {
+		ws2.onopen = function() {
 			test.ok(false);
 			ec.done();
-		});
+		};
 
-		ws2.on('connectFailed', function() {
+		ws2.onerror = function() {
 			test.ok(true);
 			ec.done();
-		});
+		};
 	},
 
 	'sync accept': function(test) {
@@ -50,16 +50,16 @@ var tests = {
 		ec.on('alldone', function() { test.done(); });
 		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
 
-		ws.on('connect', function(conn) {
+		ws.onopen = function() {
 			test.ok(true);
-			conn.close();
+			ws.close();
 			ec.done();
-		});
+		};
 
-		ws.on('connectFailed', function() {
+		ws.onerror = function() {
 			test.ok(false);
 			test.done();
-		});
+		};
 
 		testServer.app.on('online', function(peer) {
 			test.strictEqual(peer.username, 'sync_accept');
@@ -71,16 +71,16 @@ var tests = {
 		test.expect(1);
 		var ws = testServer.connect('sync_reject', 'protoo');
 
-		ws.on('connect', function(conn) {
+		ws.onopen = function() {
 			test.ok(false);
-			conn.close();
+			ws.close();
 			test.done();
-		});
+		};
 
-		ws.on('connectFailed', function() {
+		ws.onerror = function() {
 			test.ok(true);
 			test.done();
-		});
+		};
 	},
 
 	'async accept': function(test) {
@@ -91,16 +91,16 @@ var tests = {
 		ec.on('alldone', function() { test.done(); });
 		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
 
-		ws.on('connect', function(conn) {
+		ws.onopen = function() {
 			test.ok(true);
-			conn.close();
+			ws.close();
 			ec.done();
-		});
+		};
 
-		ws.on('connectFailed', function() {
+		ws.onerror = function() {
 			test.ok(false);
 			test.done();
-		});
+		};
 
 		testServer.app.on('online', function(peer) {
 			test.strictEqual(peer.username, 'async_accept');
@@ -112,30 +112,30 @@ var tests = {
 		test.expect(1);
 		var ws = testServer.connect('async_reject', 'protoo');
 
-		ws.on('connect', function(conn) {
+		ws.onopen = function() {
 			test.ok(false);
-			conn.close();
+			ws.close();
 			test.done();
-		});
+		};
 
-		ws.on('connectFailed', function() {
+		ws.onerror = function() {
 			test.ok(true);
 			test.done();
-		});
+		};
 	},
 
 	'peer disconnects': function(test) {
 		test.expect(1);
 		var ws = testServer.connect('sync_accept', 'protoo');
 
-		ws.on('connect', function(conn) {
-			conn.close();
-		});
+		ws.onopen = function() {
+			ws.close();
+		};
 
-		ws.on('connectFailed', function() {
+		ws.onerror = function() {
 			test.ok(false);
 			test.done();
-		});
+		};
 
 		testServer.app.on('offline', function(peer) {
 			test.strictEqual(peer.username, 'sync_accept');

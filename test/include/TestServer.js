@@ -5,7 +5,7 @@ var path = require('path');
 var fs = require('fs');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var WebSocketClient = require('websocket').client;
+var W3CWebSocket = require('websocket').w3cwebsocket;
 var domain = require('domain');
 var debugerror = require('debug')('test:ERROR:TestServer');
 
@@ -59,7 +59,6 @@ TestServer.prototype.connect = function(username, protocol) {
 	var protocols = [];
 	var options = {};
 	var url;
-	var client;
 
 	url = schema + '://127.0.0.1:' + this.port + '/?username=' + username;
 
@@ -71,10 +70,7 @@ TestServer.prototype.connect = function(username, protocol) {
 		options.rejectUnauthorized = false;
 	}
 
-	client = new WebSocketClient();
-	client.connect(url, protocols, null, null, options);
-
-	return client;
+	return new W3CWebSocket(url, protocols, null, null, options);
 };
 
 
