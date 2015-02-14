@@ -71,6 +71,8 @@ d.run(function() {
 
 		accept(peerInfo, onPeerCb);
 
+		// reject(4444, 'jeje');
+
 		// setTimeout(function() {
 			// accept(peerInfo, onPeerCb);
 			// reject(403, 'Y U NOT ALLOWED');
