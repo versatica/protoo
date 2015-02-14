@@ -5,7 +5,8 @@
  * Enable debug
  */
 
-process.env.DEBUG = 'myApp, protoo:ERROR:*, protoo:*'
+// process.env.DEBUG = 'myApp, protoo:ERROR:*, protoo:*'
+process.env.DEBUG = '*'
 
 
 /**
@@ -33,8 +34,6 @@ d.on('error', function(error) {
 });
 
 d.run(function() {
-	debug('protoo version: %s', protoo.version);
-
 	debug('creating a "protoo" application');
 	app = protoo();  // My Protoo application.
 
@@ -50,7 +49,7 @@ d.run(function() {
 	httpsServer.listen(10443, '127.0.0.1');
 
 
-	var wsConnectionListenerapp = function(info, acceptCb, rejectCb) {
+	var onConnection = function(info, accept, reject) {
 		var req = info.req;
 		var origin = info.origin;
 		var socket = info.socket;
@@ -70,13 +69,13 @@ d.run(function() {
 			debug('onPeerCb for peer %s', peer);
 		};
 
-		acceptCb(peerInfo, onPeerCb);
+		// accept(peerInfo, onPeerCb);
 
-		// setTimeout(function() {
-			// acceptCb(peerInfo, onPeerCb);
-			// rejectCb(403, 'Y U NOT ALLOWED');
-			// rejectCb();
-		// }, 7000);
+		setTimeout(function() {
+			accept(peerInfo, onPeerCb);
+			// reject(403, 'Y U NOT ALLOWED');
+			// reject();
+		}, 7000);
 
 		// setTimeout(function() {
 			// socket.end();
@@ -84,10 +83,10 @@ d.run(function() {
 	};
 
 	debug('handle Protoo non-secure WebSocket access on the HTTP server');
-	app.websocket(httpServer, wsConnectionListenerapp);
+	app.websocket(httpServer, onConnection);
 
 	debug('handle Protoo secure WebSocket access on the HTTPS server');
-	app.websocket(httpsServer, wsConnectionListenerapp);
+	app.websocket(httpsServer, onConnection);
 
 	app.on('error', function(error) {
 		debug('on(error) | %s', error);
