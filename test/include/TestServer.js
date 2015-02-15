@@ -54,13 +54,14 @@ TestServer.prototype.run = function(wss, connectionListener, done) {
 };
 
 
-TestServer.prototype.connect = function(username, protocol) {
+TestServer.prototype.connect = function(username, uuid, protocol) {
 	var schema = (this.wss ? 'wss' : 'ws');
 	var protocols = [];
 	var options = {};
 	var url;
 
-	url = schema + '://127.0.0.1:' + this.port + '/?username=' + username;
+	uuid = uuid || Math.round(100000 * Math.random()).toString();
+	url = schema + '://127.0.0.1:' + this.port + '/?username=' + username + '&uuid=' + uuid;
 
 	if (protocol) {
 		protocols.push(protocol);

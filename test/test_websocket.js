@@ -16,14 +16,15 @@ var tests = {
 		test.expect(2);
 		var ec = eventcollector(2, 2000);
 		var ws1 = testServer.connect('fail');
-		var ws2 = testServer.connect('fail', 'foo');
+		var ws2 = testServer.connect('fail', null, 'foo');
 
 		ec.on('alldone', function() { test.done(); });
 		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
 
 		ws1.onopen = function() {
 			test.ok(false);
-			ec.done();
+			test.done();
+			ec.destroy();
 		};
 
 		ws1.onerror = function() {
@@ -33,7 +34,8 @@ var tests = {
 
 		ws2.onopen = function() {
 			test.ok(false);
-			ec.done();
+			test.done();
+			ec.destroy();
 		};
 
 		ws2.onerror = function() {
@@ -45,7 +47,7 @@ var tests = {
 	'sync accept': function(test) {
 		test.expect(2);
 		var ec = eventcollector(2, 2000);
-		var ws = testServer.connect('sync_accept', 'protoo');
+		var ws = testServer.connect('sync_accept', null, 'protoo');
 
 		ec.on('alldone', function() { test.done(); });
 		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
@@ -59,17 +61,18 @@ var tests = {
 		ws.onerror = function() {
 			test.ok(false);
 			test.done();
+			ec.destroy();
 		};
 
 		testServer.app.on('online', function(peer) {
-			test.strictEqual(peer.username, 'sync_accept');
 			ec.done();
+			test.strictEqual(peer.username, 'sync_accept');
 		});
 	},
 
 	'sync reject': function(test) {
 		test.expect(1);
-		var ws = testServer.connect('sync_reject', 'protoo');
+		var ws = testServer.connect('sync_reject', null, 'protoo');
 
 		ws.onopen = function() {
 			test.ok(false);
@@ -86,7 +89,7 @@ var tests = {
 	'async accept': function(test) {
 		test.expect(2);
 		var ec = eventcollector(2, 2000);
-		var ws = testServer.connect('async_accept', 'protoo');
+		var ws = testServer.connect('async_accept', null, 'protoo');
 
 		ec.on('alldone', function() { test.done(); });
 		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
@@ -100,6 +103,7 @@ var tests = {
 		ws.onerror = function() {
 			test.ok(false);
 			test.done();
+			ec.destroy();
 		};
 
 		testServer.app.on('online', function(peer) {
@@ -110,7 +114,7 @@ var tests = {
 
 	'async reject': function(test) {
 		test.expect(1);
-		var ws = testServer.connect('async_reject', 'protoo');
+		var ws = testServer.connect('async_reject', null, 'protoo');
 
 		ws.onopen = function() {
 			test.ok(false);
@@ -126,7 +130,7 @@ var tests = {
 
 	'peer disconnects': function(test) {
 		test.expect(1);
-		var ws = testServer.connect('sync_accept', 'protoo');
+		var ws = testServer.connect('sync_accept', null, 'protoo');
 
 		ws.onopen = function() {
 			ws.close();
@@ -141,6 +145,57 @@ var tests = {
 			test.strictEqual(peer.username, 'sync_accept');
 			test.done();
 		});
+	},
+
+	'peer connects and disconnects': function(test) {
+		test.expect(3);
+		var ec = eventcollector(2, 2000);
+		var ws1 = testServer.connect('sync_accept', '1234', 'protoo');
+		var ws2 = testServer.connect('sync_accept', '1234', 'protoo');
+		var numOnline = 0;
+
+		ec.on('alldone', function() { test.done(); });
+		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
+
+		ws1.onopen = function() {
+			test.ok(true);
+		};
+
+		ws2.onopen = function() {
+			test.ok(true);
+			ws2.close();
+		};
+
+		ws1.onclose = function() {
+			test.ok(true);
+			ec.done();
+		};
+
+		ws1.onerror = function() {
+			test.ok(false);
+			test.done();
+			ec.destroy();
+		};
+
+		ws2.onerror = function() {
+			test.ok(false);
+			test.done();
+			ec.destroy();
+		};
+
+		testServer.app.on('online', function() {
+			++numOnline;
+
+			if (numOnline === 1) {
+				ec.done();
+			}
+
+			if (numOnline === 2) {
+				test.ok(false, 'should not emit 2 "online" events');
+				test.done();
+				ec.destroy();
+			}
+		});
 	}
 };
 
@@ -148,7 +203,7 @@ var tests = {
 function connectionListener(info, acceptCb, rejectCb) {
 	var u = url.parse(info.req.url, true);
 	var username = u.query.username;
-	var uuid = 'abcd-1234';
+	var uuid = u.query.uuid;
 
 	switch(username) {
 		case 'sync_accept':
@@ -177,9 +232,6 @@ function connectionListener(info, acceptCb, rejectCb) {
 			setImmediate(function() {
 				rejectCb(403, username);
 			});
-			break;
-
-		case 'no_cb_called':
 			break;
 	}
 }
