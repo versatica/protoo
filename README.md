@@ -1,16 +1,36 @@
-# Protoo.js
+# protoo
 
-Fast and powerful Node.js framework for building Protoo applications.
+Fast and powerful Node.js/IO.js based framework for building realtime applications.
 
-## Getting Started
-Install with: `npm install protoo`
+
+## Installation
+
+```bash
+$ npm install protoo
+```
+
 
 ## Documentation
-_(Coming soon)_
 
-## Release History
-_(Nothing yet)_
+Read the full [API documentation](docs/index.md) in the docs folder.
+
+
+## Debugging
+
+The library includes the Node [debug](https://github.com/visionmedia/debug) module. In order to enable debugging:
+
+In Node set the `DEBUG=protoo*` environment variable before running the application, or set it at the top of the script:
+
+```javascript
+process.env.DEBUG = 'protoo*';
+```
+
+
+## Author
+
+Iñaki Baz Castillo.
+
 
 ## License
-Copyright (c) 2014 Iñaki Baz Castillo  
-Licensed under the MIT license.
+
+ISC.

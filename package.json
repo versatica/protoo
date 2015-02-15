@@ -1,40 +1,31 @@
 {
   "name": "protoo",
-  "description": "Fast and powerful Node.js framework for building Protoo applications.",
   "version": "0.1.0",
-  "author": "Iñaki Baz Castillo <ibc@aliax.net>",
-  "keyworkds": [
-    "protoo",
-    "webrtc"
-  ],
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://bitbucket.org/ibc_aliax/protoo/blob/master/LICENSE-MIT"
-    }
-  ],
-  "homepage": "https://bitbucket.org/ibc_aliax/protoo",
-  "repository": {
-    "type": "git",
-    "url": "https://bitbucket.org/ibc_aliax/protoo.git"
-  },
-  "bugs": {
-    "url": "https://bitbucket.org/ibc_aliax/protoo/issues?status=new&status=open"
-  },
-  "engines": {
-    "node": "~0.10.32"
-  },
-  "main": "./lib/protoo.js",
-  "directories": {
-    "lib": "lib",
-    "test": "test"
-  },
+  "description": "Fast and powerful Node.js/IO.js based framework for building realtime applications",
+  "main": "lib/protoo.js",
   "scripts": {
     "test": "gulp test"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ibc/protoo.git"
+  },
+  "keywords": [
+    "protoo",
+    "webrtc"
+  ],
+  "author": "Iñaki Baz Castillo <ibc@aliax.net>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ibc/protoo/issues"
+  },
+  "homepage": "https://github.com/ibc/protoo",
+  "engines": {
+    "node": "~0.10.32"
+  },
   "dependencies": {
     "debug": "~2.1.1",
-    "path-to-regexp": "~1.0.3",
+    "path-to-regexp": "^1.0.3",
     "websocket": "~1.0.17"
   },
   "devDependencies": {

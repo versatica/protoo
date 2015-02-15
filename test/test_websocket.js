@@ -200,37 +200,29 @@ var tests = {
 };
 
 
-function connectionListener(info, acceptCb, rejectCb) {
+function connectionListener(info, accept, reject) {
 	var u = url.parse(info.req.url, true);
 	var username = u.query.username;
 	var uuid = u.query.uuid;
 
 	switch(username) {
 		case 'sync_accept':
-			var peerInfo = {
-				username: username,
-				uuid: uuid
-			};
-			acceptCb(peerInfo);
+			accept(username, uuid, null);
 			break;
 
 		case 'sync_reject':
-			rejectCb(403, username);
+			reject(403, username);
 			break;
 
 		case 'async_accept':
 			setImmediate(function() {
-				var peerInfo = {
-					username: username,
-					uuid: uuid
-				};
-				acceptCb(peerInfo);
+				accept(username, uuid, null);
 			});
 			break;
 
 		case 'async_reject':
 			setImmediate(function() {
-				rejectCb(403, username);
+				reject(403, username);
 			});
 			break;
 	}
