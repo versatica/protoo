@@ -230,19 +230,19 @@ function connectionListener(info, accept, reject) {
 
 
 var ws_tests = {
-	setUp: function(done)    { testServer.run(false, connectionListener, done); },
+	setUp:    function(done) { testServer.run(false, connectionListener, done); },
 	tearDown: function(done) { testServer.stop(done); }
 };
 
 
 var wss_tests = {
-	setUp: function(done)    { testServer.run(true, connectionListener, done); },
+	setUp:    function(done) { testServer.run(true, connectionListener, done); },
 	tearDown: function(done) { testServer.stop(done); }
 };
 
 
 for (var test in tests) {
-	ws_tests[test] = tests[test];
+	ws_tests[test]  = tests[test];
 	wss_tests[test] = tests[test];
 }
 

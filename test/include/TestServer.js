@@ -6,8 +6,6 @@ var fs = require('fs');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var W3CWebSocket = require('websocket').w3cwebsocket;
-var domain = require('domain');
-var debugerror = require('debug')('test:ERROR:TestServer');
 
 
 function TestServer() {
@@ -26,31 +24,24 @@ TestServer.prototype.run = function(wss, connectionListener, done) {
 
 
 	var httpServer;
-	var d = domain.create();
 
-	d.on('error', function(error) {
-		debugerror('error catched by domain module: %s', error);
-		this.emit('error', error);
-	}.bind(this));
+	this.app = protoo();
 
-	d.run(function() {
-		this.app = protoo();
-		if (wss) {
-			httpServer = https.createServer({
-				cert: fs.readFileSync(path.resolve(__dirname, 'local.protoo.org.crt.pem')),
-				key:  fs.readFileSync(path.resolve(__dirname, 'local.protoo.org.key.pem'))
-			});
-		}
-		else {
-			httpServer = http.createServer();
-		}
-
-		this.app.websocket(httpServer, connectionListener);
-
-		httpServer.listen(this.port, '127.0.0.1', function() {
-			done();
+	if (wss) {
+		httpServer = https.createServer({
+			cert: fs.readFileSync(path.resolve(__dirname, 'local.protoo.org.crt.pem')),
+			key:  fs.readFileSync(path.resolve(__dirname, 'local.protoo.org.key.pem'))
 		});
-	}.bind(this));
+	}
+	else {
+		httpServer = http.createServer();
+	}
+
+	this.app.websocket(httpServer, connectionListener);
+
+	httpServer.listen(this.port, '127.0.0.1', function() {
+		done();
+	});
 };
 
 
