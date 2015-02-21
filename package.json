@@ -26,6 +26,7 @@
   "dependencies": {
     "debug": "~2.1.1",
     "path-to-regexp": "^1.0.3",
+    "utils-merge": "^1.0.0",
     "websocket": "~1.0.17"
   },
   "devDependencies": {
