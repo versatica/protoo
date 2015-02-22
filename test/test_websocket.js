@@ -1,203 +1,178 @@
+var expect = require('expect.js');
 var url = require('url');
 var eventcollector = require('eventcollector');
 var testServer = require('./include/TestServer');
 
 
-// Show uncaught errors.
-process.on('uncaughtException', function(error) {
-	console.error('uncaught exception:');
-	console.error(error.stack);
-	process.exit(1);
-});
+runTests({wss: false});
+runTests({wss: true});
 
 
-var tests = {
-	'fail if "protoo" is not set as WebSocket sub-protocol': function(test) {
-		test.expect(2);
-		var ec = eventcollector(2, 2000);
-		var ws1 = testServer.connect('fail');
-		var ws2 = testServer.connect('fail', null, 'foo');
+function runTests(options) {
+	var useWss = options.wss;
 
-		ec.on('alldone', function() { test.done(); });
-		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
+	describe('app.websocket() API with ' + (useWss?'WSS':'WS') + ' transport', function() {
 
-		ws1.onopen = function() {
-			test.ok(false);
-			test.done();
-			ec.destroy();
-		};
-
-		ws1.onerror = function() {
-			test.ok(true);
-			ec.done();
-		};
-
-		ws2.onopen = function() {
-			test.ok(false);
-			test.done();
-			ec.destroy();
-		};
-
-		ws2.onerror = function() {
-			test.ok(true);
-			ec.done();
-		};
-	},
-
-	'sync accept': function(test) {
-		test.expect(2);
-		var ec = eventcollector(2, 2000);
-		var ws = testServer.connect('sync_accept', null, 'protoo');
-
-		ec.on('alldone', function() { test.done(); });
-		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
-
-		ws.onopen = function() {
-			test.ok(true);
-			ws.close();
-			ec.done();
-		};
-
-		ws.onerror = function() {
-			test.ok(false);
-			test.done();
-			ec.destroy();
-		};
-
-		testServer.app.on('online', function(peer) {
-			ec.done();
-			test.strictEqual(peer.username, 'sync_accept');
+		before(function(done) {
+			testServer.run(useWss, connectionListener, done);
 		});
-	},
 
-	'sync reject': function(test) {
-		test.expect(1);
-		var ws = testServer.connect('sync_reject', null, 'protoo');
-
-		ws.onopen = function() {
-			test.ok(false);
-			ws.close();
-			test.done();
-		};
-
-		ws.onerror = function() {
-			test.ok(true);
-			test.done();
-		};
-	},
-
-	'async accept': function(test) {
-		test.expect(2);
-		var ec = eventcollector(2, 2000);
-		var ws = testServer.connect('async_accept', null, 'protoo');
-
-		ec.on('alldone', function() { test.done(); });
-		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
-
-		ws.onopen = function() {
-			test.ok(true);
-			ws.close();
-			ec.done();
-		};
-
-		ws.onerror = function() {
-			test.ok(false);
-			test.done();
-			ec.destroy();
-		};
-
-		testServer.app.on('online', function(peer) {
-			test.strictEqual(peer.username, 'async_accept');
-			ec.done();
+		beforeEach(function() {
+			testServer.app.removeAllListeners('online');
+			testServer.app.removeAllListeners('offline');
 		});
-	},
 
-	'async reject': function(test) {
-		test.expect(1);
-		var ws = testServer.connect('async_reject', null, 'protoo');
-
-		ws.onopen = function() {
-			test.ok(false);
-			ws.close();
-			test.done();
-		};
-
-		ws.onerror = function() {
-			test.ok(true);
-			test.done();
-		};
-	},
-
-	'peer disconnects': function(test) {
-		test.expect(1);
-		var ws = testServer.connect('sync_accept', null, 'protoo');
-
-		ws.onopen = function() {
-			ws.close();
-		};
-
-		ws.onerror = function() {
-			test.ok(false);
-			test.done();
-		};
-
-		testServer.app.on('offline', function(peer) {
-			test.strictEqual(peer.username, 'sync_accept');
-			test.done();
+		after(function() {
+			testServer.stop();
 		});
-	},
 
-	'peer connects and disconnects': function(test) {
-		test.expect(3);
-		var ec = eventcollector(2, 2000);
-		var ws1 = testServer.connect('sync_accept', '1234', 'protoo');
-		var ws2 = testServer.connect('sync_accept', '1234', 'protoo');
-		var numOnline = 0;
+		it('must fail if WebSocket sub-protocol is not "protoo', function(done) {
+			var ec = eventcollector(2);
+			var ws1 = testServer.connect('fail');
+			var ws2 = testServer.connect('fail', null, 'foo');
 
-		ec.on('alldone', function() { test.done(); });
-		ec.on('timeout', function() { test.ok(false, 'test timeout'); test.done(); });
+			ec.on('alldone', function() { done(); });
 
-		ws1.onopen = function() {
-			test.ok(true);
-		};
+			ws1.onopen = function() {
+				done(new Error('ws1 should not connect'));
+			};
 
-		ws2.onopen = function() {
-			test.ok(true);
-			ws2.close();
-		};
-
-		ws1.onclose = function() {
-			test.ok(true);
-			ec.done();
-		};
-
-		ws1.onerror = function() {
-			test.ok(false);
-			test.done();
-			ec.destroy();
-		};
-
-		ws2.onerror = function() {
-			test.ok(false);
-			test.done();
-			ec.destroy();
-		};
-
-		testServer.app.on('online', function() {
-			++numOnline;
-
-			if (numOnline === 1) {
+			ws1.onerror = function() {
 				ec.done();
-			}
+			};
 
-			if (numOnline === 2) {
-				test.ok(false, 'should not emit 2 "online" events');
-				test.done();
-				ec.destroy();
-			}
+			ws2.onopen = function() {
+				done(new Error('ws2 should not connect'));
+			};
+
+			ws2.onerror = function() {
+				ec.done();
+			};
 		});
-	}
-};
+
+		it('must accept sync accept()', function(done) {
+			var ec = eventcollector(2);
+			var ws = testServer.connect('sync_accept', null, 'protoo');
+
+			ec.on('alldone', function() { done(); });
+
+			ws.onopen = function() {
+				ws.close();
+				ec.done();
+			};
+
+			ws.onerror = function() {
+				done(new Error('ws should not fail'));
+			};
+
+			testServer.app.on('online', function(peer) {
+				expect(peer.username).to.be('sync_accept');
+				ec.done();
+			});
+		});
+
+		it('must accept sync reject()', function(done) {
+			var ws = testServer.connect('sync_reject', null, 'protoo');
+
+			ws.onopen = function() {
+				done(new Error('ws should not connect'));
+			};
+
+			ws.onerror = function() {
+				done();
+			};
+		});
+
+		it('must accept async accept()', function(done) {
+			var ec = eventcollector(2);
+			var ws = testServer.connect('async_accept', null, 'protoo');
+
+			ec.on('alldone', function() { done(); });
+
+			ws.onopen = function() {
+				ws.close();
+				ec.done();
+			};
+
+			ws.onerror = function() {
+				done(new Error('ws should not fail'));
+			};
+
+			testServer.app.on('online', function(peer) {
+				expect(peer.username).to.be('async_accept');
+				ec.done();
+			});
+		});
+
+		it('must accept async reject()', function(done) {
+			var ws = testServer.connect('async_reject', null, 'protoo');
+
+			ws.onopen = function() {
+				// ws.close();  // TODO: si?
+				done(new Error('ws should not connect'));
+			};
+
+			ws.onerror = function() {
+				done();
+			};
+		});
+
+		it('must emit "offline"', function(done) {
+			var ws = testServer.connect('sync_accept', null, 'protoo');
+
+			ws.onopen = function() {
+				ws.close();
+			};
+
+			ws.onerror = function() {
+				done(new Error('ws should not fail'));
+			};
+
+			testServer.app.on('offline', function(peer) {
+				expect(peer.username).to.be('sync_accept');
+				done();
+			});
+		});
+
+		it('must not emit "online" again if same peer reconnects', function(done) {
+			var ec = eventcollector(2);
+			var ws1 = testServer.connect('sync_accept', '1234', 'protoo');
+			var ws2 = testServer.connect('sync_accept', '1234', 'protoo');
+			var numOnline = 0;
+
+			ec.on('alldone', function() { done(); });
+
+			ws1.onerror = function() {
+				done(new Error('ws1 should not fail'));
+			};
+
+			ws2.onerror = function() {
+				done(new Error('ws2 should not fail'));
+			};
+
+			ws2.onopen = function() {
+				ws2.close();
+			};
+
+			ws1.onclose = function() {
+				ec.done();
+			};
+
+			testServer.app.on('online', function() {
+				++numOnline;
+
+				if (numOnline === 1) {
+					ec.done();
+				}
+
+				if (numOnline === 2) {
+					done(new Error('app should not emit 2 "online" events'));
+				}
+			});
+		});
+
+	});
+}
 
 
 function connectionListener(info, accept, reject) {
@@ -229,25 +204,25 @@ function connectionListener(info, accept, reject) {
 }
 
 
-var ws_tests = {
-	setUp:    function(done) { testServer.run(false, connectionListener, done); },
-	tearDown: function(done) { testServer.stop(done); }
-};
+// var ws_tests = {
+// 	setUp:    function(done) { testServer.run(false, connectionListener, done); },
+// 	tearDown: function(done) { testServer.stop(done); }
+// };
 
 
-var wss_tests = {
-	setUp:    function(done) { testServer.run(true, connectionListener, done); },
-	tearDown: function(done) { testServer.stop(done); }
-};
+// var wss_tests = {
+// 	setUp:    function(done) { testServer.run(true, connectionListener, done); },
+// 	tearDown: function(done) { testServer.stop(done); }
+// };
 
 
-for (var test in tests) {
-	ws_tests[test]  = tests[test];
-	wss_tests[test] = tests[test];
-}
+// for (var test in tests) {
+// 	ws_tests[test]  = tests[test];
+// 	wss_tests[test] = tests[test];
+// }
 
 
-module.exports = {
-	'ws access':  ws_tests,
-	'wss access': wss_tests
-};
+// module.exports = {
+// 	'ws access':  ws_tests,
+// 	'wss access': wss_tests
+// };

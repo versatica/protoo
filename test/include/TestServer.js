@@ -66,13 +66,9 @@ TestServer.prototype.connect = function(username, uuid, protocol) {
 };
 
 
-TestServer.prototype.stop = function(done) {
+TestServer.prototype.stop = function() {
 	this.app.close(true);
 	this.app = null;
-
-	setImmediate(function() {
-		done();
-	});
 };
 
 

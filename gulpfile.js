@@ -4,13 +4,13 @@
 var gulp = require('gulp');
 var jshint = require('gulp-jshint');
 var filelog = require('gulp-filelog');
-var nodeunit = require('gulp-nodeunit-runner');
+var mocha = require('gulp-mocha');
 
 
 gulp.task('lint', function() {
 	var src = ['gulpfile.js', 'lib/**/*.js', 'test/**/*.js'];
 	return gulp.src(src)
-		.pipe(filelog('js:lint'))
+		.pipe(filelog('lint'))
 		.pipe(jshint('.jshintrc'))
 		.pipe(jshint.reporter('jshint-stylish', {verbose: true}))
 		.pipe(jshint.reporter('fail'));
@@ -18,10 +18,12 @@ gulp.task('lint', function() {
 
 
 gulp.task('test', function() {
-	var src = 'test/*.js';
-	return gulp.src(src)
-		.pipe(filelog('test'))
-		.pipe(nodeunit({reporter: 'default'}));
+	return gulp.src('test/*.js', {read: false})
+		.pipe(mocha({
+			reporter: 'spec',
+			timeout: 2000,
+			bail: true
+		}));
 });
 
 
@@ -30,5 +32,4 @@ gulp.task('watch', function() {
 });
 
 
-// TODO: set the default taks properly.
 gulp.task('default', gulp.series('lint', 'test'));
