@@ -152,7 +152,6 @@ describe('Route API', function() {
 
 function sendRequest(ws, method, url) {
 	var req = {
-		type: 'request',
 		method: method,
 		id: Math.round(100000 * Math.random()),
 		url: url

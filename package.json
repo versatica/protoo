@@ -30,7 +30,7 @@
     "websocket": "~1.0.17"
   },
   "devDependencies": {
-    "eventcollector": "^0.1.4",
+    "eventcollector": "^0.1.5",
     "expect.js": "^0.3.1",
     "gulp": "git://github.com/gulpjs/gulp.git#4.0",
     "gulp-filelog": "^0.4.1",
