@@ -37,7 +37,7 @@ function runTests(options) {
 			ec.on('alldone', function() { done(); });
 
 			ws1.onopen = function() {
-				done(new Error('ws1 should not connect'));
+				throw new Error('ws1 should not connect');
 			};
 
 			ws1.onerror = function() {
@@ -45,7 +45,7 @@ function runTests(options) {
 			};
 
 			ws2.onopen = function() {
-				done(new Error('ws2 should not connect'));
+				throw new Error('ws2 should not connect');
 			};
 
 			ws2.onerror = function() {
@@ -65,7 +65,7 @@ function runTests(options) {
 			};
 
 			ws.onerror = function() {
-				done(new Error('ws should not fail'));
+				throw new Error('ws should not fail');
 			};
 
 			app.on('online', function(peer) {
@@ -78,7 +78,7 @@ function runTests(options) {
 			var ws = app.connect('sync_reject', null, 'protoo');
 
 			ws.onopen = function() {
-				done(new Error('ws should not connect'));
+				throw new Error('ws should not connect');
 			};
 
 			ws.onerror = function() {
@@ -98,7 +98,7 @@ function runTests(options) {
 			};
 
 			ws.onerror = function() {
-				done(new Error('ws should not fail'));
+				throw new Error('ws should not fail');
 			};
 
 			app.on('online', function(peer) {
@@ -111,8 +111,7 @@ function runTests(options) {
 			var ws = app.connect('async_reject', null, 'protoo');
 
 			ws.onopen = function() {
-				// ws.close();  // TODO: si?
-				done(new Error('ws should not connect'));
+				throw new Error('ws should not connect');
 			};
 
 			ws.onerror = function() {
@@ -128,7 +127,7 @@ function runTests(options) {
 			};
 
 			ws.onerror = function() {
-				done(new Error('ws should not fail'));
+				throw new Error('ws should not fail');
 			};
 
 			app.on('offline', function(peer) {
@@ -146,11 +145,11 @@ function runTests(options) {
 			ec.on('alldone', function() { done(); });
 
 			ws1.onerror = function() {
-				done(new Error('ws1 should not fail'));
+				throw new Error('ws1 should not fail');
 			};
 
 			ws2.onerror = function() {
-				done(new Error('ws2 should not fail'));
+				throw new Error('ws2 should not fail');
 			};
 
 			ws2.onopen = function() {
@@ -169,7 +168,7 @@ function runTests(options) {
 				}
 
 				if (numOnline === 2) {
-					done(new Error('app should not emit 2 "online" events'));
+					throw new Error('app should not emit 2 "online" events');
 				}
 			});
 		});

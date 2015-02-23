@@ -111,7 +111,7 @@ describe('Route API', function() {
 
 
 		var router3 = protoo.Router();
-		app.use('/users', router3);
+		app.use('/USERS', router3);
 
 		router3.all('*', function route3_all_1(req, next) {
 			checkCount(9);
@@ -119,12 +119,16 @@ describe('Route API', function() {
 		});
 
 
-		var router4 = protoo.Router();
+		var router4 = protoo.Router({caseSensitive: true});
 		router3.use('/', router4);
 
-		router4.invite('/ALICE*', function route4_invite_1(req, next) {
+		router4.invite('/alice*', function route4_invite_1(req, next) {
 			checkCount(10);
 			next();
+		});
+
+		router4.invite('/ALICE*', function route4_invite_1() {
+			throw new Error('should not match (case sensitive)');
 		});
 
 

@@ -19,13 +19,11 @@ Arguments:
     * `accept` {Function}: Function the user must invoke to accept the connection.
     * `reject` {Function}: Function the user must invoke to reject the connection.
 
-The `accept(username, uuid, data, onPeer)` function must be called with the following arguments:
+The `accept(username, uuid, data)` function must be called with the following arguments:
 
 * `username` {String}: Username of the peer.
 * `uuid` {String}: UUID of the peer.
 * `data` {Object}: Custom data for the peer.
-* `onPeer` {Function}: Callback called upon peer
-* creation and before the "peer:online" event. It is called with the new [Peer](Peer.md) instance as argument.
 
 The `reject(code, reason)` function must be called with the following arguments:
 
@@ -63,3 +61,12 @@ Emitted when a peer becomes offline.
 Parameters:
 
 * `peer` {[Peer](Peer.md)}: The Peer instance.
+
+
+#### "error" event
+
+Emitted when an error throws in runtime.
+
+Parameters:
+
+* `error` {Error}: The Error instance.
