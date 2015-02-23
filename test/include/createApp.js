@@ -30,6 +30,10 @@ module.exports = function(url, connectionListener, done) {
 
 	// Add a custom connect() method to the app for testing.
 	app.connect = function(username, uuid, protocol) {
+		if (protocol === undefined) {
+			protocol = 'protoo';
+		}
+
 		var protocols = protocol ? [protocol] : [],
 			options = {},
 			connectUrl;

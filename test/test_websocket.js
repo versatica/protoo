@@ -9,16 +9,15 @@ runTests({wss: true});
 
 
 function runTests(options) {
-	var useWss = options.wss;
+	var app,
+		useWss = options.wss;
 
 	describe('app.websocket() API with ' + (useWss?'WSS':'WS') + ' transport', function() {
 
-		var app;
-
 		before(function(done) {
-			var url = (useWss ? 'wss://':'ws://') + '127.0.0.1:54321';
+			var connectUrl = (useWss ? 'wss://':'ws://') + '127.0.0.1:54321';
 
-			app = createApp(url, connectionListener, done);
+			app = createApp(connectUrl, connectionListener, done);
 		});
 
 		beforeEach(function() {
@@ -31,9 +30,9 @@ function runTests(options) {
 		});
 
 		it('must fail if WebSocket sub-protocol is not "protoo"', function(done) {
-			var ec = eventcollector(2);
-			var ws1 = app.connect('fail');
-			var ws2 = app.connect('fail', null, 'foo');
+			var ec = eventcollector(2),
+				ws1 = app.connect('fail', null, null),
+				ws2 = app.connect('fail', null, 'foo');
 
 			ec.on('alldone', function() { done(); });
 
@@ -55,8 +54,8 @@ function runTests(options) {
 		});
 
 		it('must accept sync accept()', function(done) {
-			var ec = eventcollector(2);
-			var ws = app.connect('sync_accept', null, 'protoo');
+			var ec = eventcollector(2),
+				ws = app.connect('sync_accept', null, 'protoo');
 
 			ec.on('alldone', function() { done(); });
 
@@ -88,8 +87,8 @@ function runTests(options) {
 		});
 
 		it('must accept async accept()', function(done) {
-			var ec = eventcollector(2);
-			var ws = app.connect('async_accept', null, 'protoo');
+			var ec = eventcollector(2),
+				ws = app.connect('async_accept', null, 'protoo');
 
 			ec.on('alldone', function() { done(); });
 
@@ -139,10 +138,10 @@ function runTests(options) {
 		});
 
 		it('must not emit "online" again if same peer reconnects', function(done) {
-			var ec = eventcollector(2);
-			var ws1 = app.connect('sync_accept', '1234', 'protoo');
-			var ws2 = app.connect('sync_accept', '1234', 'protoo');
-			var numOnline = 0;
+			var ec = eventcollector(2),
+				ws1 = app.connect('sync_accept', '1234', 'protoo'),
+				ws2 = app.connect('sync_accept', '1234', 'protoo'),
+				numOnline = 0;
 
 			ec.on('alldone', function() { done(); });
 
@@ -180,9 +179,9 @@ function runTests(options) {
 
 
 function connectionListener(info, accept, reject) {
-	var u = url.parse(info.req.url, true);
-	var username = u.query.username;
-	var uuid = u.query.uuid;
+	var u = url.parse(info.req.url, true),
+		username = u.query.username,
+		uuid = u.query.uuid;
 
 	switch(username) {
 		case 'sync_accept':

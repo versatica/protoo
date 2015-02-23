@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "debug": "~2.1.1",
-    "parseurl": "~1.3.0",
     "path-to-regexp": "0.1.3",
     "utils-merge": "^1.0.0",
     "websocket": "~1.0.17"
