@@ -1,4 +1,3 @@
-var protoo = require('../');
 var expect = require('expect.js');
 var createApp = require('./include/createApp');
 
@@ -37,7 +36,7 @@ describe('Router API', function() {
 		});
 
 
-		var router1 = protoo.Router();
+		var router1 = app.Router();
 		app.use(router1);
 
 		router1.param('folder', function(req, next, folder) {
@@ -75,7 +74,7 @@ describe('Router API', function() {
 		});
 
 
-		var router2 = protoo.Router();
+		var router2 = app.Router({strict: true});
 		router1.use('/users', router2);
 
 		router2.invite('/alice', function router2_invite1(req, next) {
@@ -85,7 +84,11 @@ describe('Router API', function() {
 			next();
 		});
 
-		router2.route('/alice')
+		router2.all('/alice/', function router2_all1() {
+			throw new Error('should not match router2_all1 due to "strict routing"');
+		});
+
+		router2.route('/Alice')
 			.all(function router2_route_all1(req, next) {
 				checkCount(6);
 				expect(req.path).to.be('/alice');
@@ -96,7 +99,7 @@ describe('Router API', function() {
 			});
 
 
-		var router3 = protoo.Router();
+		var router3 = app.Router();
 		app.use('/USERS', router3);
 
 		router3.all('*', function router3_all1(req, next) {
@@ -106,7 +109,7 @@ describe('Router API', function() {
 		});
 
 
-		var router4 = protoo.Router({caseSensitive: true});
+		var router4 = app.Router({caseSensitive: true});
 		router3.use('/', router4);
 
 		router4.invite('/alice*', function router4_invite1(req, next) {

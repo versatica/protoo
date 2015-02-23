@@ -18,6 +18,23 @@ describe('Application API', function() {
 		app.close(true);
 	});
 
+	it('settings', function() {
+		app.set('foo1', 'FOO1');
+		app.set('foo2', 'FOO2');
+		app.enable('foo3');
+		app.disable('foo4');
+
+		expect(app.get('foo1')).to.be('FOO1');
+		expect(app.get('foo2')).to.be('FOO2');
+		expect(app.get('foo3')).to.be.ok();
+		expect(app.get('foo4')).to.not.be.ok();
+		expect(app.enabled('foo3')).to.be.ok();
+		expect(app.enabled('foo4')).to.not.be.ok();
+
+		app.disable('foo3');
+		expect(app.enabled('foo3')).to.not.be.ok();
+	});
+
 	it('routing methods', function(done) {
 		var ws = app.connect('test_app'),
 			count = 0;
@@ -28,6 +45,8 @@ describe('Application API', function() {
 			}
 		}
 
+
+		app.enable('strict routing');
 
 		app.param('folder', function(req, next, folder) {
 			expect(folder).to.be('users');
@@ -55,7 +74,7 @@ describe('Application API', function() {
 			next();
 		});
 
-		app.use('/users', function app_use4(req, next) {
+		app.use('/users/', function app_use4(req, next) {
 			checkCount(3);
 			next();
 		});
@@ -66,6 +85,10 @@ describe('Application API', function() {
 			expect(req.params.user).to.be('alice');
 			expect(req.path).to.be('/users/alice');
 			next();
+		});
+
+		app.invite('/:folder/:user/', function app_invite2() {
+			throw new Error('should not match app_invite2 due to "strict routing"');
 		});
 
 		app.all('/USERS/:user', function app_all1(req, next) {

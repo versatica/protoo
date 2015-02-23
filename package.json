@@ -4,7 +4,7 @@
   "description": "Fast and powerful Node.js/IO.js based framework for building realtime applications",
   "main": "lib/protoo.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "./node_modules/.bin/gulp test"
   },
   "repository": {
     "type": "git",
@@ -37,7 +37,6 @@
     "gulp-filelog": "^0.4.1",
     "gulp-jshint": "^1.9.2",
     "gulp-mocha": "^2.0.0",
-    "jshint-stylish": "^1.0.0",
-    "tap-spec": "^2.2.1"
+    "jshint-stylish": "^1.0.0"
   }
 }
