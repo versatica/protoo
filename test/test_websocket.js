@@ -136,11 +136,12 @@ function runTests(options) {
 			});
 		});
 
-		it('must not emit "online" again if same peer reconnects', function(done) {
-			var ec = eventcollector(2),
+		it('must not emit "online" / "offline" if same peer reconnects', function(done) {
+			var ec = eventcollector(3),
 				ws1 = app.connect('sync_accept', '1234', 'protoo'),
 				ws2 = app.connect('sync_accept', '1234', 'protoo'),
-				numOnline = 0;
+				numOnline = 0,
+				numOffline = 0;
 
 			ec.on('alldone', function() { done(); });
 
@@ -169,6 +170,18 @@ function runTests(options) {
 
 				if (numOnline === 2) {
 					throw new Error('app should not emit 2 "online" events');
+				}
+			});
+
+			app.on('offline', function() {
+				++numOffline;
+
+				if (numOffline === 1) {
+					ec.done();
+				}
+
+				if (numOffline === 2) {
+					throw new Error('app should not emit 2 "offline" events');
 				}
 			});
 		});

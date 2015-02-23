@@ -28,24 +28,43 @@ module.exports = function(url, connectionListener, done) {
 		done();
 	});
 
+	app.on('error:route', function(error) {
+		throw error;
+	});
+
 	// Add a custom connect() method to the app for testing.
 	app.connect = function(username, uuid, protocol) {
+		username = username || Math.round(100000 * Math.random()).toString();
+		uuid = uuid || Math.round(100000 * Math.random()).toString();
+
 		if (protocol === undefined) {
 			protocol = 'protoo';
 		}
 
 		var protocols = protocol ? [protocol] : [],
 			options = {},
-			connectUrl;
+			connectUrl,
+			client;
 
-		uuid = uuid || Math.round(100000 * Math.random()).toString();
 		connectUrl = url + '/?username=' + username + '&uuid=' + uuid;
 
 		if (useWss) {
 			options.rejectUnauthorized = false;
 		}
 
-		return new W3CWebSocket(connectUrl, protocols, null, null, options);
+		client = new W3CWebSocket(connectUrl, protocols, null, null, options);
+
+		client.sendRequest = function(method, path) {
+			var req = {
+				method: method,
+				id: Math.round(100000 * Math.random()),
+				path: path
+			};
+
+			client.send(JSON.stringify(req));
+		};
+
+		return client;
 	};
 
 	return app;

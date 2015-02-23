@@ -63,9 +63,9 @@ Parameters:
 * `peer` {[Peer](Peer.md)}: The Peer instance.
 
 
-#### "error" event
+#### "error:route" event
 
-Emitted when an error throws in runtime.
+Emitted when an error throws in runtime while routing/dispathing a request.
 
 Parameters:
 
