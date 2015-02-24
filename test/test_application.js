@@ -39,6 +39,10 @@ describe('Application API', function() {
 		var ws = app.connect('test_app'),
 			count = 0;
 
+		app.on('error:route', function(error) {
+			throw error;
+		});
+
 		function checkCount(expected) {
 			if (++count !== expected) {
 				throw new Error('check count error [expected:' + expected + ', count:' + count + ']');
@@ -110,6 +114,30 @@ describe('Application API', function() {
 			checkCount(7);
 			expect(req.path).to.be('/users/alice');
 			done();
+		});
+
+
+		ws.onopen = function() {
+			ws.sendRequest('invite', '/users/alice');
+		};
+
+		ws.onerror = function() {
+			throw new Error('ws should not fail');
+		};
+	});
+
+	it('final handler with error', function(done) {
+		var ws = app.connect('test_app');
+
+		app.once('error:route', function() {
+			done();
+		});
+
+		// Don't log the error stack.
+		app.set('env', 'test');
+
+		app.all('/users/:user', function app_all1() {
+			throw new Error('BUMP');
 		});
 
 

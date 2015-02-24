@@ -28,10 +28,6 @@ module.exports = function(url, connectionListener, done) {
 		done();
 	});
 
-	app.on('error:route', function(error) {
-		throw error;
-	});
-
 	// Add a custom connect() method to the app for testing.
 	app.connect = function(username, uuid, protocol) {
 		username = username || Math.round(100000 * Math.random()).toString();

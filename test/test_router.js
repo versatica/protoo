@@ -22,6 +22,10 @@ describe('Router API', function() {
 		var ws = app.connect('test_router'),
 			count = 0;
 
+		app.on('error:route', function(error) {
+			throw error;
+		});
+
 		function checkCount(expected) {
 			if (++count !== expected) {
 				throw new Error('check count error [expected:' + expected + ', count:' + count + ']');
