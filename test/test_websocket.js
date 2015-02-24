@@ -12,7 +12,7 @@ function runTests(options) {
 	var app,
 		useWss = options.wss;
 
-	describe('app.websocket() API with ' + (useWss?'WSS':'WS') + ' transport', function() {
+	describe('app.websocket() API (' + (useWss?'WSS':'WS') + ' transport)', function() {
 
 		before(function(done) {
 			var connectUrl = (useWss ? 'wss://':'ws://') + '127.0.0.1:54321';
@@ -53,7 +53,7 @@ function runTests(options) {
 			};
 		});
 
-		it('must accept sync accept()', function(done) {
+		it('sync accept()', function(done) {
 			var ec = eventcollector(2),
 				ws = app.connect('sync_accept', null, 'protoo');
 
@@ -74,7 +74,7 @@ function runTests(options) {
 			});
 		});
 
-		it('must accept sync reject()', function(done) {
+		it('sync reject()', function(done) {
 			var ws = app.connect('sync_reject', null, 'protoo');
 
 			ws.onopen = function() {
@@ -86,7 +86,7 @@ function runTests(options) {
 			};
 		});
 
-		it('must accept async accept()', function(done) {
+		it('async accept()', function(done) {
 			var ec = eventcollector(2),
 				ws = app.connect('async_accept', null, 'protoo');
 
@@ -107,7 +107,7 @@ function runTests(options) {
 			});
 		});
 
-		it('must accept async reject()', function(done) {
+		it('async reject()', function(done) {
 			var ws = app.connect('async_reject', null, 'protoo');
 
 			ws.onopen = function() {
@@ -119,8 +119,11 @@ function runTests(options) {
 			};
 		});
 
-		it('must emit "offline"', function(done) {
-			var ws = app.connect('sync_accept', null, 'protoo');
+		it('must emit "online" and "offline"', function(done) {
+			var ec = eventcollector(2),
+				ws = app.connect('sync_accept', null, 'protoo');
+
+			ec.on('alldone', function() { done(); });
 
 			ws.onopen = function() {
 				ws.close();
@@ -130,13 +133,18 @@ function runTests(options) {
 				throw new Error('ws should not fail');
 			};
 
+			app.on('online', function(peer) {
+				expect(peer.username).to.be('sync_accept');
+				ec.done();
+			});
+
 			app.on('offline', function(peer) {
 				expect(peer.username).to.be('sync_accept');
-				done();
+				ec.done();
 			});
 		});
 
-		it('must not emit "online" / "offline" if same peer reconnects', function(done) {
+		it('must not emit "online"/"offline" if same peer reconnects', function(done) {
 			var ec = eventcollector(3),
 				ws1 = app.connect('sync_accept', '1234', 'protoo'),
 				ws2 = app.connect('sync_accept', '1234', 'protoo'),

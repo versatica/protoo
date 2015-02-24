@@ -126,10 +126,11 @@ describe('Application API', function() {
 		};
 	});
 
-	it('final handler with error', function(done) {
+	it('final handler with error (1)', function(done) {
 		var ws = app.connect('test_app');
 
-		app.once('error:route', function() {
+		app.once('error:route', function(error) {
+			expect(error.message).to.be('BUMP');
 			done();
 		});
 
@@ -138,6 +139,39 @@ describe('Application API', function() {
 
 		app.all('/users/:user', function app_all1() {
 			throw new Error('BUMP');
+		});
+
+		app.all('/users/:user', function app_all2() {
+			throw new Error('should not match app_all2');
+		});
+
+
+		ws.onopen = function() {
+			ws.sendRequest('invite', '/users/alice');
+		};
+
+		ws.onerror = function() {
+			throw new Error('ws should not fail');
+		};
+	});
+
+	it('final handler with error (2)', function(done) {
+		var ws = app.connect('test_app');
+
+		app.once('error:route', function(error) {
+			expect(error.message).to.be('BUMP');
+			done();
+		});
+
+		// Don't log the error stack.
+		app.set('env', 'test');
+
+		app.all('/users/:user', function app_all1(req, next) {
+			next(new Error('BUMP'));
+		});
+
+		app.all('/users/:user', function app_all2() {
+			throw new Error('should not match app_all2');
 		});
 
 
