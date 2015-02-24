@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/ibc/protoo",
   "engines": {
-    "node": "~0.10.32"
+    "node": ">=0.10.32"
   },
   "dependencies": {
     "array-flatten": "^1.0.2",
