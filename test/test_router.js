@@ -7,11 +7,7 @@ describe('Router API', function() {
 	var app;
 
 	beforeEach(function(done) {
-		var connectionListener = function(info, accept) {
-			accept('test_router', 'test_uuid', null);
-		};
-
-		app = createApp('ws://127.0.0.1:54321', connectionListener, done);
+		app = createApp('ws://127.0.0.1:54321', null, done);
 	});
 
 	afterEach(function() {
@@ -26,15 +22,9 @@ describe('Router API', function() {
 			throw error;
 		});
 
-		function checkCount(expected) {
-			if (++count !== expected) {
-				throw new Error('check count error [expected:' + expected + ', count:' + count + ']');
-			}
-		}
-
 
 		app.use(function app_use1(req, next) {
-			checkCount(1);
+			expect(++count).to.be(1);
 			expect(req.path).to.be('/users/alice');
 			next();
 		});
@@ -54,13 +44,13 @@ describe('Router API', function() {
 		});
 
 		router1.all('*', function router1_all1(req, next) {
-			checkCount(2);
+			expect(++count).to.be(2);
 			expect(req.path).to.be('/users/alice');
 			next();
 		});
 
 		router1.all('/:folder/:user', function router1_all2(req, next) {
-			checkCount(3);
+			expect(++count).to.be(3);
 			expect(req.path).to.be('/users/alice');
 			expect(req.params.folder).to.be('users');
 			expect(req.params.user).to.be('alice');
@@ -68,7 +58,7 @@ describe('Router API', function() {
 		});
 
 		router1.invite('*', function router1_invite1(req, next) {
-			checkCount(4);
+			expect(++count).to.be(4);
 			expect(req.path).to.be('/users/alice');
 			next();
 		});
@@ -82,7 +72,7 @@ describe('Router API', function() {
 		router1.use('/users', router2);
 
 		router2.invite('/alice', function router2_invite1(req, next) {
-			checkCount(5);
+			expect(++count).to.be(5);
 			expect(req.path).to.be('/alice');
 			expect(req.params.user).to.not.be('alice');
 			next();
@@ -94,7 +84,7 @@ describe('Router API', function() {
 
 		router2.route('/Alice')
 			.all(function router2_route_all1(req, next) {
-				checkCount(6);
+				expect(++count).to.be(6);
 				expect(req.path).to.be('/alice');
 				next('route');
 			})
@@ -107,7 +97,7 @@ describe('Router API', function() {
 		app.use('/USERS', router3);
 
 		router3.all('*', function router3_all1(req, next) {
-			checkCount(7);
+			expect(++count).to.be(7);
 			expect(req.path).to.be('/alice');
 			next();
 		});
@@ -117,7 +107,7 @@ describe('Router API', function() {
 		router3.use('/', router4);
 
 		router4.invite('/alice*', function router4_invite1(req, next) {
-			checkCount(8);
+			expect(++count).to.be(8);
 			expect(req.path).to.be('/alice');
 			next();
 		});
@@ -133,7 +123,7 @@ describe('Router API', function() {
 
 
 		app.use('/', function app_use_last(req) {
-			checkCount(9);
+			expect(++count).to.be(9);
 			expect(req.path).to.be('/users/alice');
 			done();
 		});

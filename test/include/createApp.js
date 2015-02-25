@@ -23,7 +23,15 @@ module.exports = function(url, connectionListener, done) {
 		httpServer = http.createServer();
 	}
 
-	app.websocket(httpServer, connectionListener);
+	function defaultConnectionListener(info, accept) {
+		var u = parseUrl(info.req.url, true);
+		var username = u.query.username;
+		var uuid = u.query.uuid;
+
+		accept(username, uuid, null);
+	}
+
+	app.websocket(httpServer, connectionListener || defaultConnectionListener);
 	httpServer.listen(parsedUrl.port, parsedUrl.hostname, function() {
 		done();
 	});

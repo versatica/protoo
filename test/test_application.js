@@ -1,4 +1,5 @@
 var expect = require('expect.js');
+var eventcollector = require('eventcollector');
 var createApp = require('./include/createApp');
 
 
@@ -7,11 +8,7 @@ describe('Application API', function() {
 	var app;
 
 	beforeEach(function(done) {
-		var connectionListener = function(info, accept) {
-			accept('test_app', 'test_uuid', null);
-		};
-
-		app = createApp('ws://127.0.0.1:54321', connectionListener, done);
+		app = createApp('ws://127.0.0.1:54321', null, done);
 	});
 
 	afterEach(function() {
@@ -43,12 +40,6 @@ describe('Application API', function() {
 			throw error;
 		});
 
-		function checkCount(expected) {
-			if (++count !== expected) {
-				throw new Error('check count error [expected:' + expected + ', count:' + count + ']');
-			}
-		}
-
 
 		app.enable('strict routing');
 
@@ -63,7 +54,7 @@ describe('Application API', function() {
 		});
 
 		app.use(function app_use1(req, next) {
-			checkCount(1);
+			expect(++count).to.be(1);
 			expect(req.path).to.be('/users/alice');
 			next();
 		});
@@ -73,18 +64,18 @@ describe('Application API', function() {
 		});
 
 		app.use('/', function app_use3(req, next) {
-			checkCount(2);
+			expect(++count).to.be(2);
 			expect(req.path).to.be('/users/alice');
 			next();
 		});
 
 		app.use('/users/', function app_use4(req, next) {
-			checkCount(3);
+			expect(++count).to.be(3);
 			next();
 		});
 
 		app.invite('/:folder/:user', function app_invite1(req, next) {
-			checkCount(4);
+			expect(++count).to.be(4);
 			expect(req.params.folder).to.be('users');
 			expect(req.params.user).to.be('alice');
 			expect(req.path).to.be('/users/alice');
@@ -96,7 +87,7 @@ describe('Application API', function() {
 		});
 
 		app.all('/USERS/:user', function app_all1(req, next) {
-			checkCount(5);
+			expect(++count).to.be(5);
 			expect(req.params.user).to.be('alice');
 			expect(req.path).to.be('/users/alice');
 			next();
@@ -104,14 +95,14 @@ describe('Application API', function() {
 
 		app.route('/users/:user')
 			.invite(function app_route_invite1(req, next) {
-				checkCount(6);
+				expect(++count).to.be(6);
 				expect(req.params.user).to.be('alice');
 				expect(req.path).to.be('/users/alice');
 				next();
 			});
 
 		app.use('/', function app_use_last(req) {
-			checkCount(7);
+			expect(++count).to.be(7);
 			expect(req.path).to.be('/users/alice');
 			done();
 		});
@@ -182,6 +173,73 @@ describe('Application API', function() {
 		ws.onerror = function() {
 			throw new Error('ws should not fail');
 		};
+	});
+
+	it('app.peers()', function(done) {
+		var ec1 = eventcollector(3),
+			ec2 = eventcollector(3),
+			numPeers,
+			ws1a = false,
+			ws1b = false,
+			ws2a = false;
+
+		app.on('online', function() {
+			ec1.done();
+		});
+
+		ec1.on('alldone', function() {
+			numPeers = app.peers('ws0');
+			expect(numPeers).to.be(0);
+
+			numPeers = app.peers('ws0', '1234');
+			expect(numPeers).to.be(0);
+
+			numPeers = app.peers('ws1', 'NOT');
+			expect(numPeers).to.be(0);
+
+			numPeers = app.peers('ws1', null, function(peer) {
+				expect(peer.username).to.be('ws1');
+
+				switch(peer.uuid) {
+					case '___1a___':
+						if (ws1a) { throw new Error('ws1a already found'); }
+						ws1a = true;
+						ec2.done();
+						break;
+					case '___1b___':
+						if (ws1b) { throw new Error('ws1b already found'); }
+						ws1b = true;
+						ec2.done();
+						break;
+					default:
+						throw new Error('unkown peer "ws1" with uuid "' + peer.uuid + '"');
+				}
+			});
+			expect(numPeers).to.be(2);
+
+			numPeers = app.peers('ws2', function(peer) {
+				expect(peer.username).to.be('ws2');
+
+				switch(peer.uuid) {
+					case '___2a___':
+						if (ws2a) { throw new Error('ws2a already found'); }
+						ws2a = true;
+						ec2.done();
+						break;
+					default:
+						throw new Error('unkown peer "ws2" with uuid "' + peer.uuid + '"');
+				}
+			});
+			expect(numPeers).to.be(1);
+		});
+
+		ec2.on('alldone', function() {
+			done();
+		});
+
+		app.connect('ws1', '___1a___');
+		app.connect('ws1', '___1b___');
+		app.connect('ws2', '___2a___');
 	});
 
 });
