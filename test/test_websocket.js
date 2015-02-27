@@ -17,7 +17,7 @@ function runTests(options) {
 		before(function(done) {
 			var connectUrl = (useWss ? 'wss://':'ws://') + '127.0.0.1:54321';
 
-			app = createApp(connectUrl, connectionListener, done);
+			app = createApp(connectUrl, requestListener, done);
 		});
 
 		beforeEach(function() {
@@ -198,7 +198,7 @@ function runTests(options) {
 }
 
 
-function connectionListener(info, accept, reject) {
+function requestListener(info, accept, reject) {
 	var u = url.parse(info.req.url, true),
 		username = u.query.username,
 		uuid = u.query.uuid;

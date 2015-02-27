@@ -4,14 +4,14 @@
 ### Methods
 
 
-#### `websocket(httpServer, onConnection)`
+#### `websocket(httpServer, requestListener)`
 
 Adds a WebSocket server to the application.
 
 Arguments:
 
 * `httpServer` {http.Server|https.Server}: A Node HTTP or HTTPS server.
-* `onConnection` {Function}: User handler for new WebSocket connections. It's called with the following arguments:
+* `requestListener` {Function}: User handler for new WebSocket connections. It's called with the following arguments:
     * `info` {Object}: Information about the WebSocket handshake:
         - `req` {http.IncomingRequest}:  The HTTP request.
         - `origin` {String}: The Origin header value in the client request (may be null).

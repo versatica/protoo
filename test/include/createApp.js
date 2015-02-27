@@ -7,7 +7,7 @@ var fs = require('fs');
 var W3CWebSocket = require('websocket').w3cwebsocket;
 
 
-module.exports = function(url, connectionListener, done) {
+module.exports = function(url, requestListener, done) {
 	var useWss = /^wss:/.test(url),
 		parsedUrl = parseUrl(url),
 		httpServer,
@@ -23,7 +23,7 @@ module.exports = function(url, connectionListener, done) {
 		httpServer = http.createServer();
 	}
 
-	function defaultConnectionListener(info, accept) {
+	function defaultRequestListener(info, accept) {
 		var u = parseUrl(info.req.url, true);
 		var username = u.query.username;
 		var uuid = u.query.uuid;
@@ -31,7 +31,7 @@ module.exports = function(url, connectionListener, done) {
 		accept(username, uuid, null);
 	}
 
-	app.websocket(httpServer, connectionListener || defaultConnectionListener);
+	app.websocket(httpServer, requestListener || defaultRequestListener);
 	httpServer.listen(parsedUrl.port, parsedUrl.hostname, function() {
 		done();
 	});
