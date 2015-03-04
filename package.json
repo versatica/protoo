@@ -1,7 +1,7 @@
 {
   "name": "protoo",
   "version": "0.1.0",
-  "description": "Fast and powerful Node.js/IO.js based framework for building realtime applications",
+  "description": "Fast and powerful Node.js based framework for building realtime applications",
   "main": "lib/protoo.js",
   "scripts": {
     "test": "./node_modules/.bin/gulp test"
