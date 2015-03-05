@@ -9,6 +9,9 @@ describe('Application API', function() {
 
 	beforeEach(function(done) {
 		app = createApp('ws://127.0.0.1:54321', null, done);
+
+		// Don't log the error stack.
+		app.set('env', 'test');
 	});
 
 	afterEach(function() {
@@ -117,6 +120,45 @@ describe('Application API', function() {
 		};
 	});
 
+	it('error handlers', function(done) {
+		var ws = app.connect('test_app'),
+			count = 0;
+
+		app.use(function app_use1() {
+			// Throw an error.
+			throw new Error('BUMP');
+		});
+
+		app.use(function app_use_error1(error, req, next) {  // jshint ignore:line
+			expect(++count).to.be(1);
+			expect(error.message).to.be('BUMP');
+			// Pass the error to the next error handler.
+			next(error);
+		});
+
+		app.use(function app_use_error2(error, req, next) {  // jshint ignore:line
+			expect(++count).to.be(2);
+			expect(error.message).to.be('BUMP');
+			// Ignore the error and pass the control to the next request handler.
+			next();
+		});
+
+		app.use(function app_use2(req, next) {  // jshint ignore:line
+			expect(++count).to.be(3);
+			expect(req.method).to.be('invite');
+			done();
+		});
+
+
+		ws.onopen = function() {
+			ws.sendRequest('invite', '/users/alice');
+		};
+
+		ws.onerror = function() {
+			throw new Error('ws should not fail');
+		};
+	});
+
 	it('final handler with error (1)', function(done) {
 		var ws = app.connect('test_app');
 
@@ -124,9 +166,6 @@ describe('Application API', function() {
 			expect(error.message).to.be('BUMP');
 			done();
 		});
-
-		// Don't log the error stack.
-		app.set('env', 'test');
 
 		app.all('/users/:user', function app_all1() {
 			throw new Error('BUMP');
@@ -153,9 +192,6 @@ describe('Application API', function() {
 			expect(error.message).to.be('BUMP');
 			done();
 		});
-
-		// Don't log the error stack.
-		app.set('env', 'test');
 
 		app.all('/users/:user', function app_all1(req, next) {
 			next(new Error('BUMP'));

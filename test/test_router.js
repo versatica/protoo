@@ -8,6 +8,9 @@ describe('Router API', function() {
 
 	beforeEach(function(done) {
 		app = createApp('ws://127.0.0.1:54321', null, done);
+
+		// Don't log the error stack.
+		app.set('env', 'test');
 	});
 
 	afterEach(function() {
@@ -125,6 +128,46 @@ describe('Router API', function() {
 		app.use('/', function app_use_last(req) {
 			expect(++count).to.be(9);
 			expect(req.path).to.be('/users/alice');
+			done();
+		});
+
+
+		ws.onopen = function() {
+			ws.sendRequest('invite', '/users/alice');
+		};
+
+		ws.onerror = function() {
+			throw new Error('ws should not fail');
+		};
+	});
+
+	it('error handlers', function(done) {
+		var ws = app.connect('test_app'),
+			count = 0;
+
+		var router1 = app.Router();
+		app.use('/users', router1);
+
+		router1.use('/', function router1_use1(req, next) {  // jshint ignore:line
+			expect(++count).to.be(1);
+			throw new Error('BUMP');
+		});
+
+		router1.use('/alice', function router1_use_error1(error, req, next) {  // jshint ignore:line
+			expect(++count).to.be(2);
+			expect(error.message).to.be('BUMP');
+			// Ignore the error and pass the control to the next request handler.
+			next();
+		});
+
+		router1.use('/*', function router1_use2(req, next) {
+			expect(++count).to.be(3);
+			expect(req.method).to.be('invite');
+			next();
+		});
+
+		app.use(function(req, next) {  // jshint ignore:line
+			expect(++count).to.be(4);
 			done();
 		});
 

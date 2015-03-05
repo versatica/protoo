@@ -18,7 +18,7 @@ gulp.task('lint', function() {
 
 
 gulp.task('test', function() {
-	return gulp.src('test/*.js', {read: false})
+	return gulp.src('test/test_*.js', {read: false})
 		.pipe(mocha({
 			reporter: 'spec',
 			timeout: 2000,
