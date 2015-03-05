@@ -10,7 +10,7 @@ Fast and extensible Node.js signaling framework for Real-Time Communication appl
 ## Installation
 
 ```bash
-$ npm install protoo
+$ npm install protoo --save
 ```
 
 
@@ -37,7 +37,7 @@ Iñaki Baz Castillo.
 
 ## License
 
-[ISC](./LICENSE)
+[MIT](./LICENSE)
 
 
 [npm-image]: https://img.shields.io/npm/v/protoo.svg

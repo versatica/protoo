@@ -15,7 +15,7 @@
     "webrtc"
   ],
   "author": "Iñaki Baz Castillo <ibc@aliax.net>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/ibc/protoo/issues"
   },
