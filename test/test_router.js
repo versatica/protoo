@@ -60,7 +60,7 @@ describe('Router API', function() {
 			next();
 		});
 
-		router1.invite('*', function router1_invite1(req, next) {
+		router1.session('*', function router1_invite1(req, next) {
 			expect(++count).to.be(4);
 			expect(req.path).to.be('/users/alice');
 			next();
@@ -74,7 +74,7 @@ describe('Router API', function() {
 		var router2 = app.Router({strict: true});
 		router1.use('/users', router2);
 
-		router2.invite('/alice', function router2_invite1(req, next) {
+		router2.session('/alice', function router2_invite1(req, next) {
 			expect(++count).to.be(5);
 			expect(req.path).to.be('/alice');
 			expect(req.params.user).to.not.be('alice');
@@ -91,7 +91,7 @@ describe('Router API', function() {
 				expect(req.path).to.be('/alice');
 				next('route');
 			})
-			.invite(function router2_route_invite1() {
+			.session(function router2_route_invite1() {
 				throw new Error('should not match router2_route_invite1 after next("route")');
 			});
 
@@ -109,13 +109,13 @@ describe('Router API', function() {
 		var router4 = app.Router({caseSensitive: true});
 		router3.use('/', router4);
 
-		router4.invite('/alice*', function router4_invite1(req, next) {
+		router4.session('/alice*', function router4_invite1(req, next) {
 			expect(++count).to.be(8);
 			expect(req.path).to.be('/alice');
 			next();
 		});
 
-		router4.invite('/ALICE*', function router4_invite2() {
+		router4.session('/ALICE*', function router4_invite2() {
 			throw new Error('should not match router4_invite2 (case sensitive)');
 		});
 
@@ -133,7 +133,7 @@ describe('Router API', function() {
 
 
 		ws.onopen = function() {
-			ws.sendRequest('invite', '/users/alice');
+			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
@@ -162,7 +162,7 @@ describe('Router API', function() {
 
 		router1.use('/*', function router1_use2(req, next) {
 			expect(++count).to.be(3);
-			expect(req.method).to.be('invite');
+			expect(req.method).to.be('session');
 			next();
 		});
 
@@ -173,7 +173,7 @@ describe('Router API', function() {
 
 
 		ws.onopen = function() {
-			ws.sendRequest('invite', '/users/alice');
+			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {

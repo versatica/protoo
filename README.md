@@ -16,23 +16,12 @@ $ npm install protoo --save
 
 ## Documentation
 
-Read the full [API documentation](docs/index.md) in the docs folder.
-
-
-## Debugging
-
-The library includes the Node [debug](https://github.com/visionmedia/debug) module. In order to enable debugging:
-
-In Node set the `DEBUG=protoo*` environment variable before running the application, or set it at the top of the script:
-
-```javascript
-process.env.DEBUG = 'protoo*';
-```
+Read the full documentation in the official website: [protoojs.org](http://protoojs.org).
 
 
 ## Author
 
-Iñaki Baz Castillo.
+[Iñaki Baz Castillo](https://github.com/ibc)
 
 
 ## License

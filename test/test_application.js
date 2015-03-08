@@ -77,7 +77,7 @@ describe('Application API', function() {
 			next();
 		});
 
-		app.invite('/:folder/:user', function app_invite1(req, next) {
+		app.session('/:folder/:user', function app_invite1(req, next) {
 			expect(++count).to.be(4);
 			expect(req.params.folder).to.be('users');
 			expect(req.params.user).to.be('alice');
@@ -85,7 +85,7 @@ describe('Application API', function() {
 			next();
 		});
 
-		app.invite('/:folder/:user/', function app_invite2() {
+		app.session('/:folder/:user/', function app_invite2() {
 			throw new Error('should not match app_invite2 due to "strict routing"');
 		});
 
@@ -97,7 +97,7 @@ describe('Application API', function() {
 		});
 
 		app.route('/users/:user')
-			.invite(function app_route_invite1(req, next) {
+			.session(function app_route_invite1(req, next) {
 				expect(++count).to.be(6);
 				expect(req.params.user).to.be('alice');
 				expect(req.path).to.be('/users/alice');
@@ -112,7 +112,7 @@ describe('Application API', function() {
 
 
 		ws.onopen = function() {
-			ws.sendRequest('invite', '/users/alice');
+			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
@@ -145,13 +145,13 @@ describe('Application API', function() {
 
 		app.use(function app_use2(req, next) {  // jshint ignore:line
 			expect(++count).to.be(3);
-			expect(req.method).to.be('invite');
+			expect(req.method).to.be('session');
 			done();
 		});
 
 
 		ws.onopen = function() {
-			ws.sendRequest('invite', '/users/alice');
+			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
@@ -177,7 +177,7 @@ describe('Application API', function() {
 
 
 		ws.onopen = function() {
-			ws.sendRequest('invite', '/users/alice');
+			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
@@ -203,7 +203,7 @@ describe('Application API', function() {
 
 
 		ws.onopen = function() {
-			ws.sendRequest('invite', '/users/alice');
+			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
