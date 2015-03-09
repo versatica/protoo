@@ -1,1 +1,0 @@
-## `Peer` class API
