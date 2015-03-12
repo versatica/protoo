@@ -25,13 +25,11 @@ describe('Router API', function() {
 			throw error;
 		});
 
-
 		app.use(function app_use1(req, next) {
 			expect(++count).to.be(1);
 			expect(req.path).to.be('/users/alice');
 			next();
 		});
-
 
 		var router1 = app.Router();
 		app.use(router1);
@@ -67,9 +65,8 @@ describe('Router API', function() {
 		});
 
 		router1.message('*', function router1_message1() {
-			throw new Error('should not match router1_message1');
+			expect().fail('should not match router1_message1');
 		});
-
 
 		var router2 = app.Router({strict: true});
 		router1.use('/users', router2);
@@ -82,7 +79,7 @@ describe('Router API', function() {
 		});
 
 		router2.all('/alice/', function router2_all1() {
-			throw new Error('should not match router2_all1 due to "strict routing"');
+			expect().fail('should not match router2_all1 due to "strict routing"');
 		});
 
 		router2.route('/Alice')
@@ -92,9 +89,8 @@ describe('Router API', function() {
 				next('route');
 			})
 			.session(function router2_route_invite1() {
-				throw new Error('should not match router2_route_invite1 after next("route")');
+				expect().fail('should not match router2_route_invite1 after next("route")');
 			});
-
 
 		var router3 = app.Router();
 		app.use('/USERS', router3);
@@ -104,7 +100,6 @@ describe('Router API', function() {
 			expect(req.path).to.be('/alice');
 			next();
 		});
-
 
 		var router4 = app.Router({caseSensitive: true});
 		router3.use('/', router4);
@@ -116,14 +111,13 @@ describe('Router API', function() {
 		});
 
 		router4.session('/ALICE*', function router4_invite2() {
-			throw new Error('should not match router4_invite2 (case sensitive)');
+			expect().fail('should not match router4_invite2 (case sensitive)');
 		});
 
 		router4.route('/Alice')
 			.all(function router4_route_all1() {
-				throw new Error('should not match router4_route_all1 (case sensitive)');
+				expect().fail('should not match router4_route_all1 (case sensitive)');
 			});
-
 
 		app.use('/', function app_use_last(req) {
 			expect(++count).to.be(9);
@@ -131,13 +125,12 @@ describe('Router API', function() {
 			done();
 		});
 
-
 		ws.onopen = function() {
 			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
-			throw new Error('ws should not fail');
+			expect().fail('ws should not fail');
 		};
 	});
 
@@ -171,13 +164,12 @@ describe('Router API', function() {
 			done();
 		});
 
-
 		ws.onopen = function() {
 			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
-			throw new Error('ws should not fail');
+			expect().fail('ws should not fail');
 		};
 	});
 

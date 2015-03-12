@@ -43,7 +43,6 @@ describe('Application API', function() {
 			throw error;
 		});
 
-
 		app.enable('strict routing');
 
 		app.param('folder', function(req, next, folder) {
@@ -63,7 +62,7 @@ describe('Application API', function() {
 		});
 
 		app.use('/NO', function app_use2() {
-			throw new Error('should not match app_use2');
+			expect().fail('should not match app_use2');
 		});
 
 		app.use('/', function app_use3(req, next) {
@@ -86,7 +85,7 @@ describe('Application API', function() {
 		});
 
 		app.session('/:folder/:user/', function app_invite2() {
-			throw new Error('should not match app_invite2 due to "strict routing"');
+			expect().fail('should not match app_invite2 due to "strict routing"');
 		});
 
 		app.all('/USERS/:user', function app_all1(req, next) {
@@ -110,13 +109,93 @@ describe('Application API', function() {
 			done();
 		});
 
-
 		ws.onopen = function() {
 			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
-			throw new Error('ws should not fail');
+			expect().fail('ws should not fail');
+		};
+	});
+
+	it('params (1)', function(done) {
+		var ws = app.connect('test_app'),
+			count = 0;
+
+		app.on('error:route', function(error) {
+			throw error;
+		});
+
+		// Validation rule for number: should be one or more digits.
+		app.message('/number/:number([0-9]+)', function(req, next) {
+			expect(++count).to.be(1);
+			expect(req.params.number).to.be('1234');
+
+			next();
+		});
+
+		app.use('/', function app_use_last(req) {
+			expect(++count).to.be(2);
+			// Params should not remain cross-router.
+			expect(req.params.number).to.not.be('1234');
+			done();
+		});
+
+		ws.onopen = function() {
+			ws.sendRequest('message', '/number/1234');
+		};
+
+		ws.onerror = function() {
+			expect().fail('ws should not fail');
+		};
+	});
+
+	it('params (2)', function(done) {
+		var ws = app.connect('test_app'),
+			count = 0;
+
+		app.on('error:route', function(error) {
+			throw error;
+		});
+
+		app.param('range', function(req, next, range) {
+			expect(++count).to.be(1);
+			setImmediate(function() {
+				next();
+			})
+		});
+
+		app.param('range', function(req, next, range) {
+			expect(++count).to.be(2);
+			next();
+		});
+
+		app.message('/range/:range(\\w+\.\.\\w+)', function(req, next) {
+			console.log('APP.MESSAGE');
+
+			// All the app.param() should be executed before the route.
+			expect(++count).to.be(4);
+			expect(req.params.range).to.be('abcd..1234');
+
+			next();
+		});
+
+		app.param('range', function(req, next, range) {
+			expect(++count).to.be(3);
+			next();
+		});
+
+		app.use('/', function app_use_last(req) {
+			expect(++count).to.be(5);
+			done();
+		});
+
+		ws.onopen = function() {
+			ws.sendRequest('message', '/range/abcd..1234');
+		};
+
+		ws.onerror = function() {
+			expect().fail('ws should not fail');
 		};
 	});
 
@@ -149,13 +228,12 @@ describe('Application API', function() {
 			done();
 		});
 
-
 		ws.onopen = function() {
 			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
-			throw new Error('ws should not fail');
+			expect().fail('ws should not fail');
 		};
 	});
 
@@ -172,16 +250,15 @@ describe('Application API', function() {
 		});
 
 		app.all('/users/:user', function app_all2() {
-			throw new Error('should not match app_all2');
+			expect().fail('should not match app_all2');
 		});
-
 
 		ws.onopen = function() {
 			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
-			throw new Error('ws should not fail');
+			expect().fail('ws should not fail');
 		};
 	});
 
@@ -198,16 +275,15 @@ describe('Application API', function() {
 		});
 
 		app.all('/users/:user', function app_all2() {
-			throw new Error('should not match app_all2');
+			expect().fail('should not match app_all2');
 		});
-
 
 		ws.onopen = function() {
 			ws.sendRequest('session', '/users/alice');
 		};
 
 		ws.onerror = function() {
-			throw new Error('ws should not fail');
+			expect().fail('ws should not fail');
 		};
 	});
 
@@ -238,17 +314,17 @@ describe('Application API', function() {
 
 				switch(peer.uuid) {
 					case '___1a___':
-						if (ws1a) { throw new Error('ws1a already found'); }
+						if (ws1a) { expect().fail('ws1a already found'); }
 						ws1a = true;
 						ec2.done();
 						break;
 					case '___1b___':
-						if (ws1b) { throw new Error('ws1b already found'); }
+						if (ws1b) { expect().fail('ws1b already found'); }
 						ws1b = true;
 						ec2.done();
 						break;
 					default:
-						throw new Error('unkown peer "ws1" with uuid "' + peer.uuid + '"');
+						expect().fail('unkown peer "ws1" with uuid "' + peer.uuid + '"');
 				}
 			});
 			expect(numPeers).to.be(2);
@@ -258,12 +334,12 @@ describe('Application API', function() {
 
 				switch(peer.uuid) {
 					case '___2a___':
-						if (ws2a) { throw new Error('ws2a already found'); }
+						if (ws2a) { expect().fail('ws2a already found'); }
 						ws2a = true;
 						ec2.done();
 						break;
 					default:
-						throw new Error('unkown peer "ws2" with uuid "' + peer.uuid + '"');
+						expect().fail('unkown peer "ws2" with uuid "' + peer.uuid + '"');
 				}
 			});
 			expect(numPeers).to.be(1);
