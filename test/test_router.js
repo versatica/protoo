@@ -28,6 +28,7 @@ describe('Router API', function() {
 		app.use(function app_use1(req, next) {
 			expect(++count).to.be(1);
 			expect(req.path).to.be('/users/alice');
+
 			next();
 		});
 
@@ -36,17 +37,20 @@ describe('Router API', function() {
 
 		router1.param('folder', function(req, next, folder) {
 			expect(folder).to.be('users');
+
 			next();
 		});
 
 		router1.param('user', function(req, next, user) {
 			expect(user).to.be('alice');
+
 			next();
 		});
 
 		router1.all('*', function router1_all1(req, next) {
 			expect(++count).to.be(2);
 			expect(req.path).to.be('/users/alice');
+
 			next();
 		});
 
@@ -55,12 +59,14 @@ describe('Router API', function() {
 			expect(req.path).to.be('/users/alice');
 			expect(req.params.folder).to.be('users');
 			expect(req.params.user).to.be('alice');
+
 			next();
 		});
 
 		router1.session('*', function router1_invite1(req, next) {
 			expect(++count).to.be(4);
 			expect(req.path).to.be('/users/alice');
+
 			next();
 		});
 
@@ -75,6 +81,7 @@ describe('Router API', function() {
 			expect(++count).to.be(5);
 			expect(req.path).to.be('/alice');
 			expect(req.params.user).to.not.be('alice');
+
 			next();
 		});
 
@@ -86,6 +93,7 @@ describe('Router API', function() {
 			.all(function router2_route_all1(req, next) {
 				expect(++count).to.be(6);
 				expect(req.path).to.be('/alice');
+
 				next('route');
 			})
 			.session(function router2_route_invite1() {
@@ -98,6 +106,7 @@ describe('Router API', function() {
 		router3.all('*', function router3_all1(req, next) {
 			expect(++count).to.be(7);
 			expect(req.path).to.be('/alice');
+
 			next();
 		});
 
@@ -107,6 +116,7 @@ describe('Router API', function() {
 		router4.session('/alice*', function router4_invite1(req, next) {
 			expect(++count).to.be(8);
 			expect(req.path).to.be('/alice');
+
 			next();
 		});
 
@@ -122,6 +132,7 @@ describe('Router API', function() {
 		app.use('/', function app_use_last(req) {
 			expect(++count).to.be(9);
 			expect(req.path).to.be('/users/alice');
+
 			done();
 		});
 
@@ -143,12 +154,14 @@ describe('Router API', function() {
 
 		router1.use('/', function router1_use1(req, next) {  // jshint ignore:line
 			expect(++count).to.be(1);
+
 			throw new Error('BUMP');
 		});
 
 		router1.use('/alice', function router1_use_error1(error, req, next) {  // jshint ignore:line
 			expect(++count).to.be(2);
 			expect(error.message).to.be('BUMP');
+
 			// Ignore the error and pass the control to the next request handler.
 			next();
 		});
@@ -156,11 +169,13 @@ describe('Router API', function() {
 		router1.use('/*', function router1_use2(req, next) {
 			expect(++count).to.be(3);
 			expect(req.method).to.be('session');
+
 			next();
 		});
 
 		app.use(function(req, next) {  // jshint ignore:line
 			expect(++count).to.be(4);
+
 			done();
 		});
 

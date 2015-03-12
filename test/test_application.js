@@ -47,17 +47,20 @@ describe('Application API', function() {
 
 		app.param('folder', function(req, next, folder) {
 			expect(folder).to.be('users');
+
 			next();
 		});
 
 		app.param('user', function(req, next, user) {
 			expect(user).to.be('alice');
+
 			next();
 		});
 
 		app.use(function app_use1(req, next) {
 			expect(++count).to.be(1);
 			expect(req.path).to.be('/users/alice');
+
 			next();
 		});
 
@@ -68,11 +71,13 @@ describe('Application API', function() {
 		app.use('/', function app_use3(req, next) {
 			expect(++count).to.be(2);
 			expect(req.path).to.be('/users/alice');
+
 			next();
 		});
 
 		app.use('/users/', function app_use4(req, next) {
 			expect(++count).to.be(3);
+
 			next();
 		});
 
@@ -81,6 +86,7 @@ describe('Application API', function() {
 			expect(req.params.folder).to.be('users');
 			expect(req.params.user).to.be('alice');
 			expect(req.path).to.be('/users/alice');
+
 			next();
 		});
 
@@ -92,6 +98,7 @@ describe('Application API', function() {
 			expect(++count).to.be(5);
 			expect(req.params.user).to.be('alice');
 			expect(req.path).to.be('/users/alice');
+
 			next();
 		});
 
@@ -100,12 +107,14 @@ describe('Application API', function() {
 				expect(++count).to.be(6);
 				expect(req.params.user).to.be('alice');
 				expect(req.path).to.be('/users/alice');
+
 				next();
 			});
 
 		app.use('/', function app_use_last(req) {
 			expect(++count).to.be(7);
 			expect(req.path).to.be('/users/alice');
+
 			done();
 		});
 
@@ -138,6 +147,7 @@ describe('Application API', function() {
 			expect(++count).to.be(2);
 			// Params should not remain cross-router.
 			expect(req.params.number).to.not.be('1234');
+
 			done();
 		});
 
@@ -160,13 +170,17 @@ describe('Application API', function() {
 
 		app.param('range', function(req, next, range) {
 			expect(++count).to.be(1);
+			expect(range).to.be('abcd..1234');
+
 			setImmediate(function() {
 				next();
-			})
+			});
 		});
 
 		app.param('range', function(req, next, range) {
 			expect(++count).to.be(2);
+			expect(range).to.be('abcd..1234');
+
 			next();
 		});
 
@@ -182,11 +196,14 @@ describe('Application API', function() {
 
 		app.param('range', function(req, next, range) {
 			expect(++count).to.be(3);
+			expect(range).to.be('abcd..1234');
+
 			next();
 		});
 
-		app.use('/', function app_use_last(req) {
+		app.use('/', function app_use_last() {
 			expect(++count).to.be(5);
+
 			done();
 		});
 
@@ -211,6 +228,7 @@ describe('Application API', function() {
 		app.use(function app_use_error1(error, req, next) {  // jshint ignore:line
 			expect(++count).to.be(1);
 			expect(error.message).to.be('BUMP');
+
 			// Pass the error to the next error handler.
 			next(error);
 		});
@@ -218,6 +236,7 @@ describe('Application API', function() {
 		app.use(function app_use_error2(error, req, next) {  // jshint ignore:line
 			expect(++count).to.be(2);
 			expect(error.message).to.be('BUMP');
+
 			// Ignore the error and pass the control to the next request handler.
 			next();
 		});
@@ -225,6 +244,7 @@ describe('Application API', function() {
 		app.use(function app_use2(req, next) {  // jshint ignore:line
 			expect(++count).to.be(3);
 			expect(req.method).to.be('session');
+
 			done();
 		});
 
@@ -242,6 +262,7 @@ describe('Application API', function() {
 
 		app.once('error:route', function(error) {
 			expect(error.message).to.be('BUMP');
+
 			done();
 		});
 
@@ -267,6 +288,7 @@ describe('Application API', function() {
 
 		app.once('error:route', function(error) {
 			expect(error.message).to.be('BUMP');
+
 			done();
 		});
 
