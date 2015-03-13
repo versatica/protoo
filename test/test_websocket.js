@@ -144,7 +144,7 @@ function runTests(options) {
 			});
 		});
 
-		it('must not emit "online"/"offline" if same peer reconnects', function(done) {
+		it('must not emit "online"/"offline" if same peer reconnects while connected', function(done) {
 			var ec = eventcollector(3),
 				ws1 = app.connect('sync_accept', '1234', 'protoo'),
 				ws2 = app.connect('sync_accept', '1234', 'protoo'),
@@ -190,6 +190,120 @@ function runTests(options) {
 
 				if (numOffline === 2) {
 					expect().fail('app should not emit 2 "offline" events');
+				}
+			});
+		});
+
+		it('must not emit "online"/"offline" if same peer reconnects before grace period', function(done) {
+			var ec = eventcollector(4),
+				ws1 = app.connect('sync_accept', '1234', 'protoo'),
+				ws2,
+				numOnline = 0,
+				numOffline = 0;
+
+			app.set('disconnect grace period', 100);
+
+			ec.on('alldone', function() { done(); });
+
+			ws1.onerror = function() {
+				expect().fail('ws1 should not fail');
+			};
+
+			ws1.onopen = function() {
+				ws1.close();
+			};
+
+			ws1.onclose = function() {
+				ec.done();
+
+				setTimeout(function() {
+					ws2 = app.connect('sync_accept', '1234', 'protoo');
+
+					ws2.onerror = function() {
+						expect().fail('ws2 should not fail');
+					};
+
+					ws2.onopen = function() {
+						ws2.close();
+						ec.done();
+					};
+				}, 50);
+			};
+
+			app.on('online', function() {
+				++numOnline;
+
+				if (numOnline === 1) {
+					ec.done();
+				}
+
+				if (numOnline === 2) {
+					expect().fail('app should not emit 2 "online" events');
+				}
+			});
+
+			app.on('offline', function() {
+				++numOffline;
+
+				if (numOffline === 1) {
+					ec.done();
+				}
+
+				if (numOffline === 2) {
+					expect().fail('app should not emit 2 "offline" events');
+				}
+			});
+		});
+
+		it('must emit "online"/"offline" if same peer reconnects after grace period', function(done) {
+			var ec = eventcollector(4),
+				ws1 = app.connect('sync_accept', '1234', 'protoo'),
+				ws2,
+				numOnline = 0,
+				numOffline = 0;
+
+			app.set('disconnect grace period', 50);
+
+			ec.on('alldone', function() { done(); });
+
+			ws1.onerror = function() {
+				expect().fail('ws1 should not fail');
+			};
+
+			ws1.onopen = function() {
+				ws1.close();
+			};
+
+			ws1.onclose = function() {
+				ec.done();
+
+				setTimeout(function() {
+					ws2 = app.connect('sync_accept', '1234', 'protoo');
+
+					ws2.onerror = function() {
+						expect().fail('ws2 should not fail');
+					};
+
+					ws2.onopen = function() {
+						ws2.close();
+						ec.done();
+					};
+				}, 100);
+			};
+
+			app.on('online', function() {
+				++numOnline;
+
+				if (numOnline === 2) {
+					ec.done();
+				}
+			});
+
+			app.on('offline', function() {
+				++numOffline;
+
+				if (numOffline === 2) {
+					ec.done();
 				}
 			});
 		});
