@@ -23,6 +23,9 @@ module.exports = function(url, requestListener, done) {
 		httpServer = http.createServer();
 	}
 
+	// Don't log the error stack.
+	app.set('env', 'test');
+
 	function defaultRequestListener(info, accept) {
 		var u = parseUrl(info.req.url, true);
 		var username = u.query.username;

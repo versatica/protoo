@@ -8,9 +8,6 @@ describe('Router API', function() {
 
 	beforeEach(function(done) {
 		app = createApp('ws://127.0.0.1:54321', null, done);
-
-		// Don't log the error stack.
-		app.set('env', 'test');
 	});
 
 	afterEach(function() {
@@ -21,7 +18,7 @@ describe('Router API', function() {
 		var ws = app.connect('test_router'),
 			count = 0;
 
-		app.on('error:route', function(error) {
+		app.on('routingError', function(error) {
 			throw error;
 		});
 
