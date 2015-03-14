@@ -61,12 +61,16 @@ module.exports = function(url, requestListener, done) {
 
 		client = new W3CWebSocket(connectUrl, protocols, null, null, options);
 
-		client.sendRequest = function(method, path) {
+		client.sendRequest = function(method, path, data, id) {
 			var req = {
 				method: method,
-				id: Math.round(100000 * Math.random()),
+				id: id || Math.round(100000 * Math.random()),
 				path: path
 			};
+
+			if (data) {
+				req.data = data;
+			}
 
 			client.send(JSON.stringify(req));
 		};

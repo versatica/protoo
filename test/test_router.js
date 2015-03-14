@@ -185,4 +185,68 @@ describe('Router API', function() {
 		};
 	});
 
+	it('merge params', function(done) {
+		var ws = app.connect('test_router'),
+			count = 0;
+
+		app.on('routingError', function(error) {
+			throw error;
+		});
+
+		app.session('/users/:username/:uuid', function app_session1(req, next) {
+			expect(++count).to.be(1);
+			expect(req.params.username).to.be('alice');
+			expect(req.params.uuid).to.be('1234');
+
+			next();
+		});
+
+		var router1 = app.Router();
+		app.use('/users/:username/:uuid', router1);
+
+		router1.session('*', function router1_session1(req, next) {
+			expect(++count).to.be(2);
+			expect(req.params.username).to.be(undefined);
+			expect(req.params.uuid).to.be(undefined);
+
+			next();
+		});
+
+		var router2 = app.Router({mergeParams: true});
+		app.use('/users/:username/:uuid', router2);
+
+		router2.session('*', function router2_session1(req, next) {
+			expect(++count).to.be(3);
+			expect(req.params.username).to.be('alice');
+			expect(req.params.uuid).to.be('1234');
+
+			next();
+		});
+
+		var router3 = app.Router({mergeParams: true});
+		app.use('/users/:uuid/:username', router3);
+
+		router3.use(function router3_session1(req, next) {
+			expect(++count).to.be(4);
+			expect(req.params.uuid).to.be('alice');
+			expect(req.params.username).to.be('1234');
+
+			next();
+		});
+
+		app.use('/', function app_use_last() {
+			expect(++count).to.be(5);
+
+			done();
+		});
+
+		ws.onopen = function() {
+			ws.sendRequest('session', '/users/alice/1234');
+		};
+
+		ws.onerror = function() {
+			expect().fail('ws should not fail');
+		};
+	});
+
 });

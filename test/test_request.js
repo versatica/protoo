@@ -14,6 +14,43 @@ describe('Request API', function() {
 		app.close(true);
 	});
 
+	it('request properties', function(done) {
+		var ws = app.connect('test_app'),
+			peer;
+
+		app.on('routingError', function(error) {
+			throw error;
+		});
+
+		app.on('online', function(_peer) {
+			peer = _peer;
+		});
+
+		app.all('/users/:username/:uuid', function app_all1(req) {
+			expect(req.method).to.be('message');
+			expect(req.path).to.be('/users/alice/1234');
+			expect(req.id).to.be(7654321);
+			expect(req.data).to.eql({foo: 123});
+
+			expect(req.peer).to.be(peer);
+			expect(req.app).to.be(app);
+			expect(req.params).to.eql({username:'alice', uuid:'1234'});
+
+			req.set('foo', 1234);
+			expect(req.get('foo')).to.be(1234);
+
+			done();
+		});
+
+		ws.onopen = function() {
+			ws.sendRequest('message', '/users/alice/1234', {foo: 123}, 7654321);
+		};
+
+		ws.onerror = function() {
+			expect().fail('ws should not fail');
+		};
+	});
+
 	it('must emit "outgoingResponse"', function(done) {
 		var ws = app.connect('test_app'),
 			count = 0;
@@ -83,7 +120,9 @@ describe('Request API', function() {
 			});
 
 			req.reply(100, 'trying');
+			expect(req.ended).to.be(false);
 			req.reply(200, 'ok');
+			expect(req.ended).to.be(true);
 
 			expect(function() {
 				req.reply(200, 'ok again');

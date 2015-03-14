@@ -182,8 +182,6 @@ describe('Application API', function() {
 		});
 
 		app.message('/range/:range(\\w+\.\.\\w+)', function(req, next) {
-			console.log('APP.MESSAGE');
-
 			// All the app.param() should be executed before the route.
 			expect(++count).to.be(4);
 			expect(req.params.range).to.be('abcd..1234');
