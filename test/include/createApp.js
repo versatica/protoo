@@ -11,6 +11,7 @@ module.exports = function(url, requestListener, done) {
 	var useWss = /^wss:/.test(url),
 		parsedUrl = parseUrl(url),
 		httpServer,
+		wsOptions,
 		app = protoo();
 
 	if (useWss) {
@@ -34,7 +35,11 @@ module.exports = function(url, requestListener, done) {
 		accept(username, uuid, null);
 	}
 
-	app.websocket(httpServer, requestListener || defaultRequestListener);
+	wsOptions = {
+		keepalive: false
+	};
+
+	app.websocket(httpServer, wsOptions, requestListener || defaultRequestListener);
 	httpServer.listen(parsedUrl.port, parsedUrl.hostname, function() {
 		done();
 	});
