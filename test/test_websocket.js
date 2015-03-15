@@ -201,7 +201,7 @@ function runTests(options) {
 				numOnline = 0,
 				numOffline = 0;
 
-			app.set('disconnect grace period', 50);
+			app.set('disconnect grace period', 100);
 
 			ec.on('alldone', function() { done(); });
 
@@ -227,7 +227,7 @@ function runTests(options) {
 						ws2.close();
 						ec.done();
 					};
-				}, 25);
+				}, 50);
 			};
 
 			app.on('online', function() {
@@ -262,7 +262,7 @@ function runTests(options) {
 				numOnline = 0,
 				numOffline = 0;
 
-			app.set('disconnect grace period', 25);
+			app.set('disconnect grace period', 50);
 
 			ec.on('alldone', function() { done(); });
 
@@ -288,7 +288,7 @@ function runTests(options) {
 						ws2.close();
 						ec.done();
 					};
-				}, 50);
+				}, 100);
 			};
 
 			app.on('online', function() {
