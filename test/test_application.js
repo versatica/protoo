@@ -1,5 +1,6 @@
 var expect = require('expect.js');
 var eventcollector = require('eventcollector');
+var protoo = require('../');
 var createApp = require('./include/createApp');
 
 
@@ -215,6 +216,10 @@ describe('Application API', function() {
 		var ws = app.connect('test_app'),
 			count = 0;
 
+		app.on('routingError', function(error) {
+			throw error;
+		});
+
 		app.use(function app_use1() {
 			// Throw an error.
 			throw new Error('BUMP');
@@ -369,6 +374,73 @@ describe('Application API', function() {
 		app.connect('ws1', '___1a___');
 		app.connect('ws1', '___1b___');
 		app.connect('ws2', '___2a___');
+	});
+
+	it('unknown method gets 404', function(done) {
+		var ws = app.connect('test_app');
+
+		app.on('routingError', function(error) {
+			throw error;
+		});
+
+		ws.onopen = function() {
+			ws.sendRequest('chicken', '/users/alice');
+		};
+
+		ws.onerror = function() {
+			expect().fail('ws should not fail');
+		};
+
+		ws.onmessage = function(event) {
+			var res = JSON.parse(event.data);
+
+			expect(res.status).to.be(404);
+			done();
+		};
+	});
+
+	it('add custom method', function(done) {
+		var ws = app.connect('test_app'),
+			count = 0;
+
+		protoo.addMethod('chicken');
+
+		app.on('routingError', function(error) {
+			throw error;
+		});
+
+		app.chicken('/users/*', function(req, next) {
+			expect(++count).to.be(1);
+			next();
+		});
+
+		app.route('/users/*')
+			.chicken(function(req, next) {
+				expect(++count).to.be(2);
+				next();
+			});
+
+		var router = app.Router();
+		app.use(router);
+
+		router.chicken('/users/*', function(req, next) {
+			expect(++count).to.be(3);
+			next();
+		});
+
+		router.route('/users/*')
+			.chicken(function() {
+				expect(++count).to.be(4);
+				done();
+			});
+
+		ws.onopen = function() {
+			ws.sendRequest('chicken', '/users/alice');
+		};
+
+		ws.onerror = function() {
+			expect().fail('ws should not fail');
+		};
 	});
 
 });
