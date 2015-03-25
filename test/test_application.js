@@ -309,7 +309,7 @@ describe('Application API', function() {
 		};
 	});
 
-	it('app.peers()', function(done) {
+	it('get peers', function(done) {
 		var ec1 = eventcollector(3),
 			ec2 = eventcollector(3),
 			numPeers,
@@ -327,9 +327,11 @@ describe('Application API', function() {
 
 			numPeers = app.peers('ws0', '1234');
 			expect(numPeers).to.be(0);
+			expect(app.peer('ws0', '1234')).to.be(undefined);
 
 			numPeers = app.peers('ws1', 'NOT');
 			expect(numPeers).to.be(0);
+			expect(app.peer('ws1', 'NOT')).to.be(undefined);
 
 			numPeers = app.peers('ws1', null, function(peer) {
 				expect(peer.username).to.be('ws1');
@@ -350,6 +352,7 @@ describe('Application API', function() {
 				}
 			});
 			expect(numPeers).to.be(2);
+			expect(app.peer('ws1', '___1a___')).to.be.ok();
 
 			numPeers = app.peers('ws2', function(peer) {
 				expect(peer.username).to.be('ws2');
@@ -365,6 +368,7 @@ describe('Application API', function() {
 				}
 			});
 			expect(numPeers).to.be(1);
+			expect(app.peer('ws2', '___2a___')).to.be.ok();
 		});
 
 		ec2.on('alldone', function() {
@@ -404,6 +408,14 @@ describe('Application API', function() {
 			count = 0;
 
 		protoo.addMethod('chicken');
+
+		expect(function() {
+			protoo.addMethod('chicken');
+		}).to.throwError();
+
+		expect(function() {
+			protoo.addMethod('all');
+		}).to.throwError();
 
 		app.on('routingError', function(error) {
 			throw error;

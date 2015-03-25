@@ -80,6 +80,20 @@ module.exports = function(url, requestListener, done) {
 			client.send(JSON.stringify(req));
 		};
 
+		client.sendResponse = function(req, status, reason, data) {
+			var res = {
+				status: status,
+				reason: reason,
+				id: req.id
+			};
+
+			if (data) {
+				res.data = data;
+			}
+
+			client.send(JSON.stringify(res));
+		};
+
 		return client;
 	};
 
