@@ -1,7 +1,7 @@
-var expect = require('expect.js');
-var url = require('url');
-var eventcollector = require('eventcollector');
-var createApp = require('./include/createApp');
+var expect = require('expect.js'),
+	url = require('url'),
+	eventcollector = require('eventcollector'),
+	createApp = require('./include/createApp');
 
 
 runTests({wss: false});
@@ -13,107 +13,113 @@ function runTests(options) {
 	var app,
 		useWss = options.wss;
 
-	describe('app.websocket() API (' + (useWss?'WSS':'WS') + ' transport)', function() {
+	describe('app.websocket() API (' + (useWss ? 'WSS' : 'WS') + ' transport)', function () {
 
-		beforeEach(function(done) {
-			var connectUrl = (useWss ? 'wss://':'ws://') + '127.0.0.1:54321';
+		beforeEach(function (done) {
+			var connectUrl = (useWss ? 'wss://' : 'ws://') + '127.0.0.1:54321';
 
 			app = createApp(connectUrl, requestListener, done);
-			app.on('routingError', function(error) {
+			app.on('routingError', function (error) {
 				throw error;
 			});
 		});
 
-		afterEach(function() {
+		afterEach(function () {
 			app.close(true);
 		});
 
-		it('must fail if WebSocket sub-protocol is not "protoo"', function(done) {
+		it('must fail if WebSocket sub-protocol is not "protoo"', function (done) {
 			var ec = eventcollector(2),
 				ws1 = app.connect('fail', null, null),
 				ws2 = app.connect('fail', null, 'foo');
 
-			ec.on('alldone', function() { done(); });
+			ec.on('alldone', function () {
+				done();
+			});
 
-			ws1.onopen = function() {
+			ws1.onopen = function () {
 				expect().fail('ws1 should not connect');
 			};
 
-			ws1.onerror = function() {
+			ws1.onerror = function () {
 				ec.done();
 			};
 
-			ws2.onopen = function() {
+			ws2.onopen = function () {
 				expect().fail('ws2 should not connect');
 			};
 
-			ws2.onerror = function() {
+			ws2.onerror = function () {
 				ec.done();
 			};
 		});
 
-		it('sync accept()', function(done) {
+		it('sync accept()', function (done) {
 			var ec = eventcollector(2),
 				ws = app.connect('sync_accept', null, 'protoo');
 
-			ec.on('alldone', function() { done(); });
+			ec.on('alldone', function () {
+				done();
+			});
 
-			ws.onopen = function() {
+			ws.onopen = function () {
 				ws.close();
 				ec.done();
 			};
 
-			ws.onerror = function() {
+			ws.onerror = function () {
 				expect().fail('ws should not fail');
 			};
 
-			app.on('online', function(peer) {
+			app.on('online', function (peer) {
 				expect(peer.username).to.be('sync_accept');
 				ec.done();
 			});
 		});
 
-		it('sync reject()', function(done) {
+		it('sync reject()', function (done) {
 			var ws = app.connect('sync_reject', null, 'protoo');
 
-			ws.onopen = function() {
+			ws.onopen = function () {
 				expect().fail('ws should not connect');
 			};
 
-			ws.onerror = function() {
+			ws.onerror = function () {
 				done();
 			};
 		});
 
-		it('async accept()', function(done) {
+		it('async accept()', function (done) {
 			var ec = eventcollector(2),
 				ws = app.connect('async_accept', null, 'protoo');
 
-			ec.on('alldone', function() { done(); });
+			ec.on('alldone', function () {
+				done();
+			});
 
-			ws.onopen = function() {
+			ws.onopen = function () {
 				ws.close();
 				ec.done();
 			};
 
-			ws.onerror = function() {
+			ws.onerror = function () {
 				expect().fail('ws should not fail');
 			};
 
-			app.on('online', function(peer) {
+			app.on('online', function (peer) {
 				expect(peer.username).to.be('async_accept');
 				ec.done();
 			});
 		});
 
-		it('async reject()', function(done) {
+		it('async reject()', function (done) {
 			var ws = app.connect('async_reject', null, 'protoo');
 
-			ws.onopen = function() {
+			ws.onopen = function () {
 				expect().fail('ws should not connect');
 			};
 
-			ws.onerror = function() {
+			ws.onerror = function () {
 				done();
 			};
 		});
@@ -128,7 +134,7 @@ function requestListener(info, accept, reject) {
 		username = u.query.username,
 		uuid = u.query.uuid;
 
-	switch(username) {
+	switch (username) {
 		case 'sync_accept':
 			accept(username, uuid, null);
 			break;
@@ -138,13 +144,13 @@ function requestListener(info, accept, reject) {
 			break;
 
 		case 'async_accept':
-			setImmediate(function() {
+			setImmediate(function () {
 				accept(username, uuid, null);
 			});
 			break;
 
 		case 'async_reject':
-			setImmediate(function() {
+			setImmediate(function () {
 				reject(403, username);
 			});
 			break;
