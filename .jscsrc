@@ -2,6 +2,5 @@
 	"preset": "crockford",
 	"validateIndentation": "\t",
 	"disallowDanglingUnderscores": null,
-	"disallowKeywords": null,
-	"excludeFiles": ["node_modules/**"]
+	"disallowKeywords": null
 }
