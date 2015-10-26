@@ -1,4 +1,5 @@
 {
+	"esnext": true,
 	"bitwise": true,
 	"curly": true,
 	"eqeqeq": true,
@@ -18,7 +19,6 @@
 	"maxlen": 200,
 	"proto": true,
 	"sub": false,
-
 	"browser": false,
 	"browserify": false,
 	"devel": false,

@@ -1,12 +1,13 @@
-var protoo = require('../'),
-	expect = require('expect.js'),
-	pkg = require('../package.json');
+var expect = require('expect.js');
 
+var protoo = require('../');
 
-describe('protoo properties', function () {
+const PKG = require('../package.json');
 
-	it('must match version property', function () {
-		expect(protoo.version).to.be(pkg.version);
+describe('protoo properties', function()
+{
+	it('must match version property', function()
+	{
+		expect(protoo.version).to.be(PKG.version);
 	});
-
 });
