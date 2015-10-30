@@ -143,6 +143,37 @@ describe('Application API', function()
 		};
 	});
 
+	it('get method', function(done)
+	{
+		var ws = app.connect('test_app');
+
+		app.set('setting1', 'FOO');
+		expect(app.get('setting1')).to.be('FOO');
+
+		app.on('routingError', function(error)
+		{
+			throw error;
+		});
+
+		app.get('/photo/:id', function(req)
+		{
+			expect(req.params.id).to.be('test.png');
+			expect(req.path).to.be('/photo/test.png');
+
+			done();
+		});
+
+		ws.onopen = function()
+		{
+			ws.sendRequest('get', '/photo/test.png');
+		};
+
+		ws.onerror = function()
+		{
+			expect().fail('ws should not fail');
+		};
+	});
+
 	it('params (1)', function(done)
 	{
 		var ws = app.connect('test_app');
@@ -363,7 +394,7 @@ describe('Application API', function()
 		};
 	});
 
-	it('get peers', function(done)
+	it('get peers by username', function(done)
 	{
 		var ec1 = eventcollector(3);
 		var ec2 = eventcollector(3);
@@ -418,6 +449,7 @@ describe('Application API', function()
 			});
 			expect(numPeers).to.be(2);
 			expect(app.peer('ws1', '___1a___')).to.be.ok();
+			expect(app.peer('ws1', '___1b___')).to.be.ok();
 
 			numPeers = app.peers('ws2', function(peer)
 			{
@@ -439,6 +471,80 @@ describe('Application API', function()
 			});
 			expect(numPeers).to.be(1);
 			expect(app.peer('ws2', '___2a___')).to.be.ok();
+		});
+
+		ec2.on('alldone', function()
+		{
+			done();
+		});
+
+		app.connect('ws1', '___1a___');
+		app.connect('ws1', '___1b___');
+		app.connect('ws2', '___2a___');
+	});
+
+	it('get all the peers', function(done)
+	{
+		var ec1 = eventcollector(3);
+		var ec2 = eventcollector(3);
+		var numPeers;
+		var ws1a = false;
+		var ws1b = false;
+		var ws2a = false;
+
+		app.on('online', function()
+		{
+			ec1.done();
+		});
+
+		ec1.on('alldone', function()
+		{
+			numPeers = app.peers(function(peer)
+			{
+				switch (peer.username)
+				{
+					case 'ws1':
+						switch (peer.uuid)
+						{
+							case '___1a___':
+								if (ws1a)
+								{
+									expect().fail('ws1a already found');
+								}
+								ws1a = true;
+								ec2.done();
+								break;
+							case '___1b___':
+								if (ws1b)
+								{
+									expect().fail('ws1b already found');
+								}
+								ws1b = true;
+								ec2.done();
+								break;
+							default:
+								expect().fail('unkown peer "ws1" with uuid "' + peer.uuid + '"');
+						}
+						break;
+
+					case 'ws2':
+						switch (peer.uuid)
+						{
+							case '___2a___':
+								if (ws2a)
+								{
+									expect().fail('ws2a already found');
+								}
+								ws2a = true;
+								ec2.done();
+								break;
+							default:
+								expect().fail('unkown peer "ws2" with uuid "' + peer.uuid + '"');
+						}
+						break;
+				}
+			});
+			expect(numPeers).to.be(3);
 		});
 
 		ec2.on('alldone', function()
