@@ -1,137 +1,134 @@
-var expect = require('expect.js');
-var eventcollector = require('eventcollector');
+'use strict';
 
-var createApp = require('./include/createApp');
+const expect = require('expect.js');
+const eventcollector = require('eventcollector');
 
-describe('Peer connections', function()
+const createApp = require('./include/createApp');
+
+describe('Peer connections', () =>
 {
-	var app;
+	let app;
 
-	beforeEach(function(done)
+	beforeEach((done) =>
 	{
 		app = createApp('ws://127.0.0.1:54321', null, done);
-		app.on('routingError', function(error)
+
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 	});
 
-	afterEach(function()
+	afterEach(() =>
 	{
 		app.close(true);
 	});
 
-	it('must emit "online" and "offline"', function(done)
+	it('must emit "online" and "offline"', (done) =>
 	{
-		var ec = eventcollector(3);
-		var ws = app.connect('carol');
+		let ec = eventcollector(3);
+		let ws = app.connect('carol');
 
-		ec.on('alldone', function()
+		ec.on('alldone', () =>
 		{
 			done();
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.close();
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 
-		app.on('online', function(peer)
+		app.on('online', (peer) =>
 		{
 			expect(peer.username).to.be('carol');
 			ec.done();
 
-			peer.on('offline', function()
+			peer.on('offline', () =>
 			{
 				ec.done();
 			});
 		});
 
-		app.on('offline', function(peer)
+		app.on('offline', (peer) =>
 		{
 			expect(peer.username).to.be('carol');
 			ec.done();
 		});
 	});
 
-	it('must not emit "online"/"offline" if same peer reconnects while connected', function(done)
+	it('must not emit "online"/"offline" if same peer reconnects while connected', (done) =>
 	{
-		var ec = eventcollector(4);
-		var ws1 = app.connect('alice', '1234');
-		var ws2;
-		var numOnline = 0;
-		var numOffline = 0;
-		var numPeerDisconnect = 0;
-		var peer;
+		let ec = eventcollector(4);
+		let ws1 = app.connect('alice', '1234');
+		let ws2;
+		let numOnline = 0;
+		let numOffline = 0;
+		let numPeerDisconnect = 0;
+		let peer;
 
 		app.set('disconnect grace period', 50);
 
-		ec.on('alldone', function()
+		ec.on('alldone', () =>
 		{
 			done();
 		});
 
-		ws1.onerror = function()
+		ws1.onerror = () =>
 		{
 			expect().fail('ws1 should not fail');
 		};
 
-		ws1.onopen = function()
+		ws1.onopen = () =>
 		{
 			ws2 = app.connect('alice', '1234', 'protoo');
 
-			ws2.onerror = function()
+			ws2.onerror = () =>
 			{
 				expect().fail('ws2 should not fail');
 			};
 
-			ws2.onopen = function()
+			ws2.onopen = () =>
 			{
 				ws2.close();
 			};
 		};
 
-		ws1.onclose = function()
+		ws1.onclose = () =>
 		{
 			ec.done();
 		};
 
-		app.on('online', function(_peer)
+		app.on('online', (_peer) =>
 		{
 			++numOnline;
 
 			if (numOnline === 1)
-			{
 				ec.done();
-			}
 			else if (numOnline === 2)
-			{
 				expect().fail('app should not emit 2 "online" events');
-			}
 
 			if (!peer)
 			{
 				peer = _peer;
 
-				peer.on('disconnect', function()
+				peer.on('disconnect', () =>
 				{
 					++numPeerDisconnect;
 
 					if (numPeerDisconnect === 2)
-					{
 						expect().fail('peer should not emit "disconnect" twice');
-					}
 				});
-				peer.on('reconnect', function()
+				peer.on('reconnect', () =>
 				{
 					expect().fail('peer should not emit "reconnect"');
 				});
-				peer.on('offline', function()
+				peer.on('offline', () =>
 				{
 					ec.done();
 				});
@@ -142,62 +139,58 @@ describe('Peer connections', function()
 			}
 		});
 
-		app.on('offline', function()
+		app.on('offline', () =>
 		{
 			++numOffline;
 
 			if (numOffline === 1)
-			{
 				ec.done();
-			}
 			else if (numOffline === 2)
-			{
 				expect().fail('app should not emit 2 "offline" events');
-			}
 		});
 	});
 
-	it('must not emit "online"/"offline" if same peer reconnects before grace period', function(done)
+	it('must not emit "online"/"offline" if same peer reconnects before grace period', (done) =>
 	{
-		var ec = eventcollector(6);
-		var ws1 = app.connect('bob', '1234');
-		var ws2;
-		var numOnline = 0;
-		var numOffline = 0;
-		var numPeerDisconnect = 0;
-		var peer;
+		let ec = eventcollector(6);
+		let ws1 = app.connect('bob', '1234');
+		let ws2;
+		let numOnline = 0;
+		let numOffline = 0;
+		let numPeerDisconnect = 0;
+		let peer;
 
 		app.set('disconnect grace period', 100);
 
-		ec.on('alldone', function()
+		ec.on('alldone', () =>
 		{
 			done();
 		});
 
-		ws1.onerror = function()
+		ws1.onerror = () =>
 		{
 			expect().fail('ws1 should not fail');
 		};
 
-		ws1.onopen = function()
+		ws1.onopen = () =>
 		{
 			ws1.close();
 		};
 
-		ws1.onclose = function()
+		ws1.onclose = () =>
 		{
 			ec.done();
 
-			setTimeout(function()
+			setTimeout(() =>
 			{
 				ws2 = app.connect('bob', '1234', 'protoo');
 
-				ws2.onerror = function()
+				ws2.onerror = () =>
 				{
 					expect().fail('ws2 should not fail');
 				};
 
-				ws2.onopen = function()
+				ws2.onopen = () =>
 				{
 					ws2.close();
 					ec.done();
@@ -205,37 +198,31 @@ describe('Peer connections', function()
 			}, 50);
 		};
 
-		app.on('online', function(_peer)
+		app.on('online', (_peer) =>
 		{
 			++numOnline;
 
 			if (numOnline === 1)
-			{
 				ec.done();
-			}
 			else if (numOnline === 2)
-			{
 				expect().fail('app should not emit 2 "online" events');
-			}
 
 			if (!peer)
 			{
 				peer = _peer;
 
-				peer.on('disconnect', function()
+				peer.on('disconnect', () =>
 				{
 					++numPeerDisconnect;
 
 					if (numPeerDisconnect === 2)
-					{
 						ec.done();
-					}
 				});
-				peer.on('reconnect', function()
+				peer.on('reconnect', () =>
 				{
 					ec.done();
 				});
-				peer.on('offline', function()
+				peer.on('offline', () =>
 				{
 					ec.done();
 				});
@@ -246,63 +233,59 @@ describe('Peer connections', function()
 			}
 		});
 
-		app.on('offline', function()
+		app.on('offline', () =>
 		{
 			++numOffline;
 
 			if (numOffline === 1)
-			{
 				ec.done();
-			}
 			else if (numOffline === 2)
-			{
 				expect().fail('app should not emit 2 "offline" events');
-			}
 		});
 	});
 
-	it('must emit "online"/"offline" if same peer reconnects after grace period', function(done)
+	it('must emit "online"/"offline" if same peer reconnects after grace period', (done) =>
 	{
-		var ec = eventcollector(4);
-		var ws1 = app.connect('alice', '1234');
-		var ws2;
-		var numOnline = 0;
-		var numOffline = 0;
-		var numPeerDisconnect = 0;
-		var numPeerOffline = 0;
-		var peer;
+		let ec = eventcollector(4);
+		let ws1 = app.connect('alice', '1234');
+		let ws2;
+		let numOnline = 0;
+		let numOffline = 0;
+		let numPeerDisconnect = 0;
+		let numPeerOffline = 0;
+		let peer;
 
 		app.set('disconnect grace period', 50);
 
-		ec.on('alldone', function()
+		ec.on('alldone', () =>
 		{
 			done();
 		});
 
-		ws1.onerror = function()
+		ws1.onerror = () =>
 		{
 			expect().fail('ws1 should not fail');
 		};
 
-		ws1.onopen = function()
+		ws1.onopen = () =>
 		{
 			ws1.close();
 		};
 
-		ws1.onclose = function()
+		ws1.onclose = () =>
 		{
 			ec.done();
 
-			setTimeout(function()
+			setTimeout(() =>
 			{
 				ws2 = app.connect('alice', '1234', 'protoo');
 
-				ws2.onerror = function()
+				ws2.onerror = () =>
 				{
 					expect().fail('ws2 should not fail');
 				};
 
-				ws2.onopen = function()
+				ws2.onopen = () =>
 				{
 					ws2.close();
 					ec.done();
@@ -310,40 +293,34 @@ describe('Peer connections', function()
 			}, 100);
 		};
 
-		app.on('online', function(_peer)
+		app.on('online', (_peer) =>
 		{
 			++numOnline;
 
 			if (numOnline === 2)
-			{
 				ec.done();
-			}
 
 			if (!peer)
 			{
 				peer = _peer;
 
-				peer.on('disconnect', function()
+				peer.on('disconnect', () =>
 				{
 					++numPeerDisconnect;
 
 					if (numPeerDisconnect === 2)
-					{
 						expect().fail('peer should not emit "disconnect" twice');
-					}
 				});
-				peer.on('reconnect', function()
+				peer.on('reconnect', () =>
 				{
 					expect().fail('peer should not emit "reconnect"');
 				});
-				peer.on('offline', function()
+				peer.on('offline', () =>
 				{
 					++numPeerOffline;
 
 					if (numPeerOffline === 2)
-					{
 						expect().fail('peer should not emit "offline" twice');
-					}
 				});
 			}
 			else if (peer === _peer)
@@ -352,31 +329,29 @@ describe('Peer connections', function()
 			}
 		});
 
-		app.on('offline', function()
+		app.on('offline', () =>
 		{
 			++numOffline;
 
 			if (numOffline === 2)
-			{
 				ec.done();
-			}
 		});
 	});
 
-	it('message between peers', function(done)
+	it('message between peers', (done) =>
 	{
-		var ws1;
-		var ws2 = app.connect('bob', 'bbbb');
-		var count = 0;
+		let ws1;
+		let ws2 = app.connect('bob', 'bbbb');
+		let count = 0;
 
-		app.message('/users/:username/:uuid', function(req)
+		app.message('/users/:username/:uuid', (req) =>
 		{
-			var peerB = req.app.peer(req.params.username, req.params.uuid);
+			let peerB = req.app.peer(req.params.username, req.params.uuid);
 
 			expect(++count).to.be(3);
 			expect(peerB).to.be.ok();
 
-			req.on('incomingResponse', function(res, local)
+			req.on('incomingResponse', (res, local) =>
 			{
 				expect(++count).to.be(5);
 				expect(res.status).to.be(200);
@@ -390,31 +365,31 @@ describe('Peer connections', function()
 			peerB.send(req);
 		});
 
-		ws2.onerror = function()
+		ws2.onerror = () =>
 		{
 			expect().fail('ws2 should not fail');
 		};
 
-		ws2.onopen = function()
+		ws2.onopen = () =>
 		{
 			expect(++count).to.be(1);
 			ws1 = app.connect('alice', 'aaaa');
 
-			ws1.onerror = function()
+			ws1.onerror = () =>
 			{
 				expect().fail('ws1 should not fail');
 			};
 
-			ws1.onopen = function()
+			ws1.onopen = () =>
 			{
 				expect(++count).to.be(2);
 				ws1.sendRequest('message', '/users/bob/bbbb');
 			};
 		};
 
-		ws2.onmessage = function(event)
+		ws2.onmessage = (event) =>
 		{
-			var req = JSON.parse(event.data);
+			let req = JSON.parse(event.data);
 
 			expect(++count).to.be(4);
 

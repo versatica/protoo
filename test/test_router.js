@@ -1,22 +1,24 @@
-var expect = require('expect.js');
+'use strict';
 
-var createApp = require('./include/createApp');
+const expect = require('expect.js');
 
-describe('Router API', function()
+const createApp = require('./include/createApp');
+
+describe('Router API', () =>
 {
 	var app;
 
-	beforeEach(function(done)
+	beforeEach((done) =>
 	{
 		app = createApp('ws://127.0.0.1:54321', null, done);
 	});
 
-	afterEach(function()
+	afterEach(() =>
 	{
 		app.close(true);
 	});
 
-	it('routing methods', function(done)
+	it('routing methods', (done) =>
 	{
 		var ws = app.connect('test_router');
 		var count = 0;
@@ -25,12 +27,12 @@ describe('Router API', function()
 		var router3;
 		var router4;
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		app.use(function(req, next)
+		app.use((req, next) =>
 		{
 			expect(++count).to.be(1);
 			expect(req.path).to.be('/users/alice');
@@ -41,21 +43,21 @@ describe('Router API', function()
 		router1 = app.Router();
 		app.use(router1);
 
-		router1.param('folder', function(req, next, folder)
+		router1.param('folder', (req, next, folder) =>
 		{
 			expect(folder).to.be('users');
 
 			next();
 		});
 
-		router1.param('user', function(req, next, user)
+		router1.param('user', (req, next, user) =>
 		{
 			expect(user).to.be('alice');
 
 			next();
 		});
 
-		router1.all('*', function(req, next)
+		router1.all('*', (req, next) =>
 		{
 			expect(++count).to.be(2);
 			expect(req.path).to.be('/users/alice');
@@ -63,7 +65,7 @@ describe('Router API', function()
 			next();
 		});
 
-		router1.all('/:folder/:user', function(req, next)
+		router1.all('/:folder/:user', (req, next) =>
 		{
 			expect(++count).to.be(3);
 			expect(req.path).to.be('/users/alice');
@@ -73,7 +75,7 @@ describe('Router API', function()
 			next();
 		});
 
-		router1.session('*', function(req, next)
+		router1.session('*', (req, next) =>
 		{
 			expect(++count).to.be(4);
 			expect(req.path).to.be('/users/alice');
@@ -81,7 +83,7 @@ describe('Router API', function()
 			next();
 		});
 
-		router1.message('*', function()
+		router1.message('*', () =>
 		{
 			expect().fail('should not match router1_message1');
 		});
@@ -89,7 +91,7 @@ describe('Router API', function()
 		router2 = app.Router({ strict: true });
 		router1.use('/users', router2);
 
-		router2.session('/alice', function(req, next)
+		router2.session('/alice', (req, next) =>
 		{
 			expect(++count).to.be(5);
 			expect(req.path).to.be('/alice');
@@ -98,20 +100,20 @@ describe('Router API', function()
 			next();
 		});
 
-		router2.all('/alice/', function()
+		router2.all('/alice/', () =>
 		{
 			expect().fail('should not match router2_all1 due to "strict routing"');
 		});
 
 		router2.route('/Alice')
-			.all(function(req, next)
+			.all((req, next) =>
 			{
 				expect(++count).to.be(6);
 				expect(req.path).to.be('/alice');
 
 				next('route');
 			})
-			.session(function()
+			.session(() =>
 			{
 				expect().fail('should not match router2_route_invite1 after next("route")');
 			});
@@ -119,7 +121,7 @@ describe('Router API', function()
 		router3 = app.Router();
 		app.use('/USERS', router3);
 
-		router3.all('*', function(req, next)
+		router3.all('*', (req, next) =>
 		{
 			expect(++count).to.be(7);
 			expect(req.path).to.be('/alice');
@@ -130,7 +132,7 @@ describe('Router API', function()
 		router4 = app.Router({ caseSensitive: true });
 		router3.use('/', router4);
 
-		router4.session('/alice*', function(req, next)
+		router4.session('/alice*', (req, next) =>
 		{
 			expect(++count).to.be(8);
 			expect(req.path).to.be('/alice');
@@ -138,18 +140,18 @@ describe('Router API', function()
 			next();
 		});
 
-		router4.session('/ALICE*', function()
+		router4.session('/ALICE*', () =>
 		{
 			expect().fail('should not match router4_invite2 (case sensitive)');
 		});
 
 		router4.route('/Alice')
-			.all(function()
+			.all(() =>
 			{
 				expect().fail('should not match router4_route_all1 (case sensitive)');
 			});
 
-		app.use('/', function(req)
+		app.use('/', (req) =>
 		{
 			expect(++count).to.be(9);
 			expect(req.path).to.be('/users/alice');
@@ -157,18 +159,18 @@ describe('Router API', function()
 			done();
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('session', '/users/alice');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('error handlers', function(done)
+	it('error handlers', (done) =>
 	{
 		var ws = app.connect('test_app');
 		var count = 0;
@@ -177,23 +179,23 @@ describe('Router API', function()
 		router1 = app.Router();
 		app.use('/users', router1);
 
-		router1.use('/', function(req, next)  // jshint ignore:line
+		router1.use('/', (req, next) => // jshint ignore:line
 		{
 			expect(++count).to.be(1);
 
 			throw new Error('BUMP');
 		});
 
-		router1.use('/alice', function(error, req, next)  // jshint ignore:line
+		router1.use('/alice', (error, req, next) => // jshint ignore:line
 		{
 			expect(++count).to.be(2);
 			expect(error.message).to.be('BUMP');
 
-			// Ignore the error and pass the control to the next request handler.
+			// Ignore the error and pass the control to the next request handler
 			next();
 		});
 
-		router1.use('/*', function(req, next)
+		router1.use('/*', (req, next) =>
 		{
 			expect(++count).to.be(3);
 			expect(req.method).to.be('session');
@@ -201,25 +203,25 @@ describe('Router API', function()
 			next();
 		});
 
-		app.use(function(req, next)  // jshint ignore:line
+		app.use((req, next) => // jshint ignore:line
 		{
 			expect(++count).to.be(4);
 
 			done();
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('session', '/users/alice');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('merge params', function(done)
+	it('merge params', (done) =>
 	{
 		var ws = app.connect('test_router');
 		var count = 0;
@@ -227,12 +229,12 @@ describe('Router API', function()
 		var router2;
 		var router3;
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		app.session('/users/:username/:uuid', function(req, next)
+		app.session('/users/:username/:uuid', (req, next) =>
 		{
 			expect(++count).to.be(1);
 			expect(req.params.username).to.be('alice');
@@ -244,7 +246,7 @@ describe('Router API', function()
 		router1 = app.Router();
 		app.use('/users/:username/:uuid', router1);
 
-		router1.session('*', function(req, next)
+		router1.session('*', (req, next) =>
 		{
 			expect(++count).to.be(2);
 			expect(req.params.username).to.be(undefined);
@@ -256,7 +258,7 @@ describe('Router API', function()
 		router2 = app.Router({ mergeParams: true });
 		app.use('/users/:username/:uuid', router2);
 
-		router2.session('*', function(req, next)
+		router2.session('*', (req, next) =>
 		{
 			expect(++count).to.be(3);
 			expect(req.params.username).to.be('alice');
@@ -268,7 +270,7 @@ describe('Router API', function()
 		router3 = app.Router({ mergeParams: true });
 		app.use('/users/:uuid/:username', router3);
 
-		router3.use(function(req, next)
+		router3.use((req, next) =>
 		{
 			expect(++count).to.be(4);
 			expect(req.params.uuid).to.be('alice');
@@ -277,19 +279,19 @@ describe('Router API', function()
 			next();
 		});
 
-		app.use('/', function()
+		app.use('/', () =>
 		{
 			expect(++count).to.be(5);
 
 			done();
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('session', '/users/alice/1234');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};

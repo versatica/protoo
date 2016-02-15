@@ -1,12 +1,14 @@
-var gulp = require('gulp');
-var jshint = require('gulp-jshint');
-var jscs = require('gulp-jscs');
-var stylish = require('gulp-jscs-stylish');
-var mocha = require('gulp-mocha');
+'use strict';
 
-gulp.task('lint', function()
+const gulp = require('gulp');
+const jshint = require('gulp-jshint');
+const jscs = require('gulp-jscs');
+const stylish = require('gulp-jscs-stylish');
+const gmocha = require('gulp-mocha');
+
+gulp.task('lint', () =>
 {
-	var src = ['gulpfile.js', 'lib/**/*.js', 'test/**/*.js'];
+	let src = [ 'gulpfile.js', 'lib/**/*.js', 'test/**/*.js' ];
 
 	return gulp.src(src)
 		.pipe(jshint('.jshintrc'))
@@ -16,20 +18,15 @@ gulp.task('lint', function()
 		.pipe(jshint.reporter('fail'));
 });
 
-gulp.task('test', function()
+gulp.task('test', () =>
 {
 	return gulp.src('test/test_*.js', { read: false })
-		.pipe(mocha(
+		.pipe(gmocha(
 			{
-				reporter: 'spec',
-				timeout: 2000,
-				bail: true
+				reporter : 'spec',
+				timeout  : 2000,
+				bail     : true
 			}));
-});
-
-gulp.task('watch', function()
-{
-	gulp.watch(['lib/**/*.js'], ['lint']);
 });
 
 gulp.task('default', gulp.series('lint', 'test'));

@@ -1,17 +1,15 @@
 {
   "name": "protoo",
-  "version": "0.2.0",
+  "version": "0.3.0-pre",
   "description": "Fast and extensible Node.js signaling framework for Real-Time Communication applications",
   "main": "lib/protoo.js",
-  "scripts": {
-    "test": "./node_modules/.bin/gulp test"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ibc/protoo.git"
   },
   "keywords": [
     "protoo",
+    "realtime",
     "webrtc"
   ],
   "author": "Iñaki Baz Castillo <ibc@aliax.net>",
@@ -21,13 +19,14 @@
   },
   "homepage": "http://protoojs.org",
   "engines": {
-    "node": ">=0.10.32"
+    "node": ">=4.0.0"
   },
   "dependencies": {
     "array-flatten": "^1.1.1",
+    "clone": "^1.0.2",
     "debug": "^2.2.0",
-    "path-to-regexp": "0.1.3",
-    "random-number": "^0.0.6",
+    "path-to-regexp": "1.2.1",
+    "random-number": "^0.0.7",
     "random-string": "^0.1.2",
     "utils-merge": "^1.0.0",
     "websocket": "^1.0.22"
@@ -37,9 +36,13 @@
     "expect.js": "^0.3.1",
     "gulp": "git://github.com/gulpjs/gulp.git#4.0",
     "gulp-jscs": "^3.0.2",
-    "gulp-jscs-stylish": "^1.2.1",
-    "gulp-jshint": "^1.12.0",
+    "gulp-jscs-stylish": "^1.3.0",
+    "gulp-jshint": "^2.0.0",
     "gulp-mocha": "^2.1.3",
-    "jshint-stylish": "^2.0.1"
+    "jshint": "^2.9.1",
+    "jshint-stylish": "^2.1.0"
+  },
+  "scripts": {
+    "test": "gulp test"
   }
 }

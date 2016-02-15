@@ -1,148 +1,151 @@
-var expect = require('expect.js');
-var url = require('url');
-var eventcollector = require('eventcollector');
+'use strict';
 
-var createApp = require('./include/createApp');
+const expect = require('expect.js');
+const url = require('url');
+const eventcollector = require('eventcollector');
+
+const createApp = require('./include/createApp');
 
 runTests({ wss: false });
 runTests({ wss: true });
 
 function runTests(options)
 {
-	var app;
-	var useWss = options.wss;
+	let app;
+	let useWss = options.wss;
 
-	describe('app.websocket() API (' + (useWss ? 'WSS' : 'WS') + ' transport)', function()
+	describe('app.websocket() API (' + (useWss ? 'WSS' : 'WS') + ' transport)', () =>
 	{
-		beforeEach(function(done)
+		beforeEach((done) =>
 		{
-			var connectUrl = (useWss ? 'wss://' : 'ws://') + '127.0.0.1:54321';
+			let connectUrl = (useWss ? 'wss://' : 'ws://') + '127.0.0.1:54321';
 
 			app = createApp(connectUrl, requestListener, done);
-			app.on('routingError', function(error)
+
+			app.on('routingerror', (error) =>
 			{
 				throw error;
 			});
 		});
 
-		afterEach(function()
+		afterEach(() =>
 		{
 			app.close(true);
 		});
 
-		it('must fail if WebSocket sub-protocol is not "protoo"', function(done)
+		it('must fail if WebSocket sub-protocol is not "protoo"', (done) =>
 		{
-			var ec = eventcollector(2);
-			var ws1 = app.connect('fail', null, null);
-			var ws2 = app.connect('fail', null, 'foo');
+			let ec = eventcollector(2);
+			let ws1 = app.connect('fail', null, null);
+			let ws2 = app.connect('fail', null, 'foo');
 
-			ec.on('alldone', function()
+			ec.on('alldone', () =>
 			{
 				done();
 			});
 
-			ws1.onopen = function()
+			ws1.onopen = () =>
 			{
 				expect().fail('ws1 should not connect');
 			};
 
-			ws1.onerror = function()
+			ws1.onerror = () =>
 			{
 				ec.done();
 			};
 
-			ws2.onopen = function()
+			ws2.onopen = () =>
 			{
 				expect().fail('ws2 should not connect');
 			};
 
-			ws2.onerror = function()
+			ws2.onerror = () =>
 			{
 				ec.done();
 			};
 		});
 
-		it('sync accept()', function(done)
+		it('sync accept()', (done) =>
 		{
-			var ec = eventcollector(2);
-			var ws = app.connect('sync_accept', null, 'protoo');
+			let ec = eventcollector(2);
+			let ws = app.connect('sync_accept', null, 'protoo');
 
-			ec.on('alldone', function()
+			ec.on('alldone', () =>
 			{
 				done();
 			});
 
-			ws.onopen = function()
+			ws.onopen = () =>
 			{
 				ws.close();
 				ec.done();
 			};
 
-			ws.onerror = function()
+			ws.onerror = () =>
 			{
 				expect().fail('ws should not fail');
 			};
 
-			app.on('online', function(peer)
+			app.on('online', (peer) =>
 			{
 				expect(peer.username).to.be('sync_accept');
 				ec.done();
 			});
 		});
 
-		it('sync reject()', function(done)
+		it('sync reject()', (done) =>
 		{
-			var ws = app.connect('sync_reject', null, 'protoo');
+			let ws = app.connect('sync_reject', null, 'protoo');
 
-			ws.onopen = function()
+			ws.onopen = () =>
 			{
 				expect().fail('ws should not connect');
 			};
 
-			ws.onerror = function()
+			ws.onerror = () =>
 			{
 				done();
 			};
 		});
 
-		it('async accept()', function(done)
+		it('async accept()', (done) =>
 		{
-			var ec = eventcollector(2);
-			var ws = app.connect('async_accept', null, 'protoo');
+			let ec = eventcollector(2);
+			let ws = app.connect('async_accept', null, 'protoo');
 
-			ec.on('alldone', function()
+			ec.on('alldone', () =>
 			{
 				done();
 			});
 
-			ws.onopen = function()
+			ws.onopen = () =>
 			{
 				ws.close();
 				ec.done();
 			};
 
-			ws.onerror = function()
+			ws.onerror = () =>
 			{
 				expect().fail('ws should not fail');
 			};
 
-			app.on('online', function(peer)
+			app.on('online', (peer) =>
 			{
 				expect(peer.username).to.be('async_accept');
 				ec.done();
 			});
 		});
 
-		it('async reject()', function(done)
+		it('async reject()', (done) =>
 		{
-			var ws = app.connect('async_reject', null, 'protoo');
+			let ws = app.connect('async_reject', null, 'protoo');
 
-			ws.onopen = function()
+			ws.onopen = () =>
 			{
 				expect().fail('ws should not connect');
 			};
 
-			ws.onerror = function()
+			ws.onerror = () =>
 			{
 				done();
 			};
@@ -153,32 +156,34 @@ function runTests(options)
 
 function requestListener(info, accept, reject)
 {
-	var u = url.parse(info.req.url, true);
-	var username = u.query.username;
-	var uuid = u.query.uuid;
+	let u = url.parse(info.req.url, true);
+	let username = u.query.username;
+	let uuid = u.query.uuid;
 
 	switch (username)
 	{
 		case 'sync_accept':
+		{
 			accept(username, uuid, null);
 			break;
+		}
 
 		case 'sync_reject':
+		{
 			reject(403, username);
 			break;
+		}
 
 		case 'async_accept':
-			setImmediate(function()
-			{
-				accept(username, uuid, null);
-			});
+		{
+			setImmediate(() => accept(username, uuid, null));
 			break;
+		}
 
 		case 'async_reject':
-			setImmediate(function()
-			{
-				reject(403, username);
-			});
+		{
+			setImmediate(() => reject(403, username));
 			break;
+		}
 	}
 }

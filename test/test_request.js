@@ -1,37 +1,39 @@
-var expect = require('expect.js');
+'use strict';
 
-var createApp = require('./include/createApp');
+const expect = require('expect.js');
 
-describe('Request API', function()
+const createApp = require('./include/createApp');
+
+describe('Request API', () =>
 {
-	var app;
+	let app;
 
-	beforeEach(function(done)
+	beforeEach((done) =>
 	{
 		app = createApp('ws://127.0.0.1:54321', null, done);
 	});
 
-	afterEach(function()
+	afterEach(() =>
 	{
 		app.close(true);
 	});
 
-	it('request properties', function(done)
+	it('request properties', (done) =>
 	{
-		var ws = app.connect('test_app');
-		var peer;
+		let ws = app.connect('test_app');
+		let peer;
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		app.on('online', function(_peer)
+		app.on('online', (_peer) =>
 		{
 			peer = _peer;
 		});
 
-		app.all('/users/:username/:uuid', function(req)
+		app.all('/users/:username/:uuid', (req) =>
 		{
 			expect(req.method).to.be('message');
 			expect(req.path).to.be('/users/alice/1234');
@@ -48,31 +50,31 @@ describe('Request API', function()
 			done();
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('message', '/users/alice/1234', { foo: 123 }, 7654321);
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('must emit "outgoingResponse"', function(done)
+	it('must emit "outgoingResponse"', (done) =>
 	{
-		var ws = app.connect('test_app');
-		var count = 0;
+		let ws = app.connect('test_app');
+		let count = 0;
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		app.use(function(req, next)
+		app.use((req, next) =>
 		{
 			expect(++count).to.be(1);
-			req.on('outgoingResponse', function(res)
+			req.on('outgoingResponse', (res) =>
 			{
 				expect(++count).to.be(4);
 				res.data.count++;
@@ -81,10 +83,10 @@ describe('Request API', function()
 			next();
 		});
 
-		app.use(function(req, next)
+		app.use((req, next) =>
 		{
 			expect(++count).to.be(2);
-			req.on('outgoingResponse', function(res)
+			req.on('outgoingResponse', (res) =>
 			{
 				expect(++count).to.be(5);
 				res.data.count++;
@@ -93,10 +95,10 @@ describe('Request API', function()
 			next();
 		});
 
-		app.use(function(req)
+		app.use((req) =>
 		{
 			expect(++count).to.be(3);
-			req.on('outgoingResponse', function(res)
+			req.on('outgoingResponse', (res) =>
 			{
 				expect(++count).to.be(6);
 				res.data.count++;
@@ -107,40 +109,35 @@ describe('Request API', function()
 			req.reply(200, 'ok', { count: 0 });
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('message', '/users/alice/1234');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('must not send two final responses', function(done)
+	it('must not send two final responses', (done) =>
 	{
-		var ws = app.connect('test_app');
-		var count = 0;
+		let ws = app.connect('test_app');
+		let count = 0;
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		app.use(function(req, next)
+		app.use((req, next) =>
 		{
-			req.on('outgoingResponse', function()
+			req.on('outgoingResponse', () =>
 			{
 				expect(++count).to.be.within(1, 2);
 
 				if (count === 2)
-				{
-					setImmediate(function()
-					{
-						done();
-					});
-				}
+					setImmediate(() => done());
 			});
 
 			req.reply(100, 'trying');
@@ -148,26 +145,26 @@ describe('Request API', function()
 			req.reply(200, 'ok');
 			expect(req.ended).to.be(true);
 
-			expect(function()
+			expect(() =>
 			{
 				req.reply(200, 'ok again');
 			}).to.throwError();
 
-			// This call to next() should be ignored after a final response.
+			// This call to next() should be ignored after a final response
 			next();
 		});
 
-		app.use(function()
+		app.use(() =>
 		{
 			expect().fail('shoud not arrive here after a final response');
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('message', '/users/alice/1234');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};

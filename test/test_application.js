@@ -1,24 +1,26 @@
-var expect = require('expect.js');
-var eventcollector = require('eventcollector');
+'use strict';
 
-var protoo = require('../');
-var createApp = require('./include/createApp');
+const expect = require('expect.js');
+const eventcollector = require('eventcollector');
 
-describe('Application API', function()
+const protoo = require('../');
+const createApp = require('./include/createApp');
+
+describe('Application API', () =>
 {
-	var app;
+	let app;
 
-	beforeEach(function(done)
+	beforeEach((done) =>
 	{
 		app = createApp('ws://127.0.0.1:54321', null, done);
 	});
 
-	afterEach(function()
+	afterEach(() =>
 	{
 		app.close(true);
 	});
 
-	it('settings', function()
+	it('settings', () =>
 	{
 		app.set('foo1', 'FOO1');
 		app.set('foo2', 'FOO2');
@@ -36,33 +38,33 @@ describe('Application API', function()
 		expect(app.enabled('foo3')).to.not.be.ok();
 	});
 
-	it('routing methods', function(done)
+	it('routing methods', (done) =>
 	{
-		var ws = app.connect('test_app');
-		var count = 0;
+		let ws = app.connect('test_app');
+		let count = 0;
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
 		app.enable('strict routing');
 
-		app.param('folder', function(req, next, folder)
+		app.param('folder', (req, next, folder) =>
 		{
 			expect(folder).to.be('users');
 
 			next();
 		});
 
-		app.param('user', function(req, next, user)
+		app.param('user', (req, next, user) =>
 		{
 			expect(user).to.be('alice');
 
 			next();
 		});
 
-		app.use(function(req, next)
+		app.use((req, next) =>
 		{
 			expect(++count).to.be(1);
 			expect(req.path).to.be('/users/alice');
@@ -70,12 +72,12 @@ describe('Application API', function()
 			next();
 		});
 
-		app.use('/NO', function()
+		app.use('/NO', () =>
 		{
 			expect().fail('should not match app_use2');
 		});
 
-		app.use('/', function(req, next)
+		app.use('/', (req, next) =>
 		{
 			expect(++count).to.be(2);
 			expect(req.path).to.be('/users/alice');
@@ -83,14 +85,14 @@ describe('Application API', function()
 			next();
 		});
 
-		app.use('/users/', function(req, next)
+		app.use('/users/', (req, next) =>
 		{
 			expect(++count).to.be(3);
 
 			next();
 		});
 
-		app.session('/:folder/:user', function(req, next)
+		app.session('/:folder/:user', (req, next) =>
 		{
 			expect(++count).to.be(4);
 			expect(req.params.folder).to.be('users');
@@ -100,12 +102,12 @@ describe('Application API', function()
 			next();
 		});
 
-		app.session('/:folder/:user/', function()
+		app.session('/:folder/:user/', () =>
 		{
 			expect().fail('should not match app_invite2 due to "strict routing"');
 		});
 
-		app.all('/USERS/:user', function(req, next)
+		app.all('/USERS/:user', (req, next) =>
 		{
 			expect(++count).to.be(5);
 			expect(req.params.user).to.be('alice');
@@ -115,7 +117,7 @@ describe('Application API', function()
 		});
 
 		app.route('/users/:user')
-			.session(function(req, next)
+			.session((req, next) =>
 			{
 				expect(++count).to.be(6);
 				expect(req.params.user).to.be('alice');
@@ -124,7 +126,7 @@ describe('Application API', function()
 				next();
 			});
 
-		app.use('/', function(req)
+		app.use('/', (req) =>
 		{
 			expect(++count).to.be(7);
 			expect(req.path).to.be('/users/alice');
@@ -132,30 +134,30 @@ describe('Application API', function()
 			done();
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('session', '/users/alice');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('get method', function(done)
+	it('get method', (done) =>
 	{
-		var ws = app.connect('test_app');
+		let ws = app.connect('test_app');
 
 		app.set('setting1', 'FOO');
 		expect(app.get('setting1')).to.be('FOO');
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		app.get('/photo/:id', function(req)
+		app.get('/photo/:id', (req) =>
 		{
 			expect(req.params.id).to.be('test.png');
 			expect(req.path).to.be('/photo/test.png');
@@ -163,29 +165,29 @@ describe('Application API', function()
 			done();
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('get', '/photo/test.png');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('params (1)', function(done)
+	it('params (1)', (done) =>
 	{
-		var ws = app.connect('test_app');
-		var count = 0;
+		let ws = app.connect('test_app');
+		let count = 0;
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		// Validation rule for number: should be one or more digits.
-		app.message('/number/:number([0-9]+)', function(req, next)
+		// Validation rule for number: should be one or more digits
+		app.message('/number/:number([0-9]+)', (req, next) =>
 		{
 			expect(++count).to.be(1);
 			expect(req.params.number).to.be('1234');
@@ -193,7 +195,7 @@ describe('Application API', function()
 			next();
 		});
 
-		app.use('/', function(req)
+		app.use('/', (req) =>
 		{
 			expect(++count).to.be(2);
 			// Params should not remain cross-router.
@@ -202,39 +204,36 @@ describe('Application API', function()
 			done();
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('message', '/number/1234');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('params (2)', function(done)
+	it('params (2)', (done) =>
 	{
-		var ws = app.connect('test_app');
-		var count = 0;
+		let ws = app.connect('test_app');
+		let count = 0;
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		app.param('range', function(req, next, range)
+		app.param('range', (req, next, range) =>
 		{
 			expect(++count).to.be(1);
 			expect(range).to.be('abcd..1234');
 
-			setImmediate(function()
-			{
-				next();
-			});
+			setImmediate(() => next());
 		});
 
-		app.param('range', function(req, next, range)
+		app.param('range', (req, next, range) =>
 		{
 			expect(++count).to.be(2);
 			expect(range).to.be('abcd..1234');
@@ -242,16 +241,16 @@ describe('Application API', function()
 			next();
 		});
 
-		app.message('/range/:range(\\w+\.\.\\w+)', function(req, next)
+		app.message('/range/:range(\\w+\.\.\\w+)', (req, next) =>
 		{
-			// All the app.param() should be executed before the route.
+			// All the app.param() should be executed before the route
 			expect(++count).to.be(4);
 			expect(req.params.range).to.be('abcd..1234');
 
 			next();
 		});
 
-		app.param('range', function(req, next, range)
+		app.param('range', (req, next, range) =>
 		{
 			expect(++count).to.be(3);
 			expect(range).to.be('abcd..1234');
@@ -259,59 +258,59 @@ describe('Application API', function()
 			next();
 		});
 
-		app.use('/', function()
+		app.use('/', () =>
 		{
 			expect(++count).to.be(5);
 
 			done();
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('message', '/range/abcd..1234');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('error handlers', function(done)
+	it('error handlers', (done) =>
 	{
-		var ws = app.connect('test_app');
-		var count = 0;
+		let ws = app.connect('test_app');
+		let count = 0;
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		app.use(function()
+		app.use(() =>
 		{
-			// Throw an error.
+			// Throw an error
 			throw new Error('BUMP');
 		});
 
-		app.use(function(error, req, next)
+		app.use((error, req, next) =>
 		{  // jshint ignore:line
 			expect(++count).to.be(1);
 			expect(error.message).to.be('BUMP');
 
-			// Pass the error to the next error handler.
+			// Pass the error to the next error handler
 			next(error);
 		});
 
-		app.use(function(error, req, next)
+		app.use((error, req, next) =>
 		{  // jshint ignore:line
 			expect(++count).to.be(2);
 			expect(error.message).to.be('BUMP');
 
-			// Ignore the error and pass the control to the next request handler.
+			// Ignore the error and pass the control to the next request handler
 			next();
 		});
 
-		app.use(function(req, next)  // jshint ignore:line
+		app.use((req, next) => // jshint ignore:line
 		{
 			expect(++count).to.be(3);
 			expect(req.method).to.be('session');
@@ -319,96 +318,96 @@ describe('Application API', function()
 			done();
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('session', '/users/alice');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('final handler with error (1)', function(done)
+	it('final handler with error (1)', (done) =>
 	{
-		var ws = app.connect('test_app');
+		let ws = app.connect('test_app');
 
-		app.once('routingError', function(error)
+		app.once('routingerror', (error) =>
 		{
 			expect(error.message).to.be('BUMP');
 
 			done();
 		});
 
-		app.all('/users/:user', function()
+		app.all('/users/:user', () =>
 		{
 			throw new Error('BUMP');
 		});
 
-		app.all('/users/:user', function()
+		app.all('/users/:user', () =>
 		{
 			expect().fail('should not match app_all2');
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('session', '/users/alice');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('final handler with error (2)', function(done)
+	it('final handler with error (2)', (done) =>
 	{
-		var ws = app.connect('test_app');
+		let ws = app.connect('test_app');
 
-		app.once('routingError', function(error)
+		app.once('routingerror', (error) =>
 		{
 			expect(error.message).to.be('BUMP');
 
 			done();
 		});
 
-		app.all('/users/:user', function(req, next)
+		app.all('/users/:user', (req, next) =>
 		{
 			next(new Error('BUMP'));
 		});
 
-		app.all('/users/:user', function()
+		app.all('/users/:user', () =>
 		{
 			expect().fail('should not match app_all2');
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('session', '/users/alice');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 	});
 
-	it('get peers by username', function(done)
+	it('get peers by username', (done) =>
 	{
-		var ec1 = eventcollector(3);
-		var ec2 = eventcollector(3);
-		var numPeers;
-		var ws1a = false;
-		var ws1b = false;
-		var ws2a = false;
+		let ec1 = eventcollector(3);
+		let ec2 = eventcollector(3);
+		let numPeers;
+		let ws1a = false;
+		let ws1b = false;
+		let ws2a = false;
 
-		app.on('online', function()
+		app.on('online', () =>
 		{
 			ec1.done();
 		});
 
-		ec1.on('alldone', function()
+		ec1.on('alldone', () =>
 		{
 			numPeers = app.peers('ws0');
 			expect(numPeers).to.be(0);
@@ -421,7 +420,7 @@ describe('Application API', function()
 			expect(numPeers).to.be(0);
 			expect(app.peer('ws1', 'NOT')).to.be(undefined);
 
-			numPeers = app.peers('ws1', null, function(peer)
+			numPeers = app.peers('ws1', null, (peer) =>
 			{
 				expect(peer.username).to.be('ws1');
 
@@ -451,7 +450,7 @@ describe('Application API', function()
 			expect(app.peer('ws1', '___1a___')).to.be.ok();
 			expect(app.peer('ws1', '___1b___')).to.be.ok();
 
-			numPeers = app.peers('ws2', function(peer)
+			numPeers = app.peers('ws2', (peer) =>
 			{
 				expect(peer.username).to.be('ws2');
 
@@ -473,7 +472,7 @@ describe('Application API', function()
 			expect(app.peer('ws2', '___2a___')).to.be.ok();
 		});
 
-		ec2.on('alldone', function()
+		ec2.on('alldone', () =>
 		{
 			done();
 		});
@@ -483,23 +482,23 @@ describe('Application API', function()
 		app.connect('ws2', '___2a___');
 	});
 
-	it('get all the peers', function(done)
+	it('get all the peers', (done) =>
 	{
-		var ec1 = eventcollector(3);
-		var ec2 = eventcollector(3);
-		var numPeers;
-		var ws1a = false;
-		var ws1b = false;
-		var ws2a = false;
+		let ec1 = eventcollector(3);
+		let ec2 = eventcollector(3);
+		let numPeers;
+		let ws1a = false;
+		let ws1b = false;
+		let ws2a = false;
 
-		app.on('online', function()
+		app.on('online', () =>
 		{
 			ec1.done();
 		});
 
-		ec1.on('alldone', function()
+		ec1.on('alldone', () =>
 		{
-			numPeers = app.peers(function(peer)
+			numPeers = app.peers((peer) =>
 			{
 				switch (peer.username)
 				{
@@ -547,7 +546,7 @@ describe('Application API', function()
 			expect(numPeers).to.be(3);
 		});
 
-		ec2.on('alldone', function()
+		ec2.on('alldone', () =>
 		{
 			done();
 		});
@@ -557,65 +556,65 @@ describe('Application API', function()
 		app.connect('ws2', '___2a___');
 	});
 
-	it('unknown method gets 404', function(done)
+	it('unknown method gets 404', (done) =>
 	{
-		var ws = app.connect('test_app');
+		let ws = app.connect('test_app');
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('chicken', '/users/alice');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};
 
-		ws.onmessage = function(event)
+		ws.onmessage = (event) =>
 		{
-			var res = JSON.parse(event.data);
+			let res = JSON.parse(event.data);
 
 			expect(res.status).to.be(404);
 			done();
 		};
 	});
 
-	it('add custom method', function(done)
+	it('add custom method', (done) =>
 	{
-		var ws = app.connect('test_app');
-		var count = 0;
-		var router;
+		let ws = app.connect('test_app');
+		let count = 0;
+		let router;
 
 		protoo.addMethod('chicken');
 
-		expect(function()
+		expect(() =>
 		{
 			protoo.addMethod('chicken');
 		}).to.throwError();
 
-		expect(function()
+		expect(() =>
 		{
 			protoo.addMethod('all');
 		}).to.throwError();
 
-		app.on('routingError', function(error)
+		app.on('routingerror', (error) =>
 		{
 			throw error;
 		});
 
-		app.chicken('/users/*', function(req, next)
+		app.chicken('/users/*', (req, next) =>
 		{
 			expect(++count).to.be(1);
 			next();
 		});
 
 		app.route('/users/*')
-			.chicken(function(req, next)
+			.chicken((req, next) =>
 			{
 				expect(++count).to.be(2);
 				next();
@@ -624,25 +623,25 @@ describe('Application API', function()
 		router = app.Router();
 		app.use(router);
 
-		router.chicken('/users/*', function(req, next)
+		router.chicken('/users/*', (req, next) =>
 		{
 			expect(++count).to.be(3);
 			next();
 		});
 
 		router.route('/users/*')
-			.chicken(function()
+			.chicken(() =>
 			{
 				expect(++count).to.be(4);
 				done();
 			});
 
-		ws.onopen = function()
+		ws.onopen = () =>
 		{
 			ws.sendRequest('chicken', '/users/alice');
 		};
 
-		ws.onerror = function()
+		ws.onerror = () =>
 		{
 			expect().fail('ws should not fail');
 		};

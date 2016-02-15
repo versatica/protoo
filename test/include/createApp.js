@@ -1,19 +1,21 @@
-var http = require('http');
-var https = require('https');
-var parseUrl = require('url').parse;
-var path = require('path');
-var fs = require('fs');
-var W3CWebSocket = require('websocket').w3cwebsocket;
+'use strict';
 
-var protoo = require('../../');
+const http = require('http');
+const https = require('https');
+const parseUrl = require('url').parse;
+const path = require('path');
+const fs = require('fs');
+const W3CWebSocket = require('websocket').w3cwebsocket;
+
+const protoo = require('../../');
 
 module.exports = function(url, requestListener, done)
 {
-	var useWss = /^wss:/.test(url);
-	var parsedUrl = parseUrl(url);
-	var httpServer;
-	var wsOptions;
-	var app = protoo();
+	let useWss = /^wss:/.test(url);
+	let parsedUrl = parseUrl(url);
+	let httpServer;
+	let wsOptions;
+	let app = protoo();
 
 	if (useWss)
 	{
@@ -28,25 +30,25 @@ module.exports = function(url, requestListener, done)
 		httpServer = http.createServer();
 	}
 
-	// Don't log the error stack.
+	// Don't log the error stack
 	app.set('env', 'test');
 
 	function defaultRequestListener(info, accept)
 	{
-		var u = parseUrl(info.req.url, true);
-		var username = u.query.username;
-		var uuid = u.query.uuid;
+		let u = parseUrl(info.req.url, true);
+		let username = u.query.username;
+		let uuid = u.query.uuid;
 
 		accept(username, uuid, null);
 	}
 
 	wsOptions =
 	{
-		keepalive: false
+		keepalive : false
 	};
 
 	app.websocket(httpServer, wsOptions, requestListener || defaultRequestListener);
-	httpServer.listen(parsedUrl.port, parsedUrl.hostname, function()
+	httpServer.listen(parsedUrl.port, parsedUrl.hostname, () =>
 	{
 		done();
 	});
@@ -54,33 +56,29 @@ module.exports = function(url, requestListener, done)
 	// Add a custom connect() method to the app for testing.
 	app.connect = function(username, uuid, protocol)
 	{
-		var protocols;
-		var options = {};
-		var connectUrl;
-		var client;
+		let protocols;
+		let options = {};
+		let connectUrl;
+		let client;
 
 		username = username || Math.round(100000 * Math.random()).toString();
 		uuid = uuid || Math.round(100000 * Math.random()).toString();
 
 		if (protocol === undefined)
-		{
 			protocol = 'protoo';
-		}
 
 		protocols = protocol ? [protocol] : [];
 
 		connectUrl = url + '/?username=' + username + '&uuid=' + uuid;
 
 		if (useWss)
-		{
 			options.rejectUnauthorized = false;
-		}
 
 		client = new W3CWebSocket(connectUrl, protocols, null, null, options);
 
 		client.sendRequest = function(method, path, data, id)
 		{
-			var req =
+			let req =
 			{
 				method : method,
 				id     : id || Math.round(100000 * Math.random()),
@@ -88,16 +86,14 @@ module.exports = function(url, requestListener, done)
 			};
 
 			if (data)
-			{
 				req.data = data;
-			}
 
 			client.send(JSON.stringify(req));
 		};
 
 		client.sendResponse = function(req, status, reason, data)
 		{
-			var res =
+			let res =
 			{
 				status : status,
 				reason : reason,
@@ -105,9 +101,7 @@ module.exports = function(url, requestListener, done)
 			};
 
 			if (data)
-			{
 				res.data = data;
-			}
 
 			client.send(JSON.stringify(res));
 		};
