@@ -19,7 +19,7 @@
   },
   "homepage": "http://protoojs.org",
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=5.0.0"
   },
   "dependencies": {
     "array-flatten": "^1.1.1",
