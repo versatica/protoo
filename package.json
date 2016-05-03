@@ -1,6 +1,6 @@
 {
   "name": "protoo",
-  "version": "0.3.0-pre",
+  "version": "0.3.0",
   "description": "Fast and extensible Node.js signaling framework for Real-Time Communication applications",
   "main": "lib/protoo.js",
   "repository": {
@@ -19,7 +19,7 @@
   },
   "homepage": "http://protoojs.org",
   "engines": {
-    "node": ">=5.0.0"
+    "node": ">=4.0.0"
   },
   "dependencies": {
     "array-flatten": "^1.1.1",
