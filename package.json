@@ -1,6 +1,6 @@
 {
   "name": "protoo",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Fast and extensible Node.js signaling framework for Real-Time Communication applications",
   "main": "lib/protoo.js",
   "repository": {
