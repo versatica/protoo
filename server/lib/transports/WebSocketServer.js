@@ -34,9 +34,9 @@ class WebSocketServer extends EventEmitter
 		});
 	}
 
-	close()
+	stop()
 	{
-		logger.debug('close()');
+		logger.debug('stop()');
 
 		// Don't close the given http.Server|https.Server but just unmount the
 		// WebSocket server.

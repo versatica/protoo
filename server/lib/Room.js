@@ -45,6 +45,12 @@ class Room extends EventEmitter
 	{
 		logger.debug('createPeer() [peerId:"%s", transport:%s]', peerId, transport);
 
+		if (!peerId || typeof peerId !== 'string')
+			throw new TypeError('peerId must be a string');
+
+		if (!transport)
+			throw new TypeError('no transport given');
+
 		if (this._peers.has(peerId))
 			throw new Error('there is already a peer with same peerId [peerId:"${peerId}"]');
 
@@ -60,13 +66,49 @@ class Room extends EventEmitter
 		return peer;
 	}
 
+	dispatch(method, data, excluded)
+	{
+		logger.debug('dispatch()');
+
+		let excludedSet = new Set();
+
+		if (excluded)
+		{
+			if (!Array.isArray(excluded))
+				excluded = [ excluded ];
+
+			for (let entry of excluded)
+			{
+				if (typeof entry === 'string')
+				{
+					let peer = this._peers.get(entry);
+
+					if (peer)
+						excludedSet.add(peer);
+				}
+				else
+				{
+					excludedSet.add(entry);
+				}
+			}
+		}
+
+		for (let peer of this._peers.values())
+		{
+			if (excludedSet.has(peer))
+				return;
+
+			peer.send(method, data);
+		}
+	}
+
 	_handlePeer(peer)
 	{
 		peer.on('close', () =>
 		{
 			// Remove from the map.
 			this._peers.delete(peer.id);
-		})
+		});
 	}
 }
 
