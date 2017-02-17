@@ -2,7 +2,7 @@
 
 const debug = require('debug');
 
-const APP_NAME = 'protoo';
+const APP_NAME = 'protoo-server';
 
 class Logger
 {
