@@ -37,6 +37,23 @@ class WebSocketTransport extends EventEmitter
 			(this._tostring = `${this._socket.encrypted ? 'WSS' : 'WS'}:[${this._socket.remoteAddress}]:${this._socket.remotePort}`);
 	}
 
+	send(message)
+	{
+		if (this._closed)
+			return Promise.reject(new Error('transport closed'));
+
+		try
+		{
+			this._connection.sendUTF(JSON.stringify(message));
+			return Promise.resolve();
+		}
+		catch(error)
+		{
+			logger.error('send() | error sending message: %s', error);
+			return Promise.reject(error);
+		}
+	}
+
 	close()
 	{
 		logger.debug('close() [conn:%s]', this);
@@ -55,23 +72,6 @@ class WebSocketTransport extends EventEmitter
 		catch(error)
 		{
 			logger.error('close() | error closing the connection: %s', error);
-		}
-	}
-
-	send(message)
-	{
-		if (this._closed)
-			return false;
-
-		try
-		{
-			this._connection.sendUTF(JSON.stringify(message));
-			return true;
-		}
-		catch(error)
-		{
-			logger.error('send() | error sending message: %s', error);
-			return false;
 		}
 	}
 

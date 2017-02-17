@@ -32,14 +32,64 @@ class Peer extends EventEmitter
 		this._handleTransport();
 	}
 
+	get id()
+	{
+		return this._id;
+	}
+
 	get closed()
 	{
 		return this._closed;
 	}
 
-	get id()
+	send(method, data)
 	{
-		return this._id;
+		let request = Message.requestFactory(method, data);
+
+		return this._transport.send(request)
+			.then(() =>
+			{
+				return new Promise((pResolve, pReject) =>
+				{
+					let handler =
+					{
+						resolve : (data) =>
+						{
+							if (!this._requestHandlers.delete(request.id))
+								return;
+
+							clearTimeout(handler.timer);
+							pResolve(data);
+						},
+
+						reject : (error) =>
+						{
+							if (!this._requestHandlers.delete(request.id))
+								return;
+
+							clearTimeout(handler.timer);
+							pReject(error);
+						},
+
+						timer : setTimeout(() =>
+						{
+							if (!this._requestHandlers.delete(request.id))
+								return;
+
+							pReject(new Error('request timeout'));
+						}, REQUEST_TIMEOUT),
+
+						close : () =>
+						{
+							clearTimeout(handler.timer);
+							pReject(new Error('peer closed'));
+						}
+					};
+
+					// Add handler stuff to the Map.
+					this._requestHandlers.set(request.id, handler);
+				});
+			});
 	}
 
 	close()
@@ -59,52 +109,6 @@ class Peer extends EventEmitter
 
 		// Emit 'close' event.
 		this.emit('close');
-	}
-
-	send(method, data)
-	{
-		let request = Message.requestFactory(method, data);
-
-		return new Promise((pResolve, pReject) =>
-		{
-			let handler =
-			{
-				resolve : (data) =>
-				{
-					if (!this._requestHandlers.delete(request.id))
-						return;
-
-					clearTimeout(handler.timer);
-					pResolve(data);
-				},
-
-				reject : (error) =>
-				{
-					if (!this._requestHandlers.delete(request.id))
-						return;
-
-					clearTimeout(handler.timer);
-					pReject(error);
-				},
-
-				timer : setTimeout(() =>
-				{
-					if (!this._requestHandlers.delete(request.id))
-						return;
-
-					pReject(new Error('request timeout'));
-				}, REQUEST_TIMEOUT),
-
-				close : () =>
-				{
-					clearTimeout(handler.timer);
-					pReject(new Error('peer closed'));
-				}
-			};
-
-			// Add handler stuff to the Map.
-			this._requestHandlers.set(request.id, handler);
-		});
 	}
 
 	_handleTransport()

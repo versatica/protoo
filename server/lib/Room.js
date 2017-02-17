@@ -20,25 +20,14 @@ class Room extends EventEmitter
 		this._peers = new Map();
 	}
 
+	get peers()
+	{
+		return this._peers.values();
+	}
+
 	get closed()
 	{
 		return this._closed;
-	}
-
-	close()
-	{
-		logger.debug('close()');
-
-		if (this._closed)
-			return;
-
-		this._closed = true;
-
-		// Close all the peers.
-		this._peers.forEach((peer) => peer.close());
-
-		// Emit 'close' event.
-		this.emit('close');
 	}
 
 	createPeer(peerId, transport)
@@ -66,9 +55,9 @@ class Room extends EventEmitter
 		return peer;
 	}
 
-	dispatch(method, data, excluded)
+	spread(method, data, excluded)
 	{
-		logger.debug('dispatch()');
+		logger.debug('spread()');
 
 		let excludedSet = new Set();
 
@@ -100,6 +89,22 @@ class Room extends EventEmitter
 
 			peer.send(method, data);
 		}
+	}
+
+	close()
+	{
+		logger.debug('close()');
+
+		if (this._closed)
+			return;
+
+		this._closed = true;
+
+		// Close all the peers.
+		this._peers.forEach((peer) => peer.close());
+
+		// Emit 'close' event.
+		this.emit('close');
 	}
 
 	_handlePeer(peer)
