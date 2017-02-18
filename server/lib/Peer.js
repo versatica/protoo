@@ -173,9 +173,9 @@ class Peer extends EventEmitter
 				this._transport.send(response);
 			},
 			// reject() function.
-			(errorReason, errorCode) =>
+			(errorCode, errorReason) =>
 			{
-				let response = Message.errorResponseFactory(request, errorReason, errorCode);
+				let response = Message.errorResponseFactory(request, errorCode, errorReason);
 
 				this._transport.send(response);
 			});

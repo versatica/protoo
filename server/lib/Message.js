@@ -61,8 +61,8 @@ class Message
 			// Error.
 			else
 			{
-				message.errorReason = object.errorReason;
 				message.errorCode = object.errorCode;
+				message.errorReason = object.errorReason;
 			}
 		}
 		// Invalid.
@@ -100,14 +100,14 @@ class Message
 		return response;
 	}
 
-	static errorResponseFactory(request, errorReason, errorCode)
+	static errorResponseFactory(request, errorCode, errorReason)
 	{
 		let response =
 		{
 			response : true,
 			id       : request.id,
-			reason   : errorReason,
-			code     : errorCode
+			code     : errorCode,
+			reason   : errorReason
 		};
 
 		return response;
