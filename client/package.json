@@ -1,19 +1,33 @@
 {
-  "name": "protoo-server",
+  "name": "protoo-client",
   "version": "0.1.0",
-  "description": "protoo signaling server",
-  "main": "index.js",
+  "description": "protoo JavaScript client library",
+  "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ibc/protoo2.git"
+    "url": "git+https://github.com/ibc/protoo.git"
   },
   "author": "Iñaki Baz Castillo <ibc@aliax.net>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ibc/protoo2/issues"
+    "url": "https://github.com/ibc/protoo/issues"
   },
-  "homepage": "https://github.com/ibc/protoo2#readme"
+  "homepage": "http://protoojs.org",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "dependencies": {
+    "debug": "^2.6.1",
+    "random-number": "^0.0.7"
+  },
+  "devDependencies": {
+    "gulp": "git://github.com/gulpjs/gulp.git#4.0",
+    "gulp-eslint": "^3.0.1"
+  },
+  "optionalDependencies": {
+    "websocket": "^1.0.24"
+  }
 }

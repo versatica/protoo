@@ -1,19 +1,19 @@
 {
   "name": "protoo-server",
   "version": "0.1.0",
-  "description": "protoo signaling server",
+  "description": "protoo Node.js server module",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ibc/protoo2.git"
+    "url": "git+https://github.com/ibc/protoo.git"
   },
   "author": "Iñaki Baz Castillo <ibc@aliax.net>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ibc/protoo2/issues"
+    "url": "https://github.com/ibc/protoo/issues"
   },
   "homepage": "http://protoojs.org",
   "engines": {
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "debug": "^2.6.1",
-    "random-number": "0.0.7",
+    "random-number": "^0.0.7",
     "websocket": "^1.0.24"
   },
   "devDependencies": {
