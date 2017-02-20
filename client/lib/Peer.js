@@ -123,8 +123,6 @@ class Peer extends EventEmitter
 			if (this._closed)
 				return;
 
-			this._closed = true;
-
 			// Emit 'open' event.
 			this.emit('open');
 		});
