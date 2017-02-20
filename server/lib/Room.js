@@ -47,7 +47,7 @@ class Room extends EventEmitter
 		let peer = new Peer(peerId, transport);
 
 		// Store it in the map.
-		this._peers.set(peer.id, Peer);
+		this._peers.set(peer.id, peer);
 
 		// Handle peer.
 		this._handlePeer(peer);
