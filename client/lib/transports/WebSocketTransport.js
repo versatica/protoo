@@ -18,7 +18,7 @@ class WebSocketTransport extends EventEmitter
 
 		// Save URL and options.
 		this._url = url;
-		this._options = options;
+		this._options = options || {};
 
 		// WebSocket instance.
 		this._ws = null;
