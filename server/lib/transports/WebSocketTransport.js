@@ -49,7 +49,7 @@ class WebSocketTransport extends EventEmitter
 		}
 		catch(error)
 		{
-			logger.error('send() | error sending message: %s', error);
+			logger.error('send() | error sending message: %s', error.message);
 			return Promise.reject(error);
 		}
 	}
@@ -71,7 +71,7 @@ class WebSocketTransport extends EventEmitter
 		}
 		catch(error)
 		{
-			logger.error('close() | error closing the connection: %s', error);
+			logger.error('close() | error closing the connection: %s', error.message);
 		}
 	}
 
@@ -92,7 +92,7 @@ class WebSocketTransport extends EventEmitter
 
 		this._connection.on('error', (error) =>
 		{
-			logger.error('connection "error" event [conn:%s, error:%s]', this, error);
+			logger.error('connection "error" event [conn:%s, error:%s]', this, error.message);
 		});
 
 		this._connection.on('message', (raw) =>

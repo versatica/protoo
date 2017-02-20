@@ -94,6 +94,7 @@ class Message
 		{
 			response : true,
 			id       : request.id,
+			ok       : true,
 			data     : data || {}
 		};
 
