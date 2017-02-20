@@ -39,7 +39,7 @@ class Message
 		{
 			message.request = true;
 
-			if (typeof object.methodd !== 'string')
+			if (typeof object.method !== 'string')
 			{
 				logger.error('parse() | missing/invalid method field');
 				return;
