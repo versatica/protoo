@@ -22,7 +22,7 @@ class Room extends EventEmitter
 
 	get peers()
 	{
-		return this._peers.values();
+		return Array.from(this._peers.values());
 	}
 
 	get closed()
