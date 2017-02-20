@@ -46,6 +46,7 @@ class Message
 			}
 
 			message.method = object.method;
+			message.data = object.data || {};
 		}
 		// Response.
 		else if (object.response)
