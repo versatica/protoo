@@ -1,6 +1,6 @@
 {
   "name": "protoo-client",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "protoo JavaScript client library",
   "main": "lib/index.js",
   "scripts": {

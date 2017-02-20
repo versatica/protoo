@@ -1,6 +1,6 @@
 {
   "name": "protoo-server",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "protoo Node.js server module",
   "main": "lib/index.js",
   "scripts": {
