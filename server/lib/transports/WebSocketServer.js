@@ -17,7 +17,7 @@ class WebSocketServer extends EventEmitter
 		this.setMaxListeners(Infinity);
 
 		// Merge some settings into the given options.
-		options = Object.asign(
+		options = Object.assign(
 			{
 				httpServer        : httpServer,
 				keepalive         : true,

@@ -25,6 +25,9 @@ class Peer extends EventEmitter
 		// Closed flag.
 		this._closed = false;
 
+		// Custom data object.
+		this._data = {};
+
 		// Map of sent requests' handlers indexed by request.id.
 		this._requestHandlers = new Map();
 
@@ -35,6 +38,16 @@ class Peer extends EventEmitter
 	get id()
 	{
 		return this._id;
+	}
+
+	get data()
+	{
+		return this._data;
+	}
+
+	set data(obj)
+	{
+		this._data = obj || {};
 	}
 
 	get closed()

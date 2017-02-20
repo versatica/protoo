@@ -9,21 +9,21 @@ const REQUEST_TIMEOUT = 10000;
 
 class Peer extends EventEmitter
 {
-	constructor(peerId, transport)
+	constructor(transport)
 	{
 		logger.debug('constructor()');
 
 		super();
 		this.setMaxListeners(Infinity);
 
-		// Peer id.
-		this._id = peerId;
-
 		// Transport.
 		this._transport = transport;
 
 		// Closed flag.
 		this._closed = false;
+
+		// Custom data object.
+		this._data = {};
 
 		// Map of sent requests' handlers indexed by request.id.
 		this._requestHandlers = new Map();
@@ -32,9 +32,14 @@ class Peer extends EventEmitter
 		this._handleTransport();
 	}
 
-	get id()
+	get data()
 	{
-		return this._id;
+		return this._data;
+	}
+
+	set data(obj)
+	{
+		this._data = obj || {};
 	}
 
 	get closed()
@@ -113,6 +118,17 @@ class Peer extends EventEmitter
 
 	_handleTransport()
 	{
+		this._transport.on('open', () =>
+		{
+			if (this._closed)
+				return;
+
+			this._closed = true;
+
+			// Emit 'open' event.
+			this.emit('open');
+		});
+
 		this._transport.on('close', () =>
 		{
 			if (this._closed)
