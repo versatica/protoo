@@ -85,7 +85,7 @@ class Room extends EventEmitter
 		for (let peer of this._peers.values())
 		{
 			if (excludedSet.has(peer))
-				return;
+				continue;
 
 			peer.send(method, data);
 		}
