@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "protoo-test",
+  "scripts": {
+    "test": "tap --bail --color --reporter=spec test.js"
+  },
+  "dependencies": {
+    "tap": "^10.2.0"
+  },
+  "devDependencies": {
+    "gulp": "git://github.com/gulpjs/gulp.git#4.0",
+    "gulp-eslint": "^3.0.1"
+  }
+}

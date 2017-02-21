@@ -184,14 +184,22 @@ class Peer extends EventEmitter
 			{
 				let response = Message.successResponseFactory(request, data);
 
-				this._transport.send(response);
+				this._transport.send(response)
+					.catch((error) =>
+					{
+						logger.warn('accept() failed, response could not be sent: %o', error);
+					});
 			},
 			// reject() function.
 			(errorCode, errorReason) =>
 			{
 				let response = Message.errorResponseFactory(request, errorCode, errorReason);
 
-				this._transport.send(response);
+				this._transport.send(response)
+					.catch((error) =>
+					{
+						logger.warn('reject() failed, response could not be sent: %o', error);
+					});
 			});
 	}
 }
