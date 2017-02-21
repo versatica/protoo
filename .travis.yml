@@ -1,0 +1,19 @@
+# Just apply Travis-CI for these branches
+branches:
+  only:
+  - master
+  - experimental
+
+language: node_js
+
+node_js:
+  - 4
+  - 5
+  - 6
+
+before_script:
+  - cd client/ && npm install
+  - cd server/ && npm install
+  - cd test/ && npm install
+
+script: cd test/ && npm test
