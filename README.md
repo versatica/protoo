@@ -22,7 +22,7 @@ Iñaki Baz Castillo ([@ibc](https://github.com/ibc/) at Github)
 
 
 
-[protoo-website]: https://protoojs.org
+[protoo-website]: http://protoojs.org
 [npm-shield-protoo-server]: https://img.shields.io/npm/v/protoo-server.svg
 [npm-shield-protoo-client]: https://img.shields.io/npm/v/protoo-client.svg
 [npm-protoo-server]: https://npmjs.org/package/protoo-server
