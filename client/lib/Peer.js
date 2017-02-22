@@ -118,6 +118,14 @@ class Peer extends EventEmitter
 
 	_handleTransport()
 	{
+		if (this._transport.closed)
+		{
+			this._closed = true;
+			setTimeout(() => this.emit('close'));
+
+			return;
+		}
+
 		this._transport.on('open', () =>
 		{
 			if (this._closed)
