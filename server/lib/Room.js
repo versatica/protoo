@@ -34,14 +34,20 @@ class Room extends EventEmitter
 	{
 		logger.debug('createPeer() [peerId:"%s", transport:%s]', peerId, transport);
 
-		if (!peerId || typeof peerId !== 'string')
-			throw new TypeError('peerId must be a string');
-
 		if (!transport)
-			throw new TypeError('no transport given');
+			return Promise.reject(new TypeError('no transport given'));
+
+		if (!peerId || typeof peerId !== 'string')
+		{
+			transport.close();
+			return Promise.reject(new TypeError('peerId must be a string'));
+		}
 
 		if (this._peers.has(peerId))
-			throw new Error('there is already a peer with same peerId [peerId:"${peerId}"]');
+		{
+			transport.close();
+			return Promise.reject(new Error(`there is already a peer with same peerId [peerId:"${peerId}"]`));
+		}
 
 		// Create the Peer instance.
 		let peer = new Peer(peerId, transport);
@@ -52,7 +58,17 @@ class Room extends EventEmitter
 		// Handle peer.
 		this._handlePeer(peer);
 
-		return peer;
+		return Promise.resolve(peer);
+	}
+
+	hasPeer(peerId)
+	{
+		return this._peers.has(peerId);
+	}
+
+	getPeer(peerId)
+	{
+		return this._peers.get(peerId);
 	}
 
 	spread(method, data, excluded)
