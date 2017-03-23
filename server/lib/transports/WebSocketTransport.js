@@ -67,7 +67,7 @@ class WebSocketTransport extends EventEmitter
 
 		try
 		{
-			this._connection.close();
+			this._connection.close(4000, 'closed by protoo-server');
 		}
 		catch(error)
 		{

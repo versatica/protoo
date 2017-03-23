@@ -2,10 +2,18 @@
 
 const EventEmitter = require('events').EventEmitter;
 const W3CWebSocket = require('websocket').w3cwebsocket;
+const retry = require('retry');
 const logger = require('../logger')('WebSocketTransport');
 const Message = require('../Message');
 
 const WS_SUBPROTOCOL = 'protoo';
+const DEFAULT_RETRY_OPTIONS =
+{
+	retries    : 10,
+	factor     : 2,
+	minTimeout : 1 * 1000,
+	maxTimeout : 8 * 1000
+};
 
 class WebSocketTransport extends EventEmitter
 {
@@ -80,68 +88,87 @@ class WebSocketTransport extends EventEmitter
 	_setWebSocket()
 	{
 		let options = this._options;
+		let operation = retry.operation(this._options.retry || DEFAULT_RETRY_OPTIONS);
 
-		this._ws = new W3CWebSocket(
-			this._url,
-			WS_SUBPROTOCOL,
-			options.origin,
-			options.headers,
-			options.requestOptions,
-			options.clientConfig
-		);
-
-		this._ws.onopen = () =>
+		operation.attempt((currentAttempt) =>
 		{
 			if (this._closed)
-				return;
-
-			// Emit 'open' event.
-			this.emit('open');
-		};
-
-		this._ws.onclose = (event) =>
-		{
-			if (this._closed)
-				return;
-
-			logger.error('WebSocket "close" event [wasClean:%s, code:%s, reason:"%s"]',
-				event.wasClean, event.code, event.reason);
-
-			this._closed = true;
-
-			// Emit 'close' event.
-			this.emit('close');
-
-			// TODO: Should try to reconnect periodically.
-		};
-
-		this._ws.onerror = () =>
-		{
-			if (this._closed)
-				return;
-
-			logger.error('WebSocket "error" event');
-		};
-
-		this._ws.onmessage = (event) =>
-		{
-			if (this._closed)
-				return;
-
-			let message = Message.parse(event.data);
-
-			if (!message)
-				return;
-
-			if (this.listenerCount('message') === 0)
 			{
-				logger.error('no listeners for WebSocket "message" event, ignoring received message');
+				operation.stop();
 				return;
 			}
 
-			// Emit 'message' event.
-			this.emit('message', message);
-		};
+			logger.debug('_setWebSocket() [currentAttempt:%s]', currentAttempt);
+
+			this._ws = new W3CWebSocket(
+				this._url,
+				WS_SUBPROTOCOL,
+				options.origin,
+				options.headers,
+				options.requestOptions,
+				options.clientConfig
+			);
+
+			this._ws.onopen = () =>
+			{
+				if (this._closed)
+					return;
+
+				// Emit 'open' event.
+				this.emit('open');
+			};
+
+			this._ws.onclose = (event) =>
+			{
+				if (this._closed)
+					return;
+
+				logger.error('WebSocket "close" event [wasClean:%s, code:%s, reason:"%s"]',
+					event.wasClean, event.code, event.reason);
+
+				// Don't retry if code is 4000 (closed by the server).
+				if (event.code !== 4000)
+				{
+					if (operation.retry(true))
+						return;
+				}
+
+				this._closed = true;
+
+				// Emit 'close' event.
+				this.emit('close');
+
+				// TODO: Should try to reconnect periodically.
+			};
+
+			this._ws.onerror = () =>
+			{
+				if (this._closed)
+					return;
+
+				logger.error('WebSocket "error" event');
+			};
+
+			this._ws.onmessage = (event) =>
+			{
+				if (this._closed)
+					return;
+
+				let message = Message.parse(event.data);
+
+				if (!message)
+					return;
+
+				if (this.listenerCount('message') === 0)
+				{
+					logger.error('no listeners for WebSocket "message" event, ignoring received message');
+					return;
+				}
+
+				// Emit 'message' event.
+				this.emit('message', message);
+			};
+		});
 	}
 }
 
