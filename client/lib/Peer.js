@@ -5,7 +5,7 @@ const logger = require('./logger')('Peer');
 const Message = require('./Message');
 
 // Max time waiting for a response.
-const REQUEST_TIMEOUT = 10000;
+const REQUEST_TIMEOUT = 20000;
 
 class Peer extends EventEmitter
 {

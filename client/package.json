@@ -1,6 +1,6 @@
 {
   "name": "protoo-client",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "protoo JavaScript client library",
   "main": "lib/index.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "transform": [["babelify", { "presets": ["es2015"] }]]
   },
   "dependencies": {
-    "debug": "^2.6.1",
+    "debug": "^2.6.3",
     "random-number": "^0.0.7"
   },
   "devDependencies": {
