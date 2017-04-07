@@ -135,6 +135,11 @@ class Peer extends EventEmitter
 			this.emit('open');
 		});
 
+		this._transport.on('disconnected', () =>
+		{
+			this.emit('disconnected');
+		});
+
 		this._transport.on('close', () =>
 		{
 			if (this._closed)

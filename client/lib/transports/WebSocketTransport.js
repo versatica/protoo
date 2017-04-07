@@ -89,6 +89,7 @@ class WebSocketTransport extends EventEmitter
 	{
 		let options = this._options;
 		let operation = retry.operation(this._options.retry || DEFAULT_RETRY_OPTIONS);
+		let wasConnected = false;
 
 		operation.attempt((currentAttempt) =>
 		{
@@ -114,6 +115,8 @@ class WebSocketTransport extends EventEmitter
 				if (this._closed)
 					return;
 
+				wasConnected = true;
+
 				// Emit 'open' event.
 				this.emit('open');
 			};
@@ -123,14 +126,28 @@ class WebSocketTransport extends EventEmitter
 				if (this._closed)
 					return;
 
-				logger.error('WebSocket "close" event [wasClean:%s, code:%s, reason:"%s"]',
+				logger.warn('WebSocket "close" event [wasClean:%s, code:%s, reason:"%s"]',
 					event.wasClean, event.code, event.reason);
 
 				// Don't retry if code is 4000 (closed by the server).
 				if (event.code !== 4000)
 				{
-					if (operation.retry(true))
+					// If is was not connected, try agein.
+					if (!wasConnected)
+					{
+						if (operation.retry(true))
+							return;
+					}
+					// If is was connected, start from scratch.
+					else
+					{
+						operation.stop();
+
+						this.emit('disconnected');
+						this._setWebSocket();
+
 						return;
+					}
 				}
 
 				this._closed = true;
