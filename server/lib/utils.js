@@ -1,5 +1,3 @@
-'use strict';
-
 const randomNumber = require('random-number');
 
 const randomNumberGenerator = randomNumber.generator(

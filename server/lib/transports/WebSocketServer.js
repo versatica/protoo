@@ -1,5 +1,3 @@
-'use strict';
-
 const EventEmitter = require('events').EventEmitter;
 const websocket = require('websocket');
 const logger = require('../logger')('WebSocketServer');
@@ -45,7 +43,8 @@ class WebSocketServer extends EventEmitter
 
 	_onRequest(request)
 	{
-		logger.debug('onRequest() [origin:%s | path:"%s"]', request.origin, request.resource);
+		logger.debug(
+			'onRequest() [origin:%s | path:"%s"]', request.origin, request.resource);
 
 		// Validate WebSocket sub-protocol.
 		if (request.requestedProtocols.indexOf(WS_SUBPROTOCOL) === -1)
@@ -53,15 +52,19 @@ class WebSocketServer extends EventEmitter
 			logger.warn('_onRequest() | invalid/missing Sec-WebSocket-Protocol');
 
 			request.reject(403, 'Invalid/missing Sec-WebSocket-Protocol');
+
 			return;
 		}
 
 		// If there are no listeners, reject the request.
 		if (this.listenerCount('connectionrequest') === 0)
 		{
-			logger.error('_onRequest() | no listeners for "connectionrequest" event, rejecting connection request');
+			logger.error(
+				'_onRequest() | no listeners for "connectionrequest" event, ' +
+				'rejecting connection request');
 
 			request.reject(500, 'No listeners for "connectionrequest" event');
+
 			return;
 		}
 
@@ -80,17 +83,19 @@ class WebSocketServer extends EventEmitter
 			{
 				if (replied)
 				{
-					logger.warn('_onRequest() | cannot call accept(), connection request already replied');
+					logger.warn(
+						'_onRequest() | cannot call accept(), connection request already replied');
+
 					return;
 				}
 
 				replied = true;
 
 				// Get the WebSocketConnection instance.
-				let connection = request.accept(WS_SUBPROTOCOL, request.origin);
+				const connection = request.accept(WS_SUBPROTOCOL, request.origin);
 
 				// Create a new Protoo WebSocket transport.
-				let transport = new WebSocketTransport(connection);
+				const transport = new WebSocketTransport(connection);
 
 				logger.debug('_onRequest() | accept() called');
 
@@ -102,7 +107,9 @@ class WebSocketServer extends EventEmitter
 			{
 				if (replied)
 				{
-					logger.warn('_onRequest() | cannot call reject(), connection request already replied');
+					logger.warn(
+						'_onRequest() | cannot call reject(), connection request already replied');
+
 					return;
 				}
 
@@ -110,7 +117,8 @@ class WebSocketServer extends EventEmitter
 				code = code || 403;
 				reason = reason || 'Rejected';
 
-				logger.debug('_onRequest() | reject() called [code:%s | reason:"%s"]', code, reason);
+				logger.debug(
+					'_onRequest() | reject() called [code:%s | reason:"%s"]', code, reason);
 
 				request.reject(code, reason);
 			});

@@ -1,5 +1,3 @@
-'use strict';
-
 const EventEmitter = require('events').EventEmitter;
 const W3CWebSocket = require('websocket').w3cwebsocket;
 const retry = require('retry');
@@ -51,11 +49,13 @@ class WebSocketTransport extends EventEmitter
 		try
 		{
 			this._ws.send(JSON.stringify(message));
+
 			return Promise.resolve();
 		}
-		catch(error)
+		catch (error)
 		{
 			logger.error('send() | error sending message: %o', error);
+
 			return Promise.reject(error);
 		}
 	}
@@ -79,7 +79,7 @@ class WebSocketTransport extends EventEmitter
 			this._ws.onmessage = null;
 			this._ws.close();
 		}
-		catch(error)
+		catch (error)
 		{
 			logger.error('close() | error closing the WebSocket: %o', error);
 		}
@@ -87,8 +87,8 @@ class WebSocketTransport extends EventEmitter
 
 	_setWebSocket()
 	{
-		let options = this._options;
-		let operation = retry.operation(this._options.retry || DEFAULT_RETRY_OPTIONS);
+		const options = this._options;
+		const operation = retry.operation(this._options.retry || DEFAULT_RETRY_OPTIONS);
 		let wasConnected = false;
 
 		operation.attempt((currentAttempt) =>
@@ -96,6 +96,7 @@ class WebSocketTransport extends EventEmitter
 			if (this._closed)
 			{
 				operation.stop();
+
 				return;
 			}
 
@@ -132,13 +133,13 @@ class WebSocketTransport extends EventEmitter
 				// Don't retry if code is 4000 (closed by the server).
 				if (event.code !== 4000)
 				{
-					// If is was not connected, try agein.
+					// If it was not connected, try agein.
 					if (!wasConnected)
 					{
 						if (operation.retry(true))
 							return;
 					}
-					// If is was connected, start from scratch.
+					// If it was connected, start from scratch.
 					else
 					{
 						operation.stop();
@@ -171,7 +172,7 @@ class WebSocketTransport extends EventEmitter
 				if (this._closed)
 					return;
 
-				let message = Message.parse(event.data);
+				const message = Message.parse(event.data);
 
 				if (!message)
 					return;
@@ -179,6 +180,7 @@ class WebSocketTransport extends EventEmitter
 				if (this.listenerCount('message') === 0)
 				{
 					logger.error('no listeners for WebSocket "message" event, ignoring received message');
+
 					return;
 				}
 

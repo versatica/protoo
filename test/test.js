@@ -1,5 +1,3 @@
-'use strict';
-
 // process.env.DEBUG = 'protoo*';
 
 const tap = require('tap');
@@ -18,9 +16,10 @@ const CLIENT_WS_OPTIONS =
 
 tap.test('create server and connects clients', { timeout: 500 }, (t) =>
 {
-	let httpServer = http.createServer();
-	let wsServer = new protooServer.WebSocketServer(httpServer);
-	let room = new protooServer.Room();
+	const httpServer = http.createServer();
+	const wsServer = new protooServer.WebSocketServer(httpServer);
+	const room = new protooServer.Room();
+
 	let clientPeerA;
 	let clientPeerB;
 	let serverPeerA;
@@ -45,29 +44,32 @@ tap.test('create server and connects clients', { timeout: 500 }, (t) =>
 			wsServer.on('connectionrequest', (info, accept) =>
 			{
 				// The client indicates the peerId in the URL query.
-				let u = url.parse(info.request.url, true);
-				let peerId = u.query['peer-id'];
-				let transport = accept();
+				const u = url.parse(info.request.url, true);
+				const peerId = u.query['peer-id'];
+				const transport = accept();
 
-				room.createPeer(peerId, transport)
-					.then((peer) =>
-					{
-						t.pass(`room.createPeer() succeeded [peerId:${peer.id}]`);
-					})
-					.catch((error) =>
-					{
-						if (peerId === 'A' && room.hasPeer('A'))
-							t.pass('room.createPeer() failed for duplicated peer [peerId:A]');
-						else
-							t.fail(`room.createPeer() failed: ${error}`);
-					});
+				let peer;
+
+				try
+				{
+					peer = room.createPeer(peerId, transport);
+
+					t.pass(`room.createPeer() succeeded [peerId:${peer.id}]`);
+				}
+				catch (error)
+				{
+					if (peerId === 'A' && room.hasPeer('A'))
+						t.pass('room.createPeer() failed for duplicated peer [peerId:A]');
+					else
+						t.fail(`room.createPeer() failed: ${error}`);
+				}
 			});
 		})
 		.then(() =>
 		{
 			return new Promise((resolve) =>
 			{
-				let transport = new protooClient.WebSocketTransport(
+				const transport = new protooClient.WebSocketTransport(
 					'ws://127.0.0.1:9999/?peer-id=A', CLIENT_WS_OPTIONS);
 
 				clientPeerA = new protooClient.Peer(transport);
@@ -85,7 +87,7 @@ tap.test('create server and connects clients', { timeout: 500 }, (t) =>
 		{
 			return new Promise((resolve) =>
 			{
-				let transport = new protooClient.WebSocketTransport(
+				const transport = new protooClient.WebSocketTransport(
 					'ws://127.0.0.1:9999/?peer-id=B', CLIENT_WS_OPTIONS);
 
 				clientPeerB = new protooClient.Peer(transport);
@@ -103,9 +105,9 @@ tap.test('create server and connects clients', { timeout: 500 }, (t) =>
 		{
 			return new Promise((resolve) =>
 			{
-				let transport = new protooClient.WebSocketTransport(
+				const transport = new protooClient.WebSocketTransport(
 					'ws://127.0.0.1:9999/?peer-id=A', CLIENT_WS_OPTIONS);
-				let duplicatedClientPeerA = new protooClient.Peer(transport);
+				const duplicatedClientPeerA = new protooClient.Peer(transport);
 
 				duplicatedClientPeerA.on('close', () =>
 				{
@@ -132,7 +134,7 @@ tap.test('create server and connects clients', { timeout: 500 }, (t) =>
 			{
 				serverPeerA.once('request', (request, accept) =>
 				{
-					accept({ baz: 'lalala'});
+					accept({ baz: 'lalala' });
 
 					t2.equal(request.method, 'chicken', 'request.method matches at serverPeerA');
 					t2.same(request.data, { foo: 123 }, 'request.data matches at serverPeerA');

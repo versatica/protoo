@@ -1,5 +1,3 @@
-'use strict';
-
 const EventEmitter = require('events').EventEmitter;
 const logger = require('./logger')('Peer');
 const Message = require('./Message');
@@ -57,22 +55,22 @@ class Peer extends EventEmitter
 
 	send(method, data)
 	{
-		let request = Message.requestFactory(method, data);
+		const request = Message.requestFactory(method, data);
 
 		return this._transport.send(request)
 			.then(() =>
 			{
 				return new Promise((pResolve, pReject) =>
 				{
-					let handler =
+					const handler =
 					{
-						resolve : (data) =>
+						resolve : (data2) =>
 						{
 							if (!this._requestHandlers.delete(request.id))
 								return;
 
 							clearTimeout(handler.timer);
-							pResolve(data);
+							pResolve(data2);
 						},
 
 						reject : (error) =>
@@ -160,11 +158,12 @@ class Peer extends EventEmitter
 
 	_handleResponse(response)
 	{
-		let handler = this._requestHandlers.get(response.id);
+		const handler = this._requestHandlers.get(response.id);
 
 		if (!handler)
 		{
 			logger.error('received response does not match any sent request');
+
 			return;
 		}
 
@@ -174,7 +173,7 @@ class Peer extends EventEmitter
 		}
 		else
 		{
-			let error = new Error(response.errorReason);
+			const error = new Error(response.errorReason);
 
 			error.code = response.errorCode;
 			handler.reject(error);
@@ -189,23 +188,26 @@ class Peer extends EventEmitter
 			// accept() function.
 			(data) =>
 			{
-				let response = Message.successResponseFactory(request, data);
+				const response = Message.successResponseFactory(request, data);
 
 				this._transport.send(response)
 					.catch((error) =>
 					{
-						logger.warn('accept() failed, response could not be sent: %s', error);
+						logger.warn(
+							'accept() failed, response could not be sent: %s', error);
 					});
 			},
 			// reject() function.
 			(errorCode, errorReason) =>
 			{
-				let response = Message.errorResponseFactory(request, errorCode, errorReason);
+				const response =
+					Message.errorResponseFactory(request, errorCode, errorReason);
 
 				this._transport.send(response)
 					.catch((error) =>
 					{
-						logger.warn('reject() failed, response could not be sent: %s', error);
+						logger.warn(
+							'reject() failed, response could not be sent: %s', error);
 					});
 			});
 	}

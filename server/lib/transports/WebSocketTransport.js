@@ -1,5 +1,3 @@
-'use strict';
-
 const EventEmitter = require('events').EventEmitter;
 const logger = require('../logger')('WebSocketTransport');
 const Message = require('../Message');
@@ -33,8 +31,11 @@ class WebSocketTransport extends EventEmitter
 
 	toString()
 	{
-		return this._tostring ||
-			(this._tostring = `${this._socket.encrypted ? 'WSS' : 'WS'}:[${this._socket.remoteAddress}]:${this._socket.remotePort}`);
+		return (
+			this._tostring ||
+			(this._tostring =
+				`${this._socket.encrypted ? 'WSS' : 'WS'}:[${this._socket.remoteAddress}]:${this._socket.remotePort}`)
+		);
 	}
 
 	send(message)
@@ -45,11 +46,13 @@ class WebSocketTransport extends EventEmitter
 		try
 		{
 			this._connection.sendUTF(JSON.stringify(message));
+
 			return Promise.resolve();
 		}
-		catch(error)
+		catch (error)
 		{
 			logger.error('send() | error sending message: %s', error);
+
 			return Promise.reject(error);
 		}
 	}
@@ -69,7 +72,7 @@ class WebSocketTransport extends EventEmitter
 		{
 			this._connection.close(4000, 'closed by protoo-server');
 		}
-		catch(error)
+		catch (error)
 		{
 			logger.error('close() | error closing the connection: %s', error);
 		}
@@ -84,7 +87,9 @@ class WebSocketTransport extends EventEmitter
 
 			this._closed = true;
 
-			logger.debug('connection "close" event [conn:%s, code:%d, reason:"%s"]', this, code, reason);
+			logger.debug(
+				'connection "close" event [conn:%s, code:%d, reason:"%s"]',
+				this, code, reason);
 
 			// Emit 'close' event.
 			this.emit('close');
@@ -92,7 +97,8 @@ class WebSocketTransport extends EventEmitter
 
 		this._connection.on('error', (error) =>
 		{
-			logger.error('connection "error" event [conn:%s, error:%s]', this, error);
+			logger.error(
+				'connection "error" event [conn:%s, error:%s]', this, error);
 		});
 
 		this._connection.on('message', (raw) =>
@@ -100,17 +106,20 @@ class WebSocketTransport extends EventEmitter
 			if (raw.type === 'binary')
 			{
 				logger.warn('ignoring received binary message [conn:%s]', this);
+
 				return;
 			}
 
-			let message = Message.parse(raw.utf8Data);
+			const message = Message.parse(raw.utf8Data);
 
 			if (!message)
 				return;
 
 			if (this.listenerCount('message') === 0)
 			{
-				logger.error('no listeners for "message" event, ignoring received message');
+				logger.error(
+					'no listeners for "message" event, ignoring received message');
+
 				return;
 			}
 

@@ -1,5 +1,3 @@
-'use strict';
-
 const Peer = require('./Peer');
 const transports = require('./transports');
 

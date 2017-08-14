@@ -1,11 +1,9 @@
-'use strict';
-
 const gulp = require('gulp');
 const eslint = require('gulp-eslint');
 
 gulp.task('lint', () =>
 {
-	let src =
+	const src =
 	[
 		'.eslintrc.js',
 		'gulpfile.js',
@@ -18,3 +16,5 @@ gulp.task('lint', () =>
 		.pipe(eslint.format())
 		.pipe(eslint.failAfterError());
 });
+
+gulp.task('default', gulp.series('lint'));

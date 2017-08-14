@@ -1,5 +1,3 @@
-'use strict';
-
 const logger = require('./logger')('Message');
 const utils = require('./utils');
 
@@ -8,27 +6,30 @@ class Message
 	static parse(raw)
 	{
 		let object;
-		let message = {};
+		const message = {};
 
 		try
 		{
 			object = JSON.parse(raw);
 		}
-		catch(error)
+		catch (error)
 		{
 			logger.error('parse() | invalid JSON: %s', error);
+
 			return;
 		}
 
 		if (typeof object !== 'object' || Array.isArray(object))
 		{
 			logger.error('parse() | not an object');
+
 			return;
 		}
 
 		if (typeof object.id !== 'number')
 		{
 			logger.error('parse() | missing/invalid id field');
+
 			return;
 		}
 
@@ -42,6 +43,7 @@ class Message
 			if (typeof object.method !== 'string')
 			{
 				logger.error('parse() | missing/invalid method field');
+
 				return;
 			}
 
@@ -70,6 +72,7 @@ class Message
 		else
 		{
 			logger.error('parse() | missing request/response field');
+
 			return;
 		}
 
@@ -78,7 +81,7 @@ class Message
 
 	static requestFactory(method, data)
 	{
-		let request =
+		const request =
 		{
 			request : true,
 			id      : utils.randomNumber(),
@@ -91,7 +94,7 @@ class Message
 
 	static successResponseFactory(request, data)
 	{
-		let response =
+		const response =
 		{
 			response : true,
 			id       : request.id,
@@ -104,7 +107,7 @@ class Message
 
 	static errorResponseFactory(request, errorCode, errorReason)
 	{
-		let response =
+		const response =
 		{
 			response : true,
 			id       : request.id,
