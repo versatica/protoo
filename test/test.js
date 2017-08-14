@@ -1,3 +1,5 @@
+'use strict';
+
 // process.env.DEBUG = 'protoo*';
 
 const tap = require('tap');

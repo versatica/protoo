@@ -1,3 +1,5 @@
+'use strict';
+
 const EventEmitter = require('events').EventEmitter;
 const logger = require('../logger')('WebSocketTransport');
 const Message = require('../Message');

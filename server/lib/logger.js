@@ -1,3 +1,5 @@
+'use strict';
+
 const debug = require('debug');
 
 const APP_NAME = 'protoo-server';

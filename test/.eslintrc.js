@@ -161,7 +161,7 @@ module.exports =
 		'space-before-function-paren': [ 2, 'never' ],
 		'space-in-parens': [ 2, 'never' ],
 		'spaced-comment': [ 2, 'always' ],
-		'strict': 2,
+		'strict': 0,
 		'valid-typeof': 2,
 		'yoda': 2
 	}
