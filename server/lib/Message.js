@@ -111,10 +111,10 @@ class Message
 	{
 		const response =
 		{
-			response : true,
-			id       : request.id,
-			code     : errorCode,
-			reason   : errorReason
+			response    : true,
+			id          : request.id,
+			codeCode    : errorCode,
+			errorReason : errorReason
 		};
 
 		return response;
