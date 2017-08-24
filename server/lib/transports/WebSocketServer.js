@@ -115,6 +115,16 @@ class WebSocketServer extends EventEmitter
 					return;
 				}
 
+				if (code instanceof Error)
+				{
+					code = 500;
+					reason = code.toString();
+				}
+				else if (reason instanceof Error)
+				{
+					reason = reason.toString();
+				}
+
 				replied = true;
 				code = code || 403;
 				reason = reason || 'Rejected';

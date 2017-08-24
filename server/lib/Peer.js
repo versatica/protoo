@@ -202,6 +202,16 @@ class Peer extends EventEmitter
 			// reject() function.
 			(errorCode, errorReason) =>
 			{
+				if (errorCode instanceof Error)
+				{
+					errorReason = errorCode.toString();
+					errorCode = 500;
+				}
+				else if (typeof errorCode === 'number' && errorReason instanceof Error)
+				{
+					errorReason = errorReason.toString();
+				}
+
 				const response =
 					Message.errorResponseFactory(request, errorCode, errorReason);
 
