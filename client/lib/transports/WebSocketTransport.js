@@ -113,6 +113,8 @@ class WebSocketTransport extends EventEmitter
 				options.clientConfig
 			);
 
+			this.emit('connecting', currentAttempt);
+
 			this._ws.onopen = () =>
 			{
 				if (this._closed)
@@ -135,9 +137,11 @@ class WebSocketTransport extends EventEmitter
 				// Don't retry if code is 4000 (closed by the server).
 				if (event.code !== 4000)
 				{
-					// If it was not connected, try agein.
+					// If it was not connected, try again.
 					if (!wasConnected)
 					{
+						this.emit('failed', currentAttempt);
+
 						if (operation.retry(true))
 							return;
 					}
@@ -157,8 +161,6 @@ class WebSocketTransport extends EventEmitter
 
 				// Emit 'close' event.
 				this.emit('close');
-
-				// TODO: Should try to reconnect periodically.
 			};
 
 			this._ws.onerror = () =>

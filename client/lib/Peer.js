@@ -126,6 +126,11 @@ class Peer extends EventEmitter
 			return;
 		}
 
+		this._transport.on('connecting', (currentAttempt) =>
+		{
+			this.emit('connecting', currentAttempt);
+		});
+
 		this._transport.on('open', () =>
 		{
 			if (this._closed)
@@ -138,6 +143,11 @@ class Peer extends EventEmitter
 		this._transport.on('disconnected', () =>
 		{
 			this.emit('disconnected');
+		});
+
+		this._transport.on('failed', (currentAttempt) =>
+		{
+			this.emit('failed', currentAttempt);
 		});
 
 		this._transport.on('close', () =>
