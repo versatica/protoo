@@ -1,6 +1,6 @@
 {
   "name": "protoo-server",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "protoo Node.js server module",
   "main": "lib/index.js",
   "scripts": {
@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "debug": "^3.1.0",
-    "random-number": "^0.0.7",
-    "websocket": "^1.0.24"
+    "random-number": "^0.0.9",
+    "websocket": "^1.0.25"
   },
   "devDependencies": {
     "gulp": "git://github.com/gulpjs/gulp.git#4.0",

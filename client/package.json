@@ -1,6 +1,6 @@
 {
   "name": "protoo-client",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "protoo JavaScript client library",
   "main": "lib/index.js",
   "scripts": {
@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "debug": "^3.1.0",
-    "random-number": "0.0.7",
+    "random-number": "0.0.9",
     "retry": "^0.10.1"
   },
   "devDependencies": {
@@ -41,6 +41,6 @@
     "gulp-eslint": "^4.0.0"
   },
   "optionalDependencies": {
-    "websocket": "^1.0.24"
+    "websocket": "^1.0.25"
   }
 }
