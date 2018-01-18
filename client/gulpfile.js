@@ -2,6 +2,7 @@
 
 const gulp = require('gulp');
 const eslint = require('gulp-eslint');
+const babel = require('gulp-babel');
 
 gulp.task('lint', () =>
 {
@@ -19,4 +20,12 @@ gulp.task('lint', () =>
 		.pipe(eslint.failAfterError());
 });
 
-gulp.task('default', gulp.series('lint'));
+gulp.task('babel', () =>
+{
+	return gulp
+		.src([ 'lib/**/*.js' ])
+		.pipe(babel())
+		.pipe(gulp.dest('lib-es5'));
+});
+
+gulp.task('default', gulp.series('lint', 'babel'));

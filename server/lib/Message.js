@@ -113,7 +113,7 @@ class Message
 		{
 			response    : true,
 			id          : request.id,
-			codeCode    : errorCode,
+			errorCode   : errorCode,
 			errorReason : errorReason
 		};
 

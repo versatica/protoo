@@ -1,8 +1,8 @@
 {
   "name": "protoo-client",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "protoo JavaScript client library",
-  "main": "lib/index.js",
+  "main": "lib-es5/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -37,8 +37,11 @@
     "retry": "^0.10.1"
   },
   "devDependencies": {
-    "gulp": "git://github.com/gulpjs/gulp.git#4.0",
-    "gulp-eslint": "^4.0.0"
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "gulp": "^4.0.0",
+    "gulp-babel": "^7.0.0",
+    "gulp-eslint": "^4.0.1"
   },
   "optionalDependencies": {
     "websocket": "^1.0.25"
