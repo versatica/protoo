@@ -5,10 +5,10 @@
     "test": "tap --bail --color --reporter=spec test.js"
   },
   "dependencies": {
-    "tap": "^10.7.3"
+    "tap": "^11.0.1"
   },
   "devDependencies": {
-    "gulp": "git://github.com/gulpjs/gulp.git#4.0",
+    "gulp": "^4.0.0",
     "gulp-eslint": "^4.0.1"
   }
 }

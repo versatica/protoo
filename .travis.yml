@@ -12,7 +12,7 @@ node_js:
   - 6
 
 install:
-  - cd client/ && npm install && cd ..
+  - cd client/ && npm install && gulp babel && cd ..
   - cd server/ && npm install && cd ..
   - cd test/ && npm install && cd ..
 
