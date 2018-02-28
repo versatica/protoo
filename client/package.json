@@ -28,8 +28,8 @@
     "babel-core": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "gulp": "^4.0.0",
-    "gulp-babel": "^7.0.0",
-    "gulp-eslint": "^4.0.1"
+    "gulp-babel": "^7.0.1",
+    "gulp-eslint": "^4.0.2"
   },
   "optionalDependencies": {
     "websocket": "^1.0.25"

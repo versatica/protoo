@@ -26,6 +26,6 @@
   },
   "devDependencies": {
     "gulp": "^4.0.0",
-    "gulp-eslint": "^4.0.1"
+    "gulp-eslint": "^4.0.2"
   }
 }
