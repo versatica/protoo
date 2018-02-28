@@ -28,15 +28,6 @@ class Message
 			return;
 		}
 
-		if (typeof object.id !== 'number')
-		{
-			logger.error('parse() | missing/invalid id field');
-
-			return;
-		}
-
-		message.id = object.id;
-
 		// Request.
 		if (object.request)
 		{
@@ -49,6 +40,15 @@ class Message
 				return;
 			}
 
+			if (typeof object.id !== 'number')
+			{
+				logger.error('parse() | missing/invalid id field');
+
+				return;
+			}
+
+			message.id = object.id;
+
 			message.method = object.method;
 			message.data = object.data || {};
 		}
@@ -56,6 +56,15 @@ class Message
 		else if (object.response)
 		{
 			message.response = true;
+
+			if (typeof object.id !== 'number')
+			{
+				logger.error('parse() | missing/invalid id field');
+
+				return;
+			}
+
+			message.id = object.id;
 
 			// Success.
 			if (object.ok)
@@ -69,6 +78,21 @@ class Message
 				message.errorCode = object.errorCode;
 				message.errorReason = object.errorReason;
 			}
+		}
+		// Notification.
+		else if (object.notification)
+		{
+			message.notification = true;
+
+			if (typeof object.method !== 'string')
+			{
+				logger.error('parse() | missing/invalid method field');
+
+				return;
+			}
+
+			message.method = object.method;
+			message.data = object.data || {};
 		}
 		// Invalid.
 		else
@@ -118,6 +142,18 @@ class Message
 		};
 
 		return response;
+	}
+
+	static notificationFactory(method, data)
+	{
+		const notification =
+		{
+			notification : true,
+			method       : method,
+			data         : data || {}
+		};
+
+		return notification;
 	}
 }
 

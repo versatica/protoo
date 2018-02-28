@@ -105,6 +105,13 @@ class Peer extends EventEmitter
 			});
 	}
 
+	notify(method, data)
+	{
+		const notification = Message.notificationFactory(method, data);
+
+		return this._transport.send(notification);
+	}
+
 	close()
 	{
 		logger.debug('close()');
@@ -147,39 +154,19 @@ class Peer extends EventEmitter
 
 		this._transport.on('message', (message) =>
 		{
-			if (message.response)
-			{
-				this._handleResponse(message);
-			}
-			else if (message.request)
+			if (message.request)
 			{
 				this._handleRequest(message);
 			}
+			else if (message.response)
+			{
+				this._handleResponse(message);
+			}
+			else if (message.notification)
+			{
+				this._handleNotification(message);
+			}
 		});
-	}
-
-	_handleResponse(response)
-	{
-		const handler = this._requestHandlers.get(response.id);
-
-		if (!handler)
-		{
-			logger.error('received response does not match any sent request');
-
-			return;
-		}
-
-		if (response.ok)
-		{
-			handler.resolve(response.data);
-		}
-		else
-		{
-			const error = new Error(response.errorReason);
-
-			error.code = response.errorCode;
-			handler.reject(error);
-		}
 	}
 
 	_handleRequest(request)
@@ -222,6 +209,35 @@ class Peer extends EventEmitter
 							'reject() failed, response could not be sent: %s', error);
 					});
 			});
+	}
+
+	_handleResponse(response)
+	{
+		const handler = this._requestHandlers.get(response.id);
+
+		if (!handler)
+		{
+			logger.error('received response does not match any sent request');
+
+			return;
+		}
+
+		if (response.ok)
+		{
+			handler.resolve(response.data);
+		}
+		else
+		{
+			const error = new Error(response.errorReason);
+
+			error.code = response.errorCode;
+			handler.reject(error);
+		}
+	}
+
+	_handleNotification(notification)
+	{
+		this.emit('notification', notification);
 	}
 }
 

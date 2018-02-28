@@ -159,38 +159,34 @@ tap.test('create server and connects clients', { timeout: 500 }, (t) =>
 		})
 		.then(() =>
 		{
-			return t.test('spread request to all the other clients', { timeout: 500 }, (t2) =>
+			return t.test('spread notification to all the other clients', { timeout: 500 }, (t2) =>
 			{
-				serverPeerA.once('request', (request, accept) =>
+				serverPeerA.once('notification', (notification) =>
 				{
-					accept();
+					t2.equal(notification.method, 'message', 'notification.method matches at serverPeerA');
+					t2.same(notification.data, { text: 'hello' }, 'notification.data matches at serverPeerA');
 
-					t2.equal(request.method, 'message', 'request.method matches at serverPeerA');
-					t2.same(request.data, { text: 'hello' }, 'request.data matches at serverPeerA');
-
-					room.spread(request.method, request.data, [ serverPeerA ]);
+					room.spread(notification.method, notification.data, [ serverPeerA ]);
 				});
 
-				clientPeerB.on('request', (request, accept) =>
+				clientPeerB.on('notification', (notification) =>
 				{
-					accept();
-
-					t2.pass('clientPeerB received the request');
-					t2.equal(request.method, 'message', 'request.method matches at clientPeerB');
-					t2.same(request.data, { text: 'hello' }, 'request.data matches at clientPeerB');
+					t2.pass('clientPeerB received the notification');
+					t2.equal(notification.method, 'message', 'notification.method matches at clientPeerB');
+					t2.same(notification.data, { text: 'hello' }, 'notification.data matches at clientPeerB');
 
 					t2.end();
 				});
 
-				t2.pass('calling clientPeerA.send()');
-				clientPeerA.send('message', { text: 'hello' })
+				t2.pass('calling clientPeerA.notify()');
+				clientPeerA.notify('message', { text: 'hello' })
 					.then(() =>
 					{
-						t2.pass('clientPeerA.send() succeeded');
+						t2.pass('clientPeerA.notify() succeeded');
 					})
 					.catch((error) =>
 					{
-						t2.fail(`clientPeerA.send() failed: ${error}`);
+						t2.fail(`clientPeerA.notify() failed: ${error}`);
 					});
 			});
 		});

@@ -105,12 +105,8 @@ class Room extends EventEmitter
 			if (excludedSet.has(peer))
 				continue;
 
-			peer.send(method, data)
-				.catch((error) =>
-				{
-					logger.warn(
-						'peer.send() failed, request could not be sent: %s', error);
-				});
+			peer.notify(method, data)
+				.catch(() => {});
 		}
 	}
 
