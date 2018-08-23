@@ -1,6 +1,6 @@
 {
   "name": "protoo-server",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "protoo Node.js server module",
   "main": "lib/index.js",
   "scripts": {
@@ -22,10 +22,10 @@
   "dependencies": {
     "debug": "^3.1.0",
     "random-number": "^0.0.9",
-    "websocket": "^1.0.25"
+    "websocket": "^1.0.26"
   },
   "devDependencies": {
     "gulp": "^4.0.0",
-    "gulp-eslint": "^4.0.2"
+    "gulp-eslint": "^5.0.0"
   }
 }
