@@ -135,6 +135,8 @@ class Peer extends EventEmitter
 
 		this._transport.on('connecting', (currentAttempt) =>
 		{
+			logger.debug('emit "connecting" [currentAttempt:%s]', currentAttempt);
+
 			this.emit('connecting', currentAttempt);
 		});
 
@@ -143,17 +145,23 @@ class Peer extends EventEmitter
 			if (this._closed)
 				return;
 
+			logger.debug('emit "open"');
+
 			// Emit 'open' event.
 			this.emit('open');
 		});
 
 		this._transport.on('disconnected', () =>
 		{
+			logger.debug('emit "disconnected"');
+
 			this.emit('disconnected');
 		});
 
 		this._transport.on('failed', (currentAttempt) =>
 		{
+			logger.debug('emit "failed" [currentAttempt:%s]', currentAttempt);
+
 			this.emit('failed', currentAttempt);
 		});
 
@@ -163,6 +171,8 @@ class Peer extends EventEmitter
 				return;
 
 			this._closed = true;
+
+			logger.debug('emit "close"');
 
 			// Emit 'close' event.
 			this.emit('close');

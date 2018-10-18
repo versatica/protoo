@@ -142,6 +142,9 @@ class WebSocketTransport extends EventEmitter
 					{
 						this.emit('failed', currentAttempt);
 
+						if (this._closed)
+							return;
+
 						if (operation.retry(true))
 							return;
 					}
@@ -151,6 +154,10 @@ class WebSocketTransport extends EventEmitter
 						operation.stop();
 
 						this.emit('disconnected');
+
+						if (this._closed)
+							return;
+
 						this._setWebSocket();
 
 						return;
