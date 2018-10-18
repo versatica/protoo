@@ -7,10 +7,9 @@ branches:
 language: node_js
 
 node_js:
-  - 4
   - 6
-  - 7
   - 8
+  - 10
 
 install:
   - cd client/ && npm install && gulp babel && cd ..
