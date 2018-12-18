@@ -1,5 +1,3 @@
-'use strict';
-
 const logger = require('./logger')();
 const Room = require('./Room');
 const transports = require('./transports');

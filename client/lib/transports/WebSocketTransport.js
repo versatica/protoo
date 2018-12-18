@@ -1,5 +1,3 @@
-'use strict';
-
 const EventEmitter = require('events').EventEmitter;
 const W3CWebSocket = require('websocket').w3cwebsocket;
 const retry = require('retry');

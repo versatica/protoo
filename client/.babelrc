@@ -1,7 +1,0 @@
-{
-	"plugins": [],
-	"presets":
-	[
-		"@babel/env"
-	]
-}

@@ -1,38 +1,29 @@
 {
   "name": "protoo-client",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "protoo JavaScript client library",
-  "main": "lib-es5/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "author": "Iñaki Baz Castillo <ibc@aliax.net>",
+  "homepage": "https://protoojs.org",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ibc/protoo.git"
   },
-  "author": "Iñaki Baz Castillo <ibc@aliax.net>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/ibc/protoo/issues"
-  },
-  "homepage": "https://protoojs.org",
+  "main": "lib/index.js",
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">=6.4"
+  },
+  "scripts": {
+    "lint": "eslint -c .eslintrc.js lib"
   },
   "dependencies": {
-    "@babel/runtime": "^7.1.2",
     "debug": "^4.1.0",
     "events": "^3.0.0",
     "random-number": "0.0.9",
     "retry": "^0.12.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.1.2",
-    "@babel/plugin-transform-runtime": "^7.1.0",
-    "@babel/preset-env": "^7.1.0",
-    "gulp": "^4.0.0",
-    "gulp-babel": "^8.0.0",
-    "gulp-eslint": "^5.0.0"
+    "eslint": "^5.10.0"
   },
   "optionalDependencies": {
     "websocket": "^1.0.28"

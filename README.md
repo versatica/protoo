@@ -1,6 +1,8 @@
 # protoo
 
-[![][npm-shield-protoo-server]][npm-protoo-server] [![][npm-shield-protoo-client]][npm-protoo-client]
+[![][npm-shield-protoo-server]][npm-protoo-server]
+[![][npm-shield-protoo-client]][npm-protoo-client]
+[![][travis-ci-shield-protoo]][travis-ci-protoo]
 
 Minimalist and extensible Node.js signaling framework for multi-party Real-Time Communication applications.
 
@@ -27,3 +29,5 @@ Iñaki Baz Castillo ([@ibc](https://github.com/ibc/) at Github)
 [npm-shield-protoo-client]: https://img.shields.io/npm/v/protoo-client.svg
 [npm-protoo-server]: https://npmjs.org/package/protoo-server
 [npm-protoo-client]: https://npmjs.org/package/protoo-client
+[travis-ci-shield-protoo]: https://img.shields.io/travis/ibc/protoo/master.svg
+[travis-ci-protoo]: https://travis-ci.com/ibc/protoo
