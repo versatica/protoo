@@ -29,5 +29,5 @@ Iñaki Baz Castillo ([@ibc](https://github.com/ibc/) at Github)
 [npm-shield-protoo-client]: https://img.shields.io/npm/v/protoo-client.svg
 [npm-protoo-server]: https://npmjs.org/package/protoo-server
 [npm-protoo-client]: https://npmjs.org/package/protoo-client
-[travis-ci-shield-protoo]: https://img.shields.io/travis/ibc/protoo/master.svg
+[travis-ci-shield-protoo]: https://travis-ci.com/ibc/protoo.svg?branch=master
 [travis-ci-protoo]: https://travis-ci.com/ibc/protoo
