@@ -9,10 +9,9 @@ class Peer extends EnhancedEventEmitter
 	/**
 	 * @param {protoo.Transport} transport
 	 *
-	 * @emits {currentAttempt: Number} connecting
 	 * @emits open
+	 * @emits {currentAttempt: Number} failed
 	 * @emits disconnected
-	 * @emits failed
 	 * @emits close
 	 * @emits {request: protoo.Request, accept: Function, reject: Function} request
 	 * @emits {notification: protoo.Notification} notification
@@ -207,18 +206,6 @@ class Peer extends EnhancedEventEmitter
 
 			return;
 		}
-
-		this._transport.on('connecting', (currentAttempt) =>
-		{
-			if (this._closed)
-				return;
-
-			logger.debug('emit "connecting" [currentAttempt:%s]', currentAttempt);
-
-			this._connected = false;
-
-			this.safeEmit('connecting', currentAttempt);
-		});
 
 		this._transport.on('open', () =>
 		{

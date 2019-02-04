@@ -120,8 +120,6 @@ class WebSocketTransport extends EnhancedEventEmitter
 				this._options.requestOptions,
 				this._options.clientConfig);
 
-			this.safeEmit('connecting', currentAttempt);
-
 			this._ws.onopen = () =>
 			{
 				if (this._closed)

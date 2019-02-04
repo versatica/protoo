@@ -1,6 +1,6 @@
 {
   "name": "protoo-client",
-  "version": "4.0.0-dev",
+  "version": "4.0.0",
   "description": "protoo JavaScript client module",
   "author": "Iñaki Baz Castillo <ibc@aliax.net>",
   "homepage": "https://protoojs.org",
