@@ -1,12 +1,12 @@
-'use strict';
-
-// process.env.DEBUG = 'protoo*';
-
-const tap = require('tap');
+const { toBeType } = require('jest-tobetype');
 const http = require('http');
 const url = require('url');
 const protooServer = require('../server');
 const protooClient = require('../client');
+const protooServerPkg = require('../server/package.json');
+const protooClientPkg = require('../client/package.json');
+
+expect.extend({ toBeType });
 
 const CLIENT_WS_OPTIONS =
 {
@@ -16,178 +16,182 @@ const CLIENT_WS_OPTIONS =
 	}
 };
 
-tap.test('create server and connects clients', { timeout: 500 }, (t) =>
+let httpServer;
+let peerA;
+let peerB;
+let serverPeerA;
+let serverPeerB;
+
+beforeEach(clear);
+afterEach(clear);
+
+function clear()
 {
-	const httpServer = http.createServer();
+	if (httpServer)
+		httpServer.close();
+
+	if (peerA)
+		peerA.close();
+
+	if (peerB)
+		peerB.close();
+}
+
+test('protooClient.version exposes the package version', () =>
+{
+	expect(protooClient.version).toBeType('string');
+	expect(protooClient.version).toBe(protooClientPkg.version);
+}, 500);
+
+test('protooServer.version exposes the package version', () =>
+{
+	expect(protooServer.version).toBeType('string');
+	expect(protooServer.version).toBe(protooServerPkg.version);
+}, 500);
+
+test('full scenario with protooClient and protooServer', async () =>
+{
+	httpServer = http.createServer();
+
 	const wsServer = new protooServer.WebSocketServer(httpServer);
 	const room = new protooServer.Room();
 
-	let clientPeerA;
-	let clientPeerB;
-	let serverPeerA;
-	let serverPeerB;
-
-	t.tearDown(() =>
+	await new Promise((resolve) =>
 	{
-		httpServer.close();
-		room.close();
+		httpServer.listen(9999, '127.0.0.1', resolve);
 	});
 
-	return Promise.resolve()
-		.then(() =>
+	const onServerConnectionRequest = jest.fn();
+	const onServerRequest = jest.fn();
+	const onServerNotification = jest.fn();
+	const onClientNotification = jest.fn();
+
+	wsServer.on('connectionrequest', async (info, accept) =>
+	{
+		onServerConnectionRequest();
+
+		// The client indicates the peerId in the URL query.
+		const u = url.parse(info.request.url, true);
+		const peerId = u.query.peerId;
+		const transport = accept();
+		const peer = await room.createPeer(peerId, transport);
+
+		switch (peerId)
 		{
-			return new Promise((resolve) =>
+			case 'A':
+				serverPeerA = peer;
+				break;
+			case 'B':
+				serverPeerB = peer;
+				break;
+		}
+
+		peer.on('request', (request, accept, /* reject */) => // eslint-disable-line no-shadow
+		{
+			onServerRequest();
+
+			if (request.method === 'hello')
+				accept({ bar: 111 });
+		});
+
+		peer.on('notification', (notification) =>
+		{
+			onServerNotification();
+
+			if (notification.method === 'bye')
 			{
-				httpServer.listen(9999, '127.0.0.1', resolve);
-			});
-		})
-		.then(() =>
+				expect(notification.data).toEqual({});
+
+				peer.notify('bye');
+			}
+		});
+	});
+
+	// Create peerA.
+	{
+		const transport = new protooClient.WebSocketTransport(
+			'ws://127.0.0.1:9999/?peerId=A', CLIENT_WS_OPTIONS);
+
+		peerA = new protooClient.Peer(transport);
+
+		await new Promise((resolve) => peerA.on('open', resolve));
+
+		expect(onServerConnectionRequest).toHaveBeenCalledTimes(1);
+		expect(room.hasPeer('A')).toBe(true);
+		expect(room.peers).toEqual([ serverPeerA ]);
+
+		const data = await peerA.request('hello', { foo: 111 });
+
+		expect(onServerRequest).toHaveBeenCalledTimes(1);
+		expect(data).toEqual({ bar: 111 });
+
+		await peerA.notify('bye');
+
+		await new Promise((resolve) =>
 		{
-			wsServer.on('connectionrequest', (info, accept) =>
+			peerA.on('notification', (/* notification */) =>
 			{
-				// The client indicates the peerId in the URL query.
-				const u = url.parse(info.request.url, true);
-				const peerId = u.query['peer-id'];
-				const transport = accept();
-
-				let peer;
-
-				try
-				{
-					peer = room.createPeer(peerId, transport);
-
-					t.pass(`room.createPeer() succeeded [peerId:${peer.id}]`);
-				}
-				catch (error)
-				{
-					if (peerId === 'A' && room.hasPeer('A'))
-						t.pass('room.createPeer() failed for duplicated peer [peerId:A]');
-					else
-						t.fail(`room.createPeer() failed: ${error}`);
-				}
-			});
-		})
-		.then(() =>
-		{
-			return new Promise((resolve) =>
-			{
-				const transport = new protooClient.WebSocketTransport(
-					'ws://127.0.0.1:9999/?peer-id=A', CLIENT_WS_OPTIONS);
-
-				clientPeerA = new protooClient.Peer(transport);
-				clientPeerA.data.id = 'A';
-				clientPeerA.on('open', () =>
-				{
-					t.pass(`protoo-client Peer connected [peerId:${clientPeerA.data.id}]`);
-
-					serverPeerA = room.peers[0];
-					resolve();
-				});
-			});
-		})
-		.then(() =>
-		{
-			return new Promise((resolve) =>
-			{
-				const transport = new protooClient.WebSocketTransport(
-					'ws://127.0.0.1:9999/?peer-id=B', CLIENT_WS_OPTIONS);
-
-				clientPeerB = new protooClient.Peer(transport);
-				clientPeerB.data.id = 'B';
-				clientPeerB.on('open', () =>
-				{
-					t.pass(`protoo-client Peer connected [peerId:${clientPeerB.data.id}]`);
-
-					serverPeerB = room.peers[1];
-					resolve();
-				});
-			});
-		})
-		.then(() =>
-		{
-			return new Promise((resolve) =>
-			{
-				const transport = new protooClient.WebSocketTransport(
-					'ws://127.0.0.1:9999/?peer-id=A', CLIENT_WS_OPTIONS);
-				const duplicatedClientPeerA = new protooClient.Peer(transport);
-
-				duplicatedClientPeerA.on('close', () =>
-				{
-					t.pass('protoo-client Peer with same could not connect [peerId:A]');
-
-					resolve();
-				});
-			});
-		})
-		.then(() =>
-		{
-			t.equal(room.peers.length, 2, 'room has 2 peers');
-			t.ok(room.hasPeer('A'), 'room.hasPeer("A") returns true');
-			t.ok(room.hasPeer('B'), 'room.hasPeer("B") returns true');
-			t.notOk(room.hasPeer('C'), 'room.hasPeer("C") returns false');
-			t.equal(room.getPeer('A'), serverPeerA, 'room.getPeer("A") matches serverPeerA');
-			t.equal(room.getPeer('B'), serverPeerB, 'room.getPeer("A") matches serverPeerB');
-			t.equal(clientPeerA.data.id, serverPeerA.id, 'clientPeerA.data.id matches serverPeerA.id');
-			t.equal(clientPeerB.data.id, serverPeerB.id, 'clientPeerB.data.id matches serverPeerB.id');
-		})
-		.then(() =>
-		{
-			return t.test('send request and receive expected response', { timeout: 500 }, (t2) =>
-			{
-				serverPeerA.once('request', (request, accept) =>
-				{
-					accept({ baz: 'lalala' });
-
-					t2.equal(request.method, 'chicken', 'request.method matches at serverPeerA');
-					t2.same(request.data, { foo: 123 }, 'request.data matches at serverPeerA');
-				});
-
-				t2.pass('calling clientPeerA.send()');
-				clientPeerA.send('chicken', { foo: 123 })
-					.then((data) =>
-					{
-						t2.pass('clientPeerA.send() succeeded');
-						t2.same(data, { baz: 'lalala' }, 'response.data matches at clientPeerA');
-
-						t2.end();
-					})
-					.catch((error) =>
-					{
-						t2.fail(`clientPeerA.send() failed: ${error}`);
-					});
-			});
-		})
-		.then(() =>
-		{
-			return t.test('spread notification to all the other clients', { timeout: 500 }, (t2) =>
-			{
-				serverPeerA.once('notification', (notification) =>
-				{
-					t2.equal(notification.method, 'message', 'notification.method matches at serverPeerA');
-					t2.same(notification.data, { text: 'hello' }, 'notification.data matches at serverPeerA');
-
-					room.spread(notification.method, notification.data, [ serverPeerA ]);
-				});
-
-				clientPeerB.on('notification', (notification) =>
-				{
-					t2.pass('clientPeerB received the notification');
-					t2.equal(notification.method, 'message', 'notification.method matches at clientPeerB');
-					t2.same(notification.data, { text: 'hello' }, 'notification.data matches at clientPeerB');
-
-					t2.end();
-				});
-
-				t2.pass('calling clientPeerA.notify()');
-				clientPeerA.notify('message', { text: 'hello' })
-					.then(() =>
-					{
-						t2.pass('clientPeerA.notify() succeeded');
-					})
-					.catch((error) =>
-					{
-						t2.fail(`clientPeerA.notify() failed: ${error}`);
-					});
+				onClientNotification();
+				resolve();
 			});
 		});
-});
+
+		expect(onServerNotification).toHaveBeenCalledTimes(1);
+		expect(onClientNotification).toHaveBeenCalledTimes(1);
+
+		peerA.close();
+
+		expect(peerA.closed).toBe(true);
+		expect(transport.closed).toBe(true);
+
+		await new Promise((resolve) => serverPeerA.on('close', resolve));
+
+		expect(serverPeerA.closed).toBe(true);
+		expect(room.hasPeer('A')).toBe(false);
+		expect(room.peers).toEqual([]);
+	}
+
+	// Create peerB.
+	{
+		const transport = new protooClient.WebSocketTransport(
+			'ws://127.0.0.1:9999/?peerId=B', CLIENT_WS_OPTIONS);
+
+		peerB = new protooClient.Peer(transport);
+
+		await new Promise((resolve) => peerB.on('open', resolve));
+
+		expect(onServerConnectionRequest).toHaveBeenCalledTimes(2);
+		expect(room.hasPeer('B')).toBe(true);
+		expect(room.peers).toEqual([ serverPeerB ]);
+
+		const data = await peerB.request('hello', { foo: 111 });
+
+		expect(onServerRequest).toHaveBeenCalledTimes(2);
+		expect(data).toEqual({ bar: 111 });
+
+		await peerB.notify('bye');
+
+		await new Promise((resolve) =>
+		{
+			peerB.on('notification', (/* notification */) =>
+			{
+				onClientNotification();
+				resolve();
+			});
+		});
+
+		expect(onServerNotification).toHaveBeenCalledTimes(2);
+		expect(onClientNotification).toHaveBeenCalledTimes(2);
+
+		serverPeerB.close();
+
+		expect(serverPeerB.closed).toBe(true);
+
+		await new Promise((resolve) => peerB.on('close', resolve));
+
+		expect(peerB.closed).toBe(true);
+		expect(transport.closed).toBe(true);
+		expect(room.hasPeer('B')).toBe(false);
+		expect(room.peers).toEqual([]);
+	}
+}, 4000);

@@ -1,19 +1,24 @@
-const logger = require('./logger')();
+const { version } = require('../package.json');
 const Room = require('./Room');
-const transports = require('./transports');
-const PKG = require('../package.json');
+const WebSocketServer = require('./transports/WebSocketServer');
 
-logger.debug('%s version %s', PKG.name, PKG.version);
+/**
+ * Expose mediasoup version.
+ *
+ * @type {String}
+ */
+exports.version = version;
 
-module.exports =
-{
-	/**
-	 * Expose Room.
-	 */
-	Room : Room,
+/**
+ * Expose Room class.
+ *
+ * @type {Class}
+ */
+exports.Room = Room;
 
-	/**
-	 * Expose the built-in WebSocketServer.
-	 */
-	WebSocketServer : transports.WebSocketServer
-};
+/**
+ * Expose WebSocketServer class.
+ *
+ * @type {Class}
+ */
+exports.WebSocketServer = WebSocketServer;

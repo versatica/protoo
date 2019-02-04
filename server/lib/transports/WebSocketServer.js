@@ -1,18 +1,25 @@
-const EventEmitter = require('events').EventEmitter;
 const websocket = require('websocket');
-const logger = require('../logger')('WebSocketServer');
+const Logger = require('../Logger');
+const EnhancedEventEmitter = require('../EnhancedEventEmitter');
 const WebSocketTransport = require('./WebSocketTransport');
 
 const WS_SUBPROTOCOL = 'protoo';
 
-class WebSocketServer extends EventEmitter
+const logger = new Logger('WebSocketServer');
+
+class WebSocketServer extends EnhancedEventEmitter
 {
+	/**
+	 * @param {http.Server} httpServer - Node HTTP/HTTPS compatible server.
+	 * @param {Object} [options] - Options for WebSocket-Node.WebSocketServer.
+	 *
+	 * @emits {info: Object, accept: Function, reject: Function} connectionrequest
+	 */
 	constructor(httpServer, options)
 	{
-		logger.debug('constructor() [option:%o]', options);
+		super(logger);
 
-		super();
-		this.setMaxListeners(Infinity);
+		logger.debug('constructor() [option:%o]', options);
 
 		// Merge some settings into the given options.
 		options = Object.assign(
@@ -23,15 +30,17 @@ class WebSocketServer extends EventEmitter
 			},
 			options);
 
-		// Run a websocket.Server instance.
+		// Run a WebSocket server instance.
+		// @type {WebSocket-Node.WebSocketServer}
 		this._wsServer = new websocket.server(options);
 
-		this._wsServer.on('request', (request) =>
-		{
-			this._onRequest(request);
-		});
+		this._wsServer.on('request', (request) => this._onRequest(request));
 	}
 
+	/**
+	 * Stop listening for protoo WebSocket connections. This method does NOT
+	 * close the HTTP/HTTPS server.
+	 */
 	stop()
 	{
 		logger.debug('stop()');
@@ -51,7 +60,7 @@ class WebSocketServer extends EventEmitter
 		{
 			logger.warn('_onRequest() | invalid/missing Sec-WebSocket-Protocol');
 
-			request.reject(403, 'Invalid/missing Sec-WebSocket-Protocol');
+			request.reject(403, 'invalid/missing Sec-WebSocket-Protocol');
 
 			return;
 		}
@@ -63,75 +72,84 @@ class WebSocketServer extends EventEmitter
 				'_onRequest() | no listeners for "connectionrequest" event, ' +
 				'rejecting connection request');
 
-			request.reject(500, 'No listeners for "connectionrequest" event');
+			request.reject(500, 'no listeners for "connectionrequest" event');
 
 			return;
 		}
 
 		let replied = false;
 
-		// Emit 'connectionrequest' event.
-		this.emit('connectionrequest',
-			// Connection data.
-			{
-				request : request.httpRequest,
-				origin  : request.origin,
-				socket  : request.httpRequest.socket
-			},
-			// accept() function.
-			() =>
-			{
-				if (replied)
+		try
+		{
+			// Emit 'connectionrequest' event.
+			this.emit('connectionrequest',
+				// Connection data.
 				{
-					logger.warn(
-						'_onRequest() | cannot call accept(), connection request already replied');
-
-					return;
-				}
-
-				replied = true;
-
-				// Get the WebSocketConnection instance.
-				const connection = request.accept(WS_SUBPROTOCOL, request.origin);
-
-				// Create a new Protoo WebSocket transport.
-				const transport = new WebSocketTransport(connection);
-
-				logger.debug('_onRequest() | accept() called');
-
-				// Return the transport.
-				return transport;
-			},
-			// reject() function.
-			(code, reason) =>
-			{
-				if (replied)
+					request : request.httpRequest,
+					origin  : request.origin,
+					socket  : request.httpRequest.socket
+				},
+				// accept() function.
+				() =>
 				{
-					logger.warn(
-						'_onRequest() | cannot call reject(), connection request already replied');
+					if (replied)
+					{
+						logger.warn(
+							'_onRequest() | cannot call accept(), connection request already replied');
 
-					return;
-				}
+						return;
+					}
 
-				if (code instanceof Error)
+					replied = true;
+
+					// Get the WebSocketConnection instance.
+					const connection = request.accept(WS_SUBPROTOCOL, request.origin);
+
+					// Create a new Protoo WebSocket transport.
+					const transport = new WebSocketTransport(connection);
+
+					logger.debug('_onRequest() | accept() called');
+
+					// Return the transport.
+					return transport;
+				},
+				// reject() function.
+				(code, reason) =>
 				{
-					code = 500;
-					reason = code.toString();
-				}
-				else if (reason instanceof Error)
-				{
-					reason = reason.toString();
-				}
+					if (replied)
+					{
+						logger.warn(
+							'_onRequest() | cannot call reject(), connection request already replied');
 
-				replied = true;
-				code = code || 403;
-				reason = reason || 'Rejected';
+						return;
+					}
 
-				logger.debug(
-					'_onRequest() | reject() called [code:%s | reason:"%s"]', code, reason);
+					if (code instanceof Error)
+					{
+						code = 500;
+						reason = String(code);
+					}
+					else if (reason instanceof Error)
+					{
+						reason = String(reason);
+					}
 
-				request.reject(code, reason);
-			});
+					replied = true;
+					code = code || 403;
+					reason = reason || 'Rejected';
+
+					logger.debug(
+						'_onRequest() | reject() called [code:%s | reason:"%s"]', code, reason);
+
+					request.reject(code, reason);
+				});
+		}
+		catch (error)
+		{
+			logger.error('_onRequest() | unexpected error:%o', error);
+
+			request.reject(500, String(error));
+		}
 	}
 }
 

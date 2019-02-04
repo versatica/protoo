@@ -2,7 +2,6 @@ module.exports =
 {
 	env:
 	{
-		browser: false,
 		es6: true,
 		node: true
 	},
@@ -67,7 +66,7 @@ module.exports =
 		'max-len': [ 2, 90,
 		{
 			tabWidth: 2,
-			comments: 110,
+			comments: 90,
 			ignoreUrls: true,
 			ignoreStrings: true,
 			ignoreTemplateLiterals: true,
@@ -113,7 +112,7 @@ module.exports =
 		'no-mixed-spaces-and-tabs': 2,
 		'no-multi-spaces': 2,
 		'no-multi-str': 2,
-		'no-multiple-empty-lines': [ 2, { max: 1, maxEOF: 0, maxBOF: 0 } ],
+		'no-multiple-empty-lines': [ 1, { max: 1, maxEOF: 0, maxBOF: 0 } ],
 		'no-native-reassign': 2,
 		'no-negated-in-lhs': 2,
 		'no-new': 2,

@@ -1,7 +1,7 @@
-const EventEmitter = require('events').EventEmitter;
 const W3CWebSocket = require('websocket').w3cwebsocket;
 const retry = require('retry');
-const logger = require('../logger')('WebSocketTransport');
+const Logger = require('../Logger');
+const EnhancedEventEmitter = require('../EnhancedEventEmitter');
 const Message = require('../Message');
 
 const WS_SUBPROTOCOL = 'protoo';
@@ -13,27 +13,38 @@ const DEFAULT_RETRY_OPTIONS =
 	maxTimeout : 8 * 1000
 };
 
-class WebSocketTransport extends EventEmitter
+const logger = new Logger('WebSocketTransport');
+
+class WebSocketTransport extends EnhancedEventEmitter
 {
+	/**
+	 * @param {String} url - WebSocket URL.
+	 * @param {Object} [options] - Options for WebSocket-Node.W3CWebSocket and retry.
+	 */
 	constructor(url, options)
 	{
-		logger.debug('constructor() [url:"%s", options:%o]', url, options);
+		super(logger);
 
-		super();
-		this.setMaxListeners(Infinity);
+		logger.debug('constructor() [url:%s, options:%o]', url, options);
 
-		// Save URL and options.
+		// Closed flag.
+		// @type {Boolean}
+		this._closed = false;
+
+		// WebSocket URL.
+		// @type {String}
 		this._url = url;
+
+		// Options.
+		// @type {Object}
 		this._options = options || {};
 
 		// WebSocket instance.
+		// @type {WebSocket}
 		this._ws = null;
 
-		// Closed flag.
-		this._closed = false;
-
-		// Set WebSocket
-		this._setWebSocket();
+		// Run the WebSocket.
+		this._runWebSocket();
 	}
 
 	get closed()
@@ -41,35 +52,16 @@ class WebSocketTransport extends EventEmitter
 		return this._closed;
 	}
 
-	send(message)
-	{
-		if (this._closed)
-			return Promise.reject(new Error('transport closed'));
-
-		try
-		{
-			this._ws.send(JSON.stringify(message));
-
-			return Promise.resolve();
-		}
-		catch (error)
-		{
-			logger.error('send() | error sending message: %o', error);
-
-			return Promise.reject(error);
-		}
-	}
-
 	close()
 	{
-		logger.debug('close()');
-
 		if (this._closed)
 			return;
 
+		logger.debug('close()');
+
 		// Don't wait for the WebSocket 'close' event, do it now.
 		this._closed = true;
-		this.emit('close');
+		this.safeEmit('close');
 
 		try
 		{
@@ -85,10 +77,28 @@ class WebSocketTransport extends EventEmitter
 		}
 	}
 
-	_setWebSocket()
+	async send(message)
 	{
-		const options = this._options;
-		const operation = retry.operation(this._options.retry || DEFAULT_RETRY_OPTIONS);
+		if (this._closed)
+			throw new Error('transport closed');
+
+		try
+		{
+			this._ws.send(JSON.stringify(message));
+		}
+		catch (error)
+		{
+			logger.warn('send() failed:%o', error);
+
+			throw error;
+		}
+	}
+
+	_runWebSocket()
+	{
+		const operation =
+			retry.operation(this._options.retry || DEFAULT_RETRY_OPTIONS);
+
 		let wasConnected = false;
 
 		operation.attempt((currentAttempt) =>
@@ -100,18 +110,17 @@ class WebSocketTransport extends EventEmitter
 				return;
 			}
 
-			logger.debug('_setWebSocket() [currentAttempt:%s]', currentAttempt);
+			logger.debug('_runWebSocket() [currentAttempt:%s]', currentAttempt);
 
 			this._ws = new W3CWebSocket(
 				this._url,
 				WS_SUBPROTOCOL,
-				options.origin,
-				options.headers,
-				options.requestOptions,
-				options.clientConfig
-			);
+				this._options.origin,
+				this._options.headers,
+				this._options.requestOptions,
+				this._options.clientConfig);
 
-			this.emit('connecting', currentAttempt);
+			this.safeEmit('connecting', currentAttempt);
 
 			this._ws.onopen = () =>
 			{
@@ -121,7 +130,7 @@ class WebSocketTransport extends EventEmitter
 				wasConnected = true;
 
 				// Emit 'open' event.
-				this.emit('open');
+				this.safeEmit('open');
 			};
 
 			this._ws.onclose = (event) =>
@@ -129,7 +138,8 @@ class WebSocketTransport extends EventEmitter
 				if (this._closed)
 					return;
 
-				logger.warn('WebSocket "close" event [wasClean:%s, code:%s, reason:"%s"]',
+				logger.warn(
+					'WebSocket "close" event [wasClean:%s, code:%s, reason:"%s"]',
 					event.wasClean, event.code, event.reason);
 
 				// Don't retry if code is 4000 (closed by the server).
@@ -138,7 +148,7 @@ class WebSocketTransport extends EventEmitter
 					// If it was not connected, try again.
 					if (!wasConnected)
 					{
-						this.emit('failed', currentAttempt);
+						this.safeEmit('failed', currentAttempt);
 
 						if (this._closed)
 							return;
@@ -151,12 +161,12 @@ class WebSocketTransport extends EventEmitter
 					{
 						operation.stop();
 
-						this.emit('disconnected');
+						this.safeEmit('disconnected');
 
 						if (this._closed)
 							return;
 
-						this._setWebSocket();
+						this._runWebSocket();
 
 						return;
 					}
@@ -165,7 +175,7 @@ class WebSocketTransport extends EventEmitter
 				this._closed = true;
 
 				// Emit 'close' event.
-				this.emit('close');
+				this.safeEmit('close');
 			};
 
 			this._ws.onerror = () =>
@@ -188,13 +198,14 @@ class WebSocketTransport extends EventEmitter
 
 				if (this.listenerCount('message') === 0)
 				{
-					logger.error('no listeners for WebSocket "message" event, ignoring received message');
+					logger.error(
+						'no listeners for WebSocket "message" event, ignoring received message');
 
 					return;
 				}
 
 				// Emit 'message' event.
-				this.emit('message', message);
+				this.safeEmit('message', message);
 			};
 		});
 	}

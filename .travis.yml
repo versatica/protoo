@@ -1,25 +1,26 @@
-# Just apply Travis-CI for these branches
 branches:
   only:
   - master
-  - experimental
+  - v4
+
+dist: trusty
 
 language: node_js
 
 node_js:
-- 6
 - 8
 - 10
 
 install:
-- cd client/ && npm install && cd ..
-- cd server/ && npm install && cd ..
-- cd test/ && npm install && cd ..
+- npm install --prefix client/
+- npm install --prefix server/
+- npm install --prefix test/
 
 script:
-- cd client/ && npm run lint && cd ..
-- cd server/ && npm run lint && cd ..
-- cd test/ && npm run lint && npm test
+- npm run lint --prefix client/
+- npm run lint --prefix server/
+- npm run lint --prefix test/
+- npm test --prefix test/
 
 notifications:
   email:

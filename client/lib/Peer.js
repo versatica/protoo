@@ -1,124 +1,177 @@
-const EventEmitter = require('events').EventEmitter;
-const logger = require('./logger')('Peer');
+const Logger = require('./Logger');
+const EnhancedEventEmitter = require('./EnhancedEventEmitter');
 const Message = require('./Message');
 
-// Max time waiting for a response.
-const REQUEST_TIMEOUT = 20000;
+const logger = new Logger('Peer');
 
-class Peer extends EventEmitter
+class Peer extends EnhancedEventEmitter
 {
+	/**
+	 * @param {protoo.Transport} transport
+	 *
+	 * @emits {currentAttempt: Number} connecting
+	 * @emits open
+	 * @emits disconnected
+	 * @emits failed
+	 * @emits close
+	 * @emits {request: protoo.Request, accept: Function, reject: Function} request
+	 * @emits {notification: protoo.Notification} notification
+	 */
 	constructor(transport)
 	{
+		super(logger);
+
 		logger.debug('constructor()');
 
-		super();
-		this.setMaxListeners(Infinity);
-
-		// Transport.
-		this._transport = transport;
-
 		// Closed flag.
+		// @type {Boolean}
 		this._closed = false;
 
+		// Transport.
+		// @type {protoo.Transport}
+		this._transport = transport;
+
 		// Custom data object.
+		// @type {Object}
 		this._data = {};
 
-		// Map of sent requests' handlers indexed by request.id.
-		this._requestHandlers = new Map();
+		// Map of pending sent request objects indexed by request id.
+		// @type {Map<Number, Object>}
+		this._sents = new Map();
 
 		// Handle transport.
 		this._handleTransport();
 	}
 
-	get data()
-	{
-		return this._data;
-	}
-
-	set data(obj)
-	{
-		this._data = obj || {};
-	}
-
+	/**
+	 * Whether the Peer is closed.
+	 *
+	 * @returns {Boolean}
+	 */
 	get closed()
 	{
 		return this._closed;
 	}
 
-	send(method, data)
+	/**
+	 * App custom data.
+	 *
+	 * @returns {Object}
+	 */
+	get data()
 	{
-		const request = Message.requestFactory(method, data);
-
-		return this._transport.send(request)
-			.then(() =>
-			{
-				return new Promise((pResolve, pReject) =>
-				{
-					const handler =
-					{
-						resolve : (data2) =>
-						{
-							if (!this._requestHandlers.delete(request.id))
-								return;
-
-							clearTimeout(handler.timer);
-							pResolve(data2);
-						},
-
-						reject : (error) =>
-						{
-							if (!this._requestHandlers.delete(request.id))
-								return;
-
-							clearTimeout(handler.timer);
-							pReject(error);
-						},
-
-						timer : setTimeout(() =>
-						{
-							if (!this._requestHandlers.delete(request.id))
-								return;
-
-							pReject(new Error('request timeout'));
-						}, REQUEST_TIMEOUT),
-
-						close : () =>
-						{
-							clearTimeout(handler.timer);
-							pReject(new Error('peer closed'));
-						}
-					};
-
-					// Add handler stuff to the Map.
-					this._requestHandlers.set(request.id, handler);
-				});
-			});
+		return this._data;
 	}
 
-	notify(method, data)
+	/**
+	 * Invalid setter.
+	 */
+	set data(data) // eslint-disable-line no-unused-vars
 	{
-		const notification = Message.notificationFactory(method, data);
-
-		return this._transport.send(notification);
+		throw new Error('cannot override data object');
 	}
 
+	/**
+	 * Close this Peer and its Transport.
+	 */
 	close()
 	{
-		logger.debug('close()');
-
 		if (this._closed)
 			return;
 
+		logger.debug('close()');
+
 		this._closed = true;
 
-		// Close transport.
+		// Close Transport.
 		this._transport.close();
 
-		// Close every pending request handler.
-		this._requestHandlers.forEach((handler) => handler.close());
+		// Close every pending sent.
+		for (const sent of this._sents.values())
+		{
+			sent.close();
+		}
 
 		// Emit 'close' event.
-		this.emit('close');
+		this.safeEmit('close');
+	}
+
+	/**
+	 * Send a protoo request to the server-side Room.
+	 *
+	 * @param {String} method
+	 * @param {Object} [data]
+	 *
+	 * @async
+	 * @returns {Object} The response data Object if a success response is received.
+	 */
+	async request(method, data = undefined)
+	{
+		const request = Message.createRequest(method, data);
+
+		this._logger.debug('request() [method:%s, id:%s]', method, request.id);
+
+		// This may throw.
+		this._transport.send(request);
+
+		return new Promise((pResolve, pReject) =>
+		{
+			const timeout = 1500 * (15 + (0.1 * this._sents.size));
+			const sent =
+			{
+				id      : request.id,
+				method  : request.method,
+				resolve : (data2) =>
+				{
+					if (!this._sents.delete(request.id))
+						return;
+
+					clearTimeout(sent.timer);
+					pResolve(data2);
+				},
+				reject : (error) =>
+				{
+					if (!this._sents.delete(request.id))
+						return;
+
+					clearTimeout(sent.timer);
+					pReject(error);
+				},
+				timer : setTimeout(() =>
+				{
+					if (!this._sents.delete(request.id))
+						return;
+
+					pReject(new Error('request timeout'));
+				}, timeout),
+				close : () =>
+				{
+					clearTimeout(sent.timer);
+					pReject(new Error('peer closed'));
+				}
+			};
+
+			// Add sent stuff to the map.
+			this._sents.set(request.id, sent);
+		});
+	}
+
+	/**
+	 * Send a protoo notification to the server-side Room.
+	 *
+	 * @param {String} method
+	 * @param {Object} [data]
+	 *
+	 * @async
+	 */
+	async notify(method, data = undefined)
+	{
+		const notification = Message.createNotification(method, data);
+
+		this._logger.debug('notify() [method:%s]', method);
+
+		// This may throw.
+		this._transport.send(notification);
 	}
 
 	_handleTransport()
@@ -126,16 +179,26 @@ class Peer extends EventEmitter
 		if (this._transport.closed)
 		{
 			this._closed = true;
-			setTimeout(() => this.emit('close'));
+
+			setTimeout(() =>
+			{
+				if (this._closed)
+					return;
+
+				this.safeEmit('close');
+			});
 
 			return;
 		}
 
 		this._transport.on('connecting', (currentAttempt) =>
 		{
+			if (this._closed)
+				return;
+
 			logger.debug('emit "connecting" [currentAttempt:%s]', currentAttempt);
 
-			this.emit('connecting', currentAttempt);
+			this.safeEmit('connecting', currentAttempt);
 		});
 
 		this._transport.on('open', () =>
@@ -146,21 +209,27 @@ class Peer extends EventEmitter
 			logger.debug('emit "open"');
 
 			// Emit 'open' event.
-			this.emit('open');
+			this.safeEmit('open');
 		});
 
 		this._transport.on('disconnected', () =>
 		{
+			if (this._closed)
+				return;
+
 			logger.debug('emit "disconnected"');
 
-			this.emit('disconnected');
+			this.safeEmit('disconnected');
 		});
 
 		this._transport.on('failed', (currentAttempt) =>
 		{
+			if (this._closed)
+				return;
+
 			logger.debug('emit "failed" [currentAttempt:%s]', currentAttempt);
 
-			this.emit('failed', currentAttempt);
+			this.safeEmit('failed', currentAttempt);
 		});
 
 		this._transport.on('close', () =>
@@ -173,95 +242,92 @@ class Peer extends EventEmitter
 			logger.debug('emit "close"');
 
 			// Emit 'close' event.
-			this.emit('close');
+			this.safeEmit('close');
 		});
 
 		this._transport.on('message', (message) =>
 		{
 			if (message.request)
-			{
 				this._handleRequest(message);
-			}
 			else if (message.response)
-			{
 				this._handleResponse(message);
-			}
 			else if (message.notification)
-			{
 				this._handleNotification(message);
-			}
 		});
 	}
 
 	_handleRequest(request)
 	{
-		this.emit('request',
-			// Request.
-			request,
-			// accept() function.
-			(data) =>
-			{
-				const response = Message.successResponseFactory(request, data);
-
-				this._transport.send(response)
-					.catch((error) =>
-					{
-						logger.warn(
-							'accept() failed, response could not be sent: %o', error);
-					});
-			},
-			// reject() function.
-			(errorCode, errorReason) =>
-			{
-				if (errorCode instanceof Error)
+		try
+		{
+			this.emit('request',
+				// Request.
+				request,
+				// accept() function.
+				(data) =>
 				{
-					errorReason = errorCode.toString();
-					errorCode = 500;
-				}
-				else if (typeof errorCode === 'number' && errorReason instanceof Error)
+					const response = Message.createSuccessResponse(request, data);
+
+					this._transport.send(response)
+						.catch(() => {});
+				},
+				// reject() function.
+				(errorCode, errorReason) =>
 				{
-					errorReason = errorReason.toString();
-				}
-
-				const response =
-					Message.errorResponseFactory(request, errorCode, errorReason);
-
-				this._transport.send(response)
-					.catch((error) =>
+					if (errorCode instanceof Error)
 					{
-						logger.warn(
-							'reject() failed, response could not be sent: %o', error);
-					});
-			});
+						errorCode = 500;
+						errorReason = String(errorCode);
+					}
+					else if (typeof errorCode === 'number' && errorReason instanceof Error)
+					{
+						errorReason = String(errorReason);
+					}
+
+					const response =
+						Message.createErrorResponse(request, errorCode, errorReason);
+
+					this._transport.send(response)
+						.catch(() => {});
+				});
+		}
+		catch (error)
+		{
+			const response = Message.createErrorResponse(request, 500, String(error));
+
+			this._transport.send(response)
+				.catch(() => {});
+		}
 	}
 
 	_handleResponse(response)
 	{
-		const handler = this._requestHandlers.get(response.id);
+		const sent = this._sents.get(response.id);
 
-		if (!handler)
+		if (!sent)
 		{
-			logger.error('received response does not match any sent request');
+			logger.error(
+				'received response does not match any sent request [id:%s]', response.id);
 
 			return;
 		}
 
 		if (response.ok)
 		{
-			handler.resolve(response.data);
+			sent.resolve(response.data);
 		}
 		else
 		{
 			const error = new Error(response.errorReason);
 
 			error.code = response.errorCode;
-			handler.reject(error);
+			sent.reject(error);
 		}
 	}
 
 	_handleNotification(notification)
 	{
-		this.emit('notification', notification);
+		this.safeEmit('notification', notification);
 	}
 }
 

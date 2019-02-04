@@ -1,5 +1,7 @@
-const logger = require('./logger')('Message');
-const utils = require('./utils');
+const Logger = require('./Logger');
+const { generateRandomNumber } = require('./utils');
+
+const logger = new Logger('Message');
 
 class Message
 {
@@ -46,7 +48,6 @@ class Message
 			}
 
 			message.id = object.id;
-
 			message.method = object.method;
 			message.data = object.data || {};
 		}
@@ -73,6 +74,7 @@ class Message
 			// Error.
 			else
 			{
+				message.ok = false;
 				message.errorCode = object.errorCode;
 				message.errorReason = object.errorReason;
 			}
@@ -103,12 +105,12 @@ class Message
 		return message;
 	}
 
-	static requestFactory(method, data)
+	static createRequest(method, data)
 	{
 		const request =
 		{
 			request : true,
-			id      : utils.randomNumber(),
+			id      : generateRandomNumber(),
 			method  : method,
 			data    : data || {}
 		};
@@ -116,7 +118,7 @@ class Message
 		return request;
 	}
 
-	static successResponseFactory(request, data)
+	static createSuccessResponse(request, data)
 	{
 		const response =
 		{
@@ -129,7 +131,7 @@ class Message
 		return response;
 	}
 
-	static errorResponseFactory(request, errorCode, errorReason)
+	static createErrorResponse(request, errorCode, errorReason)
 	{
 		const response =
 		{
@@ -142,7 +144,7 @@ class Message
 		return response;
 	}
 
-	static notificationFactory(method, data)
+	static createNotification(method, data)
 	{
 		const notification =
 		{

@@ -1,27 +1,30 @@
 {
   "name": "protoo-server",
-  "version": "3.0.3",
+  "version": "4.0.0-dev",
   "description": "protoo Node.js server module",
   "author": "Iñaki Baz Castillo <ibc@aliax.net>",
   "homepage": "https://protoojs.org",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ibc/protoo.git"
+    "url": "https://github.com/ibc/protoo.git"
   },
   "main": "lib/index.js",
+  "keywords": [
+    "nodejs",
+    "websocket"
+  ],
   "engines": {
-    "node": ">=6.4"
+    "node": ">=8.0.0"
   },
   "scripts": {
     "lint": "eslint -c .eslintrc.js lib"
   },
   "dependencies": {
-    "debug": "^4.1.0",
-    "random-number": "^0.0.9",
+    "debug": "^4.1.1",
     "websocket": "^1.0.28"
   },
   "devDependencies": {
-    "eslint": "^5.10.0"
+    "eslint": "^5.13.0"
   }
 }

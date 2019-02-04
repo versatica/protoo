@@ -1,24 +1,28 @@
-const EventEmitter = require('events').EventEmitter;
-const logger = require('../logger')('WebSocketTransport');
+const Logger = require('../Logger');
+const EnhancedEventEmitter = require('../EnhancedEventEmitter');
 const Message = require('../Message');
 
-class WebSocketTransport extends EventEmitter
+const logger = new Logger('WebSocketTransport');
+
+class WebSocketTransport extends EnhancedEventEmitter
 {
 	constructor(connection)
 	{
+		super(logger);
+
 		logger.debug('constructor()');
 
-		super();
-		this.setMaxListeners(Infinity);
+		// Closed flag.
+		// @type {Boolean}
+		this._closed = false;
 
-		// WebSocket-Node.WebSocketConnection instance.
+		// WebSocket cnnection instance.
+		// @type {WebSocket-Node.WebSocketConnection}
 		this._connection = connection;
 
-		// The Node net.Socket instance.
+		// Socket instance.
+		// @type {net.Socket}
 		this._socket = connection.socket;
-
-		// Closed flag.
-		this._closed = false;
 
 		// Handle connection.
 		this._handleConnection();
@@ -38,35 +42,16 @@ class WebSocketTransport extends EventEmitter
 		);
 	}
 
-	send(message)
-	{
-		if (this._closed)
-			return Promise.reject(new Error('transport closed'));
-
-		try
-		{
-			this._connection.sendUTF(JSON.stringify(message));
-
-			return Promise.resolve();
-		}
-		catch (error)
-		{
-			logger.error('send() | error sending message: %s', error);
-
-			return Promise.reject(error);
-		}
-	}
-
 	close()
 	{
-		logger.debug('close() [conn:%s]', this);
-
 		if (this._closed)
 			return;
 
+		logger.debug('close() [conn:%s]', this);
+
 		// Don't wait for the WebSocket 'close' event, do it now.
 		this._closed = true;
-		this.emit('close');
+		this.safeEmit('close');
 
 		try
 		{
@@ -75,6 +60,23 @@ class WebSocketTransport extends EventEmitter
 		catch (error)
 		{
 			logger.error('close() | error closing the connection: %s', error);
+		}
+	}
+
+	async send(message)
+	{
+		if (this._closed)
+			throw new Error('transport closed');
+
+		try
+		{
+			this._connection.sendUTF(JSON.stringify(message));
+		}
+		catch (error)
+		{
+			logger.warn('send() failed:%o', error);
+
+			throw error;
 		}
 	}
 
@@ -92,7 +94,7 @@ class WebSocketTransport extends EventEmitter
 				this, code, reason);
 
 			// Emit 'close' event.
-			this.emit('close');
+			this.safeEmit('close');
 		});
 
 		this._connection.on('error', (error) =>
@@ -124,7 +126,7 @@ class WebSocketTransport extends EventEmitter
 			}
 
 			// Emit 'message' event.
-			this.emit('message', message);
+			this.safeEmit('message', message);
 		});
 	}
 }

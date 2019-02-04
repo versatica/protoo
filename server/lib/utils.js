@@ -1,13 +1,9 @@
-const randomNumber = require('random-number');
-
-const randomNumberGenerator = randomNumber.generator(
-	{
-		min     : 1000000,
-		max     : 9999999,
-		integer : true
-	});
-
-module.exports =
+/**
+ * Generates a random positive integer.
+ *
+ * @returns {Number}
+ */
+exports.generateRandomNumber = function()
 {
-	randomNumber : randomNumberGenerator
+	return Math.round(Math.random() * 10000000);
 };

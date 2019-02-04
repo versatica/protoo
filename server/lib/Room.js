@@ -1,52 +1,101 @@
-const EventEmitter = require('events').EventEmitter;
-const logger = require('./logger')('Room');
+const Logger = require('./Logger');
+const EnhancedEventEmitter = require('./EnhancedEventEmitter');
 const Peer = require('./Peer');
 
-class Room extends EventEmitter
+const logger = new Logger('Room');
+
+class Room extends EnhancedEventEmitter
 {
+	/**
+	 * @emits close
+	 */
 	constructor()
 	{
+		super(logger);
+
 		logger.debug('constructor()');
 
-		super();
-		this.setMaxListeners(Infinity);
-
 		// Closed flag.
+		// @type {Boolean}
 		this._closed = false;
 
-		// Map of peers indexed by peerId.
+		// Map of Peers indexed by id.
+		// @type {Map<String, Peer>}
 		this._peers = new Map();
 	}
 
-	get peers()
-	{
-		return Array.from(this._peers.values());
-	}
-
+	/**
+	 * Whether the Room is closed.
+	 *
+	 * @returns {Boolean}
+	 */
 	get closed()
 	{
 		return this._closed;
 	}
 
-	createPeer(peerId, transport)
+	/**
+	 * Get the list of conneted Peers.
+	 *
+	 * @returns {Array<Peer>}
+	 */
+	get peers()
+	{
+		return Array.from(this._peers.values());
+	}
+
+	/**
+	 * Clsoe the Room.
+	 */
+	close()
+	{
+		if (this._closed)
+			return;
+
+		logger.debug('close()');
+
+		this._closed = true;
+
+		// Close all Peers.
+		for (const peer of this._peers.values())
+		{
+			peer.close();
+		}
+
+		// Emit 'close' event.
+		this.safeEmit('close');
+	}
+
+	/**
+	 * Create a Peer.
+	 *
+	 * @param {String} peerId
+	 * @param {protoo.Transport} transport
+	 *
+	 * @async
+	 * @returns {Peer}
+	 */
+	async createPeer(peerId, transport)
 	{
 		logger.debug(
-			'createPeer() [peerId:"%s", transport:%s]', peerId, transport);
+			'createPeer() [peerId:%s, transport:%s]', peerId, transport);
 
 		if (!transport)
 			throw new TypeError('no transport given');
 
-		if (!peerId || typeof peerId !== 'string')
+		if (typeof peerId !== 'string' || !peerId)
 		{
 			transport.close();
+
 			throw new TypeError('peerId must be a string');
 		}
 
 		if (this._peers.has(peerId))
 		{
 			transport.close();
+
 			throw new Error(
-				`there is already a peer with same peerId [peerId:"${peerId}"]`);
+				`there is already a Peer with same peerId [peerId:"${peerId}"]`);
 		}
 
 		// Create the Peer instance.
@@ -54,6 +103,7 @@ class Room extends EventEmitter
 
 		// Store it in the map.
 		this._peers.set(peer.id, peer);
+		peer.on('close', () => this._peers.delete(peerId));
 
 		// Handle peer.
 		this._handlePeer(peer);
@@ -61,67 +111,24 @@ class Room extends EventEmitter
 		return peer;
 	}
 
+	/**
+	 * Whether the Room has a Peer with given peerId.
+	 *
+	 * @returns {Booelan}
+	 */
 	hasPeer(peerId)
 	{
 		return this._peers.has(peerId);
 	}
 
+	/**
+	 * Retrieve the Peer with  given peerId.
+	 *
+	 * @returns {Peer|Undefined}
+	 */
 	getPeer(peerId)
 	{
 		return this._peers.get(peerId);
-	}
-
-	spread(method, data, excluded)
-	{
-		logger.debug('spread()');
-
-		const excludedSet = new Set();
-
-		if (excluded)
-		{
-			if (!Array.isArray(excluded))
-				excluded = [ excluded ];
-
-			for (const entry of excluded)
-			{
-				if (typeof entry === 'string')
-				{
-					const peer = this._peers.get(entry);
-
-					if (peer)
-						excludedSet.add(peer);
-				}
-				else
-				{
-					excludedSet.add(entry);
-				}
-			}
-		}
-
-		for (const peer of this._peers.values())
-		{
-			if (excludedSet.has(peer))
-				continue;
-
-			peer.notify(method, data)
-				.catch(() => {});
-		}
-	}
-
-	close()
-	{
-		logger.debug('close()');
-
-		if (this._closed)
-			return;
-
-		this._closed = true;
-
-		// Close all the peers.
-		this._peers.forEach((peer) => peer.close());
-
-		// Emit 'close' event.
-		this.emit('close');
 	}
 
 	_handlePeer(peer)

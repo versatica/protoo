@@ -1,29 +1,33 @@
 {
   "name": "protoo-client",
-  "version": "3.0.3",
-  "description": "protoo JavaScript client library",
+  "version": "4.0.0-dev",
+  "description": "protoo JavaScript client module",
   "author": "Iñaki Baz Castillo <ibc@aliax.net>",
   "homepage": "https://protoojs.org",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ibc/protoo.git"
+    "url": "https://github.com/ibc/protoo.git"
   },
   "main": "lib/index.js",
+  "keywords": [
+    "nodejs",
+    "browser",
+    "websocket"
+  ],
   "engines": {
-    "node": ">=6.4"
+    "node": ">=8.0.0"
   },
   "scripts": {
     "lint": "eslint -c .eslintrc.js lib"
   },
   "dependencies": {
-    "debug": "^4.1.0",
+    "debug": "^4.1.1",
     "events": "^3.0.0",
-    "random-number": "0.0.9",
     "retry": "^0.12.0"
   },
   "devDependencies": {
-    "eslint": "^5.10.0"
+    "eslint": "^5.13.0"
   },
   "optionalDependencies": {
     "websocket": "^1.0.28"

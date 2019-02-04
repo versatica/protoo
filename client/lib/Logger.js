@@ -42,7 +42,4 @@ class Logger
 	}
 }
 
-module.exports = function(prefix)
-{
-	return new Logger(prefix);
-};
+module.exports = Logger;
