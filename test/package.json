@@ -2,14 +2,13 @@
   "private": true,
   "name": "protoo-test",
   "scripts": {
-    "lint": "eslint -c .eslintrc.js test.js",
+    "lint": "eslint -c .eslintrc.js __tests__",
     "test": "jest",
     "coverage": "jest --coverage && opn coverage/lcov-report/index.html"
   },
   "jest": {
     "verbose": true,
-    "testEnvironment": "node",
-    "testRegex": "test\\.js"
+    "testEnvironment": "node"
   },
   "devDependencies": {
     "eslint": "^5.13.0",

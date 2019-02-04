@@ -190,6 +190,7 @@ class Peer extends EnhancedEventEmitter
 		if (this._transport.closed)
 		{
 			this._closed = true;
+
 			setImmediate(() => this.safeEmit('close'));
 
 			return;
@@ -202,24 +203,17 @@ class Peer extends EnhancedEventEmitter
 
 			this._closed = true;
 
-			// Emit 'close' event.
 			this.safeEmit('close');
 		});
 
 		this._transport.on('message', (message) =>
 		{
 			if (message.request)
-			{
 				this._handleRequest(message);
-			}
 			else if (message.response)
-			{
 				this._handleResponse(message);
-			}
 			else if (message.notification)
-			{
 				this._handleNotification(message);
-			}
 		});
 	}
 

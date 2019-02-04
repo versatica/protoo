@@ -4,7 +4,7 @@
 [![][npm-shield-protoo-client]][npm-protoo-client]
 [![][travis-ci-shield-protoo]][travis-ci-protoo]
 
-Minimalist and extensible Node.js signaling framework for multi-party Real-Time Communication applications.
+Minimalist and extensible Node.js signaling framework for multi-party Real-Time applications.
 
 
 ## Website and documentation
@@ -29,5 +29,5 @@ Iñaki Baz Castillo ([@ibc](https://github.com/ibc/) at Github)
 [npm-shield-protoo-client]: https://img.shields.io/npm/v/protoo-client.svg
 [npm-protoo-server]: https://npmjs.org/package/protoo-server
 [npm-protoo-client]: https://npmjs.org/package/protoo-client
-[travis-ci-shield-protoo]: https://travis-ci.com/ibc/protoo.svg?branch=master
-[travis-ci-protoo]: https://travis-ci.com/ibc/protoo
+[travis-ci-shield-protoo]: https://travis-ci.com/versatica/protoo.svg?branch=master
+[travis-ci-protoo]: https://travis-ci.com/versatica/protoo

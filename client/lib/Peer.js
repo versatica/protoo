@@ -31,6 +31,10 @@ class Peer extends EnhancedEventEmitter
 		// @type {protoo.Transport}
 		this._transport = transport;
 
+		// Connected flag.
+		// @type {Boolean}
+		this._connected = false;
+
 		// Custom data object.
 		// @type {Object}
 		this._data = {};
@@ -51,6 +55,16 @@ class Peer extends EnhancedEventEmitter
 	get closed()
 	{
 		return this._closed;
+	}
+
+	/**
+	 * Whether the Peer is connected.
+	 *
+	 * @returns {Boolean}
+	 */
+	get connected()
+	{
+		return this._connected;
 	}
 
 	/**
@@ -82,6 +96,7 @@ class Peer extends EnhancedEventEmitter
 		logger.debug('close()');
 
 		this._closed = true;
+		this._connected = false;
 
 		// Close Transport.
 		this._transport.close();
@@ -185,6 +200,8 @@ class Peer extends EnhancedEventEmitter
 				if (this._closed)
 					return;
 
+				this._connected = false;
+
 				this.safeEmit('close');
 			});
 
@@ -198,6 +215,8 @@ class Peer extends EnhancedEventEmitter
 
 			logger.debug('emit "connecting" [currentAttempt:%s]', currentAttempt);
 
+			this._connected = false;
+
 			this.safeEmit('connecting', currentAttempt);
 		});
 
@@ -208,7 +227,8 @@ class Peer extends EnhancedEventEmitter
 
 			logger.debug('emit "open"');
 
-			// Emit 'open' event.
+			this._connected = true;
+
 			this.safeEmit('open');
 		});
 
@@ -219,6 +239,8 @@ class Peer extends EnhancedEventEmitter
 
 			logger.debug('emit "disconnected"');
 
+			this._connected = false;
+
 			this.safeEmit('disconnected');
 		});
 
@@ -228,6 +250,8 @@ class Peer extends EnhancedEventEmitter
 				return;
 
 			logger.debug('emit "failed" [currentAttempt:%s]', currentAttempt);
+
+			this._connected = false;
 
 			this.safeEmit('failed', currentAttempt);
 		});
@@ -241,7 +265,8 @@ class Peer extends EnhancedEventEmitter
 
 			logger.debug('emit "close"');
 
-			// Emit 'close' event.
+			this._connected = false;
+
 			this.safeEmit('close');
 		});
 
