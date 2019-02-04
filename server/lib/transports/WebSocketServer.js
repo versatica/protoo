@@ -146,8 +146,6 @@ class WebSocketServer extends EnhancedEventEmitter
 		}
 		catch (error)
 		{
-			console.warn('qweqweqweqwe', error.toString());
-
 			logger.error('_onRequest() | unexpected error:%o', error);
 
 			request.reject(500, String(error));
