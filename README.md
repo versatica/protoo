@@ -16,8 +16,7 @@ Minimalist and extensible Node.js signaling framework for multi-party Real-Time 
 
 * In **protoo-server**:
   - `peer.send()` has been renamed to `peer.request()`.
-  - `room.createPeer()` is now `async` (so it returns a promise that resolves to a `Peer`).
-  - `room.spread()` method has been removed.
+  - `room.spread()` has been removed.
 
 * In **protoo-client**:
   - `peer.send()` has been renamed to `peer.request()`.

@@ -24,7 +24,7 @@ beforeEach(async () =>
 		httpServer.listen(9999, '127.0.0.1', resolve);
 	});
 
-	wsServer.on('connectionrequest', async (info, accept, reject) =>
+	wsServer.on('connectionrequest', (info, accept, reject) =>
 	{
 		const u = url.parse(info.request.url, true);
 		const peerId = u.query.peerId;
@@ -41,7 +41,7 @@ beforeEach(async () =>
 			default:
 			{
 				transport = accept();
-				serverPeer = await room.createPeer(peerId, transport);
+				serverPeer = room.createPeer(peerId, transport);
 			}
 		}
 	});

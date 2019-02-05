@@ -72,10 +72,11 @@ class Room extends EnhancedEventEmitter
 	 * @param {String} peerId
 	 * @param {protoo.Transport} transport
 	 *
-	 * @async
 	 * @returns {Peer}
+	 * @throws {TypeError} if wrong parameters.
+	 * @throws {Error} if Peer with same peerId already exists.
 	 */
-	async createPeer(peerId, transport)
+	createPeer(peerId, transport)
 	{
 		logger.debug(
 			'createPeer() [peerId:%s, transport:%s]', peerId, transport);
@@ -105,9 +106,6 @@ class Room extends EnhancedEventEmitter
 		this._peers.set(peer.id, peer);
 		peer.on('close', () => this._peers.delete(peerId));
 
-		// Handle peer.
-		this._handlePeer(peer);
-
 		return peer;
 	}
 
@@ -129,15 +127,6 @@ class Room extends EnhancedEventEmitter
 	getPeer(peerId)
 	{
 		return this._peers.get(peerId);
-	}
-
-	_handlePeer(peer)
-	{
-		peer.on('close', () =>
-		{
-			// Remove from the map.
-			this._peers.delete(peer.id);
-		});
 	}
 }
 
