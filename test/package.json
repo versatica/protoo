@@ -1,6 +1,6 @@
 {
-  "private": true,
   "name": "protoo-test",
+  "private": true,
   "scripts": {
     "lint": "eslint -c .eslintrc.js __tests__",
     "test": "jest",
