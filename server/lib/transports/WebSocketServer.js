@@ -55,6 +55,10 @@ class WebSocketServer extends EnhancedEventEmitter
 		logger.debug(
 			'onRequest() [origin:%s | path:"%s"]', request.origin, request.resource);
 
+		// NOTE: To avoid https://github.com/theturtle32/WebSocket-Node/issues/351
+		// in Node 10.
+		request.httpRequest.socket.on('error', () => {});
+
 		// Validate WebSocket sub-protocol.
 		if (request.requestedProtocols.indexOf(WS_SUBPROTOCOL) === -1)
 		{
@@ -146,8 +150,6 @@ class WebSocketServer extends EnhancedEventEmitter
 		}
 		catch (error)
 		{
-			logger.error('_onRequest() | unexpected error:%o', error);
-
 			request.reject(500, String(error));
 		}
 	}
