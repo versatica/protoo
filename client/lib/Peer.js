@@ -126,7 +126,7 @@ class Peer extends EnhancedEventEmitter
 		this._logger.debug('request() [method:%s, id:%s]', method, request.id);
 
 		// This may throw.
-		this._transport.send(request);
+		await this._transport.send(request);
 
 		return new Promise((pResolve, pReject) =>
 		{
@@ -185,7 +185,7 @@ class Peer extends EnhancedEventEmitter
 		this._logger.debug('notify() [method:%s]', method);
 
 		// This may throw.
-		this._transport.send(notification);
+		await this._transport.send(notification);
 	}
 
 	_handleTransport()
