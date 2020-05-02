@@ -18,13 +18,15 @@
     "node": ">=8.0.0"
   },
   "scripts": {
-    "lint": "eslint -c .eslintrc.js lib"
+    "lint": "eslint -c .eslintrc.js lib",
+    "build:types": "tsc --resolveJsonModule"
   },
   "dependencies": {
     "debug": "^4.1.1",
     "websocket": "^1.0.31"
   },
   "devDependencies": {
+    "@types/node": "^13.13.4",
     "eslint": "^5.16.0"
   }
 }

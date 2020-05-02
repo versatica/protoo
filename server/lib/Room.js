@@ -1,11 +1,18 @@
 const Logger = require('./Logger');
 const EnhancedEventEmitter = require('./EnhancedEventEmitter');
 const Peer = require('./Peer');
+const WebSocketTransport = require('./transports/WebSocketTransport')
 
 const logger = new Logger('Room');
 
 class Room extends EnhancedEventEmitter
 {
+	/**
+	 * @typedef {Peer} peer
+	 * @type {Map<string, peer>}
+	 */
+	_peers;
+
 	/**
 	 * @emits close
 	 */
@@ -45,7 +52,7 @@ class Room extends EnhancedEventEmitter
 	}
 
 	/**
-	 * Clsoe the Room.
+	 * Close the Room.
 	 */
 	close()
 	{
@@ -70,7 +77,7 @@ class Room extends EnhancedEventEmitter
 	 * Create a Peer.
 	 *
 	 * @param {String} peerId
-	 * @param {protoo.Transport} transport
+	 * @param {WebSocketTransport} transport
 	 *
 	 * @returns {Peer}
 	 * @throws {TypeError} if wrong parameters.
@@ -111,8 +118,8 @@ class Room extends EnhancedEventEmitter
 
 	/**
 	 * Whether the Room has a Peer with given peerId.
-	 *
-	 * @returns {Booelan}
+	 * @param {String} peerId
+	 * @returns {Boolean}
 	 */
 	hasPeer(peerId)
 	{
@@ -122,6 +129,7 @@ class Room extends EnhancedEventEmitter
 	/**
 	 * Retrieve the Peer with  given peerId.
 	 *
+	 * @param {String} peerId
 	 * @returns {Peer|Undefined}
 	 */
 	getPeer(peerId)

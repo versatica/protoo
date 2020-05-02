@@ -10,7 +10,7 @@ const logger = new Logger('WebSocketServer');
 class WebSocketServer extends EnhancedEventEmitter
 {
 	/**
-	 * @param {http.Server} httpServer - Node HTTP/HTTPS compatible server.
+	 * @param {Object} httpServer - Node HTTP/HTTPS compatible server.
 	 * @param {Object} [options] - Options for WebSocket-Node.WebSocketServer.
 	 *
 	 * @emits {info: Object, accept: Function, reject: Function} connectionrequest

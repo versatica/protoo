@@ -12,13 +12,15 @@ exports.version = version;
 /**
  * Expose Room class.
  *
- * @type {Class}
+ * @typedef {Room} room
+ * @class {room}
  */
 exports.Room = Room;
 
 /**
  * Expose WebSocketServer class.
  *
- * @type {Class}
+ * @typedef {WebSocketServer} webSocketServer
+ * @class {webSocketServer}
  */
 exports.WebSocketServer = WebSocketServer;

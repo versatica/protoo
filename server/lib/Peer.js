@@ -1,6 +1,7 @@
 const Logger = require('./Logger');
 const EnhancedEventEmitter = require('./EnhancedEventEmitter');
 const Message = require('./Message');
+const WebSocketTransport = require('./transports/WebSocketTransport')
 
 const logger = new Logger('Peer');
 
@@ -8,7 +9,7 @@ class Peer extends EnhancedEventEmitter
 {
 	/**
 	 * @param {String} peerId
-	 * @param {protoo.Transport} transport
+	 * @param {WebSocketTransport} transport
 	 *
 	 * @emits close
 	 * @emits {request: protoo.Request, accept: Function, reject: Function} request
@@ -114,7 +115,7 @@ class Peer extends EnhancedEventEmitter
 	 * @param {Object} [data]
 	 *
 	 * @async
-	 * @returns {Object} The response data Object if a success response is received.
+	 * @returns {Promise<Object>} The response data Object if a success response is received.
 	 */
 	async request(method, data = undefined)
 	{
@@ -281,7 +282,8 @@ class Peer extends EnhancedEventEmitter
 		{
 			const error = new Error(response.errorReason);
 
-			error.code = response.errorCode;
+			//FIXME: why do I get a typescript error on next line
+			// error.code = response.errorCode;
 			sent.reject(error);
 		}
 	}
