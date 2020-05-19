@@ -1,5 +1,6 @@
 const { version } = require('../package.json');
 const Room = require('./Room');
+const Peer = require('./Peer');
 const WebSocketServer = require('./transports/WebSocketServer');
 
 /**
@@ -16,6 +17,14 @@ exports.version = version;
  * @class {room}
  */
 exports.Room = Room;
+
+/**
+ * Expose Peer class.
+ *
+ * @typedef {Peer} peer
+ * @class {peer}
+ */
+exports.Peer = Peer;
 
 /**
  * Expose WebSocketServer class.
