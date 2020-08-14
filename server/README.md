@@ -10,7 +10,7 @@ This is the **protoo** server side Node.js module.
 
 ## Website and documentation
 
-* [protoojs.org][protoo-website]
+* [protoo.versatica.com][protoo-website]
 
 
 ## Breaking changes in v4
@@ -35,7 +35,7 @@ MIT
 
 
 
-[protoo-website]: https://protoojs.org
+[protoo-website]: https://protoo.versatica.com
 [npm-shield-protoo-server]: https://img.shields.io/npm/v/protoo-server.svg
 [npm-protoo-server]: https://npmjs.org/package/protoo-server
 [travis-ci-shield-protoo]: https://travis-ci.com/versatica/protoo.svg?branch=master

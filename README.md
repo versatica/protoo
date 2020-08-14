@@ -9,7 +9,7 @@ Minimalist and extensible Node.js signaling framework for multi-party Real-Time 
 
 ## Website and documentation
 
-* [protoojs.org][protoo-website]
+* [protoo.versatica.com][protoo-website]
 
 
 ## Breaking changes in v4
@@ -34,7 +34,7 @@ Iñaki Baz Castillo ([@ibc](https://github.com/ibc/) at Github)
 
 
 
-[protoo-website]: https://protoojs.org
+[protoo-website]: https://protoo.versatica.com
 [npm-shield-protoo-server]: https://img.shields.io/npm/v/protoo-server.svg
 [npm-shield-protoo-client]: https://img.shields.io/npm/v/protoo-client.svg
 [npm-protoo-server]: https://npmjs.org/package/protoo-server
