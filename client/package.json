@@ -30,6 +30,6 @@
     "eslint": "^5.16.0"
   },
   "optionalDependencies": {
-    "websocket": "^1.0.28"
+    "websocket": "^1.0.33"
   }
 }
