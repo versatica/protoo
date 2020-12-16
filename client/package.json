@@ -1,6 +1,6 @@
 {
   "name": "protoo-client",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "protoo JavaScript client module",
   "author": "Iñaki Baz Castillo <ibc@aliax.net>",
   "homepage": "https://protoo.versatica.com",
@@ -22,8 +22,8 @@
     "lint": "eslint -c .eslintrc.js lib"
   },
   "dependencies": {
-    "debug": "^4.1.1",
-    "events": "^3.1.0",
+    "debug": "^4.3.1",
+    "events": "^3.2.0",
     "retry": "^0.12.0"
   },
   "devDependencies": {

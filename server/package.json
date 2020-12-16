@@ -1,6 +1,6 @@
 {
   "name": "protoo-server",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "protoo Node.js server module",
   "author": "Iñaki Baz Castillo <ibc@aliax.net>",
   "homepage": "https://protoo.versatica.com",
@@ -21,7 +21,7 @@
     "lint": "eslint -c .eslintrc.js lib"
   },
   "dependencies": {
-    "debug": "^4.1.1",
+    "debug": "^4.3.1",
     "websocket": "^1.0.33"
   },
   "devDependencies": {
