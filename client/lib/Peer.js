@@ -288,12 +288,12 @@ class Peer extends EnhancedEventEmitter
 				{
 					if (errorCode instanceof Error)
 					{
+						errorReason = errorCode.message;
 						errorCode = 500;
-						errorReason = String(errorCode);
 					}
 					else if (typeof errorCode === 'number' && errorReason instanceof Error)
 					{
-						errorReason = String(errorReason);
+						errorReason = errorReason.message;
 					}
 
 					const response =
