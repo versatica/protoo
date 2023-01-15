@@ -84,7 +84,14 @@ class WebSocketTransport extends EnhancedEventEmitter
 
 		try
 		{
-			this._ws.send(JSON.stringify(message));
+      // format message
+			if (message.id) {
+        this._ws.send(JSON.stringify(message));
+      }
+      // binary data
+      else{
+        this._ws.send(message);
+      }
 		}
 		catch (error)
 		{

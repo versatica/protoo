@@ -188,6 +188,17 @@ class Peer extends EnhancedEventEmitter
 		await this._transport.send(notification);
 	}
 
+  /**
+   * send binary data
+   * 
+   * @param {Buffer} buffer 
+   */
+  async send(buffer)
+	{
+		// This may throw.
+		await this._transport.send(buffer);
+	}
+
 	_handleTransport()
 	{
 		if (this._transport.closed)

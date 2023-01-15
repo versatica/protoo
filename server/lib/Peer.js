@@ -215,6 +215,11 @@ class Peer extends EnhancedEventEmitter
 			else if (message.notification)
 				this._handleNotification(message);
 		});
+
+    this._transport.on('binary', (raw) =>
+		{
+      this.safeEmit('binary', raw.binaryData);
+		});
 	}
 
 	_handleRequest(request)
