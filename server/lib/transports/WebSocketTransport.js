@@ -70,7 +70,17 @@ class WebSocketTransport extends EnhancedEventEmitter
 
 		try
 		{
-			this._connection.sendUTF(JSON.stringify(message));
+			return new Promise((resolve, reject) => {
+				this._connection.sendUTF(JSON.stringify(message), (error) => {
+					if(error) {
+						logger.warn('send() failed:%o', error);
+
+						reject(error);
+					} else {
+						resolve()
+					}
+				});
+			});
 		}
 		catch (error)
 		{
