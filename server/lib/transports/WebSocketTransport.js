@@ -99,6 +99,9 @@ class WebSocketTransport extends EnhancedEventEmitter
 
 		this._connection.on('error', (error) =>
 		{
+			if (this._closed)
+				return;
+
 			logger.error(
 				'connection "error" event [conn:%s, error:%s]', this, error);
 		});
