@@ -59,7 +59,7 @@ class WebSocketTransport extends EnhancedEventEmitter
 		}
 		catch (error)
 		{
-			logger.error('close() | error closing the connection: %s', error);
+			logger.warn('close() | error closing the connection: %s', error);
 		}
 	}
 
@@ -74,7 +74,7 @@ class WebSocketTransport extends EnhancedEventEmitter
 		}
 		catch (error)
 		{
-			logger.warn('send() failed:%o', error);
+			logger.warn('send() | failed:%o', error);
 
 			throw error;
 		}
@@ -102,8 +102,11 @@ class WebSocketTransport extends EnhancedEventEmitter
 			if (this._closed)
 				return;
 
-			logger.error(
-				'connection "error" event [conn:%s, error:%s]', this, error);
+			if (error.code !== 'ECONNRESET')
+			{
+				logger.warn(
+					'connection "error" event [conn:%s, error:%s]', this, error);
+			}
 		});
 
 		this._connection.on('message', (raw) =>
@@ -122,7 +125,7 @@ class WebSocketTransport extends EnhancedEventEmitter
 
 			if (this.listenerCount('message') === 0)
 			{
-				logger.error(
+				logger.warn(
 					'no listeners for "message" event, ignoring received message');
 
 				return;

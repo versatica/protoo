@@ -16,14 +16,14 @@ class Message
 		}
 		catch (error)
 		{
-			logger.error('parse() | invalid JSON: %s', error);
+			logger.warn('parse() | invalid JSON: %s', error);
 
 			return;
 		}
 
 		if (typeof object !== 'object' || Array.isArray(object))
 		{
-			logger.error('parse() | not an object');
+			logger.warn('parse() | not an object');
 
 			return;
 		}
@@ -35,14 +35,14 @@ class Message
 
 			if (typeof object.method !== 'string')
 			{
-				logger.error('parse() | missing/invalid method field');
+				logger.warn('parse() | missing/invalid method field');
 
 				return;
 			}
 
 			if (typeof object.id !== 'number')
 			{
-				logger.error('parse() | missing/invalid id field');
+				logger.warn('parse() | missing/invalid id field');
 
 				return;
 			}
@@ -58,7 +58,7 @@ class Message
 
 			if (typeof object.id !== 'number')
 			{
-				logger.error('parse() | missing/invalid id field');
+				logger.warn('parse() | missing/invalid id field');
 
 				return;
 			}
@@ -86,7 +86,7 @@ class Message
 
 			if (typeof object.method !== 'string')
 			{
-				logger.error('parse() | missing/invalid method field');
+				logger.warn('parse() | missing/invalid method field');
 
 				return;
 			}
@@ -97,7 +97,7 @@ class Message
 		// Invalid.
 		else
 		{
-			logger.error('parse() | missing request/response field');
+			logger.warn('parse() | missing request/response field');
 
 			return;
 		}

@@ -72,7 +72,7 @@ class WebSocketServer extends EnhancedEventEmitter
 		// If there are no listeners, reject the request.
 		if (this.listenerCount('connectionrequest') === 0)
 		{
-			logger.error(
+			logger.warn(
 				'_onRequest() | no listeners for "connectionrequest" event, ' +
 				'rejecting connection request');
 
