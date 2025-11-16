@@ -27,7 +27,7 @@
     "retry": "^0.12.0"
   },
   "devDependencies": {
-    "eslint": "^5.16.0"
+    "eslint": "^9.39.1"
   },
   "optionalDependencies": {
     "websocket": "^1.0.35"
