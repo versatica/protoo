@@ -66,18 +66,25 @@ class WebSocketTransport extends EnhancedEventEmitter
 	async send(message)
 	{
 		if (this._closed)
+		{
 			throw new Error('transport closed');
+		}
 
 		try
 		{
-			return new Promise((resolve, reject) => {
-				this._connection.sendUTF(JSON.stringify(message), (error) => {
-					if(error) {
+			return new Promise((resolve, reject) =>
+			{
+				this._connection.sendUTF(JSON.stringify(message), (error) =>
+				{
+					if (error)
+					{
 						logger.warn('send() failed:%o', error);
 
 						reject(error);
-					} else {
-						resolve()
+					}
+					else
+					{
+						resolve();
 					}
 				});
 			});
