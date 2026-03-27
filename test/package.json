@@ -4,7 +4,7 @@
   "scripts": {
     "lint": "eslint -c .eslintrc.js __tests__",
     "test": "jest",
-    "coverage": "cd .. && jest --coverage --config test/package.json && opn coverage/lcov-report/index.html"
+    "coverage": "cd .. && jest --coverage --config test/package.json && open-cli coverage/lcov-report/index.html"
   },
   "jest": {
     "verbose": true,
@@ -12,10 +12,10 @@
     "rootDir": "../"
   },
   "devDependencies": {
-    "eslint": "^10.0.3",
+    "eslint": "^8.57.1",
     "eslint-plugin-jest": "^22.4.1",
     "jest": "^24.7.1",
     "jest-tobetype": "^1.2.3",
-    "opn-cli": "^4.1.0"
+    "open-cli": "^9.0.0"
   }
 }

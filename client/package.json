@@ -16,7 +16,7 @@
     "websocket"
   ],
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "lint": "eslint -c .eslintrc.js lib"
@@ -27,7 +27,7 @@
     "retry": "^0.13.1"
   },
   "devDependencies": {
-    "eslint": "^10.0.3"
+    "eslint": "^8.57.1"
   },
   "optionalDependencies": {
     "websocket": "^1.0.35"

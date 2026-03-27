@@ -15,7 +15,7 @@
     "websocket"
   ],
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "lint": "eslint -c .eslintrc.js lib"
