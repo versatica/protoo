@@ -14,7 +14,7 @@
   "devDependencies": {
     "eslint": "^8.57.1",
     "eslint-plugin-jest": "^22.4.1",
-    "jest": "^24.7.1",
+    "jest": "^30.4.2",
     "jest-tobetype": "^1.2.3",
     "open-cli": "^9.0.0"
   }
