@@ -94,7 +94,7 @@ class WebSocketServer extends EnhancedEventEmitter
 					socket  : request.httpRequest.socket
 				},
 				// accept() function.
-				() =>
+				(cookies) =>
 				{
 					if (replied)
 					{
@@ -107,7 +107,7 @@ class WebSocketServer extends EnhancedEventEmitter
 					replied = true;
 
 					// Get the WebSocketConnection instance.
-					const connection = request.accept(WS_SUBPROTOCOL, request.origin);
+					const connection = request.accept(WS_SUBPROTOCOL, request.origin, cookies);
 
 					// Create a new Protoo WebSocket transport.
 					const transport = new WebSocketTransport(connection);
